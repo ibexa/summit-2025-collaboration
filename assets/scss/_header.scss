@@ -36,8 +36,12 @@
 
     .ibexa-welcome-img {
         flex: initial;
-        margin-top: 230px;
+        margin-top: 150px;
         margin-right: -300px;
+    }
+
+    .ibexa-welcome-btn + .ibexa-welcome-btn {
+        margin-left: 24px;
     }
 }
 
@@ -45,6 +49,7 @@
     .ibexa-welcome-header {
         .ibexa-welcome-img {
             width: 100%;
+            margin-top: 190px;
             margin-right: 0;
         }
     }

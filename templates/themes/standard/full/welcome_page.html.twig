@@ -15,6 +15,10 @@
 
 {% block javascripts %}
     {{ encore_entry_script_tags('welcome-page-js') }}
+    
+    {% if encore_entry_exists('react-blocks-js') %}
+        {{ encore_entry_script_tags('react-blocks-js') }}
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -36,15 +40,24 @@
                         })|desc('Welcome to %name% %version%')|raw }}
                     </h1>
                     <p class="ibexa-welcome-paragraph">
-                        {{ 'ibexa_platform_welcome_page.header.content'|trans|desc('Open-source solution for building custom, scalable websites.') }}
+                        {{ 'ibexa_platform_welcome_page.header.content'|trans|desc('Digitalize and automate the way you do business.') }}
                     </p>
-                    {% set admin_url = url('ibexa.dashboard', { 'siteaccess': 'admin' }) %}
-                    <a
-                        href="{{ admin_url }}"
-                        class="ibexa-welcome-btn ibexa-welcome-btn--filled"
-                    >
-                        {{ 'ibexa_platform_welcome_page.header.action'|trans|desc('Start your project') }}
-                    </a>
+                    <div>
+                        {% set admin_url = url('ibexa.dashboard', { 'siteaccess': 'admin' }) %}
+                        {% set storefront_url = ibexa_url(ibexa_get_product_catalog_root()) %}
+                        <a
+                            href="{{ admin_url }}"
+                            class="ibexa-welcome-btn ibexa-welcome-btn--filled"
+                        >
+                            {{ 'ibexa_platform_welcome_page.header.action'|trans|desc('Start your project') }}
+                        </a>
+                        <a
+                            href="{{ storefront_url }}"
+                            class="ibexa-welcome-btn ibexa-welcome-btn--border"
+                        >
+                            {{ 'ibexa_platform_welcome_page.header.storefront'|trans|desc('Go to storefront') }}
+                        </a>
+                    </div>
                     <button class="ibexa-welcome-header__go-down">
                         <img
                             src="{{ asset('build/images/caret-down.svg') }}"
@@ -55,12 +68,16 @@
                 <div class="ibexa-welcome-column ibexa-welcome-header__img-column">
                     <img
                         class="ibexa-welcome-img ibexa-welcome-img--center"
-                        src="{{ asset('build/images/oss.png') }}"
-                        alt="{{ 'ibexa_platform_welcome_page.header.image'|trans|desc('OSS') }}"
+                        src="{{ asset('build/images/commerce.png') }}"
+                        alt="{{ 'ibexa_platform_welcome_page.header.image'|trans|desc('Commerce') }}"
                     />
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="ibexa-welcome-container ibexa-welcome-blocks">
+        {{ ibexa_render_field(content, 'page') }}
     </div>
 
     <div class="ibexa-welcome-container ibexa-welcome-documentation-hub">

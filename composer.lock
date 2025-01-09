@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b969216901bfdf08ff2cd91371efe55f",
+    "content-hash": "fc00aa071f326be203a144371442311c",
     "packages": [
         {
             "name": "alcohol/iso4217",
@@ -3881,6 +3881,103 @@
                 "issues": "https://github.com/ibexa/checkout/issues"
             },
             "time": "2024-12-16T07:17:10+00:00"
+        },
+        {
+            "name": "ibexa/collaboration",
+            "version": "4.6.x-dev",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:ibexa/collaboration.git",
+                "reference": "c73f5deeb696e80f63b9eda6522eb67419db45a0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ibexa/collaboration/zipball/c73f5deeb696e80f63b9eda6522eb67419db45a0",
+                "reference": "c73f5deeb696e80f63b9eda6522eb67419db45a0",
+                "shasum": ""
+            },
+            "require": {
+                "ibexa/core": "~4.6.x-dev",
+                "ibexa/core-persistence": "^4.6",
+                "ibexa/core-search": "~4.6.x-dev",
+                "ibexa/doctrine-schema": "^4.6",
+                "ibexa/rest": "~4.6.x-dev",
+                "php": "^7.4 || ^8.0",
+                "symfony/config": "^5.4",
+                "symfony/dependency-injection": "^5.4",
+                "symfony/event-dispatcher": "^5.4",
+                "symfony/event-dispatcher-contracts": "^2.2",
+                "symfony/http-foundation": "^5.4",
+                "symfony/http-kernel": "^5.4",
+                "symfony/uid": "^5.4",
+                "symfony/validator": "^5.4",
+                "symfony/yaml": "^5.4"
+            },
+            "require-dev": {
+                "dama/doctrine-test-bundle": "^v6.7",
+                "ibexa/behat": "~4.6.x-dev",
+                "ibexa/code-style": "~2.0.0",
+                "ibexa/test-core": "~4.6.x-dev",
+                "ibexa/test-rest": "~4.6.x-dev",
+                "matthiasnoback/symfony-dependency-injection-test": "^4.3",
+                "phpstan/phpstan": "^1.10",
+                "phpstan/phpstan-phpunit": "^1.3",
+                "phpstan/phpstan-symfony": "^1.3",
+                "phpunit/phpunit": "^9",
+                "qossmic/deptrac-shim": "^0.24.0 || ^1.0.2"
+            },
+            "type": "ibexa-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "4.6.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Ibexa\\Bundle\\Collaboration\\": "src/bundle/",
+                    "Ibexa\\Contracts\\Collaboration\\": "src/contracts/",
+                    "Ibexa\\Collaboration\\": "src/lib/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Ibexa\\Tests\\Bundle\\Collaboration\\": "tests/bundle/",
+                    "Ibexa\\Tests\\Integration\\Collaboration\\": "tests/integration/",
+                    "Ibexa\\Tests\\Collaboration\\": "tests/lib/"
+                }
+            },
+            "notification-url": "https://updates.ibexa.co/notifystats",
+            "scripts": {
+                "fix-cs": [
+                    "php-cs-fixer fix --config=.php-cs-fixer.php --show-progress=dots"
+                ],
+                "check-cs": [
+                    "@fix-cs --dry-run"
+                ],
+                "test": [
+                    "phpunit -c phpunit.xml.dist"
+                ],
+                "test-integration": [
+                    "phpunit -c phpunit.integration.xml"
+                ],
+                "phpstan": [
+                    "phpstan analyse -c phpstan.neon"
+                ],
+                "deptrac": [
+                    "php vendor/bin/deptrac analyse"
+                ]
+            },
+            "license": [
+                "proprietary"
+            ],
+            "keywords": [
+                "ibexa-dxp"
+            ],
+            "support": {
+                "source": "https://github.com/ibexa/collaboration/tree/4.6",
+                "issues": "https://github.com/ibexa/collaboration/issues"
+            },
+            "time": "2024-12-19T06:43:27+00:00"
         },
         {
             "name": "ibexa/commerce",
@@ -8661,6 +8758,99 @@
                 "issues": "https://github.com/ibexa/seo/issues"
             },
             "time": "2025-01-08T09:50:31+00:00"
+        },
+        {
+            "name": "ibexa/share",
+            "version": "dev-remove-update",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:ibexa/share.git",
+                "reference": "585309060554751b1cf6efce274790737684798e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ibexa/share/zipball/585309060554751b1cf6efce274790737684798e",
+                "reference": "585309060554751b1cf6efce274790737684798e",
+                "shasum": ""
+            },
+            "require": {
+                "ibexa/admin-ui": "~4.6.x-dev",
+                "ibexa/collaboration": "~4.6.x-dev",
+                "ibexa/core": "~4.6.x-dev",
+                "ibexa/rest": "~4.6.x-dev",
+                "php": "^7.4 || ^8.0",
+                "symfony/config": "^5.4",
+                "symfony/dependency-injection": "^5.4",
+                "symfony/event-dispatcher": "^5.4",
+                "symfony/event-dispatcher-contracts": "^2.2",
+                "symfony/http-foundation": "^5.4",
+                "symfony/http-kernel": "^5.4",
+                "symfony/yaml": "^5.4"
+            },
+            "require-dev": {
+                "dama/doctrine-test-bundle": "^v6.7",
+                "ibexa/behat": "~4.6.x-dev",
+                "ibexa/code-style": "~2.0.0",
+                "ibexa/core-search": "~4.6.x-dev",
+                "ibexa/search": "~4.6.x-dev",
+                "ibexa/test-core": "~4.6.x-dev",
+                "phpstan/phpstan": "^1.10",
+                "phpstan/phpstan-phpunit": "^1.3",
+                "phpstan/phpstan-symfony": "^1.3",
+                "phpunit/phpunit": "^9",
+                "qossmic/deptrac-shim": "^0.24.0 || ^1.0.2"
+            },
+            "type": "ibexa-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "4.6.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Ibexa\\Bundle\\Share\\": "src/bundle/",
+                    "Ibexa\\Contracts\\Share\\": "src/contracts/",
+                    "Ibexa\\Share\\": "src/lib/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Ibexa\\Tests\\Bundle\\Share\\": "tests/bundle/",
+                    "Ibexa\\Tests\\Integration\\Share\\": "tests/integration/",
+                    "Ibexa\\Tests\\Share\\": "tests/lib/"
+                }
+            },
+            "scripts": {
+                "fix-cs": [
+                    "php-cs-fixer fix --config=.php-cs-fixer.php --show-progress=dots"
+                ],
+                "check-cs": [
+                    "@fix-cs --dry-run"
+                ],
+                "test": [
+                    "phpunit -c phpunit.xml.dist"
+                ],
+                "test-integration": [
+                    "phpunit -c phpunit.integration.xml.dist"
+                ],
+                "phpstan": [
+                    "phpstan analyse -c phpstan.neon"
+                ],
+                "deptrac": [
+                    "php vendor/bin/deptrac analyse"
+                ]
+            },
+            "license": [
+                "proprietary"
+            ],
+            "keywords": [
+                "ibexa-dxp"
+            ],
+            "support": {
+                "source": "https://github.com/ibexa/share/tree/remove-update",
+                "issues": "https://github.com/ibexa/share/issues"
+            },
+            "time": "2024-12-19T11:50:44+00:00"
         },
         {
             "name": "ibexa/shipping",
@@ -21550,10 +21740,18 @@
         }
     ],
     "packages-dev": [],
-    "aliases": [],
+    "aliases": [
+        {
+            "package": "ibexa/share",
+            "version": "dev-remove-update",
+            "alias": "4.6.x-dev",
+            "alias_normalized": "4.6.9999999.9999999-dev"
+        }
+    ],
     "minimum-stability": "dev",
     "stability-flags": {
-        "ibexa/commerce": 20
+        "ibexa/commerce": 20,
+        "ibexa/share": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

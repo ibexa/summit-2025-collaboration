@@ -34,6 +34,11 @@ security:
     #!        in_memory:
     #!            memory: ~
 
+    ## Uncomment authorize access control if you wish to use product as an OAuth2 Server
+    #access_control:
+    #    - { path: ^/authorize/jwks$, roles: ~ }
+    #    - { path: ^/authorize, roles: IS_AUTHENTICATED_REMEMBERED }
+
     firewalls:
         # disables authentication for assets and the profiler, adapt it according to your needs
         dev:
@@ -47,6 +52,35 @@ security:
         ibexa_register_from_invitation:
             pattern: /user/from-invite/register|/from-invite/register
             security: false
+
+        ibexa_corporate_dev:
+            pattern: ^/corporate/(css|images|js)/
+            security: false
+
+        ibexa_corporate_customer_portal_register:
+            pattern: ^/corporate/customer-portal/register
+            security: false
+
+        ibexa_corporate_fieldtype_address:
+            pattern: ^/corporate/address/form/
+            security: false
+
+        ## Uncomment oauth2_token firewall if you wish to use product as an OAuth2 Server.
+        ## Use oauth2 guard any other (for example ibexa_front) firewall you wish to be
+        ## exposed as OAuth2-available resource. Example:
+        ##    guard:
+        ##        authenticators:
+        ##            - Ibexa\OAuth2Server\Security\Guard\OAuth2Authenticator
+        #oauth2_token:
+        #    pattern: ^/token$
+        #    security: false
+
+        # Uncomment `ibexa_cdp` rule if you are using Ibexa CDP connector
+        #ibexa_cdp:
+        #    pattern: /cdp/webhook
+        #    guard:
+        #        authenticator: 'Ibexa\Cdp\Security\CdpRequestAuthenticator'
+        #    stateless: true
 
         # Uncomment the rules below to enable JSON Web Token (JWT) authentication for REST and/or GraphQL
         #ibexa_jwt_rest:
@@ -69,6 +103,28 @@ security:
         #        entry_point: lexik_jwt_authentication.jwt_token_authenticator
         #    stateless: true
 
+        # Uncomment ibexa_oauth2_connect, ibexa_oauth2_front rules and comment ibexa_front firewall
+        # to enable OAuth2 authentication
+
+        #ibexa_oauth2_connect:
+        #    pattern: /oauth2/connect/*
+        #    security: false
+
+        #ibexa_oauth2_front:
+        #    pattern: ^/
+        #    user_checker: Ibexa\Core\MVC\Symfony\Security\UserChecker
+        #    anonymous: ~
+        #    ibexa_rest_session: ~
+        #    guard:
+        #        authenticators:
+        #            - Ibexa\Bundle\OAuth2Client\Security\Authenticator\OAuth2Authenticator
+        #            - Ibexa\PageBuilder\Security\EditorialMode\TokenAuthenticator
+        #        entry_point: Ibexa\Bundle\OAuth2Client\Security\Authenticator\OAuth2Authenticator
+        #    form_login:
+        #        require_previous_session: false
+        #        csrf_token_generator: security.csrf.token_manager
+        #    logout: ~
+
         ibexa_front:
             pattern: ^/
             user_checker: Ibexa\Core\MVC\Symfony\Security\UserChecker
@@ -77,7 +133,10 @@ security:
             form_login:
                 require_previous_session: false
                 csrf_token_generator: security.csrf.token_manager
-            logout: ~
+            guard:
+                authenticator: 'Ibexa\PageBuilder\Security\EditorialMode\TokenAuthenticator'
+            logout:
+                path: logout
 
         main:
             anonymous: ~

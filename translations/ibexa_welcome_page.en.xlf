@@ -109,14 +109,19 @@ The commerce documentation covers the eCommerce features and APIs of Ibexa DXP. 
         <note>key: ibexa_platform_welcome_page.header.caret_down</note>
       </trans-unit>
       <trans-unit id="7d9f206306b985903c673b0fde7b661dd69a8169" resname="ibexa_platform_welcome_page.header.content">
-        <source>Open-source solution for building custom, scalable websites.</source>
-        <target state="new">Open-source solution for building custom, scalable websites.</target>
+        <source>Digitalize and automate the way you do business.</source>
+        <target state="new">Digitalize and automate the way you do business.</target>
         <note>key: ibexa_platform_welcome_page.header.content</note>
       </trans-unit>
       <trans-unit id="98c2ffa53627e1a600dc9dc9c1105167b18b4ce5" resname="ibexa_platform_welcome_page.header.image">
-        <source>OSS</source>
-        <target state="new">OSS</target>
+        <source>Commerce</source>
+        <target state="new">Commerce</target>
         <note>key: ibexa_platform_welcome_page.header.image</note>
+      </trans-unit>
+      <trans-unit id="5ed01ca41cbaaac518bc6c5b3a2d44aefe55ef68" resname="ibexa_platform_welcome_page.header.storefront">
+        <source>Go to storefront</source>
+        <target state="new">Go to storefront</target>
+        <note>key: ibexa_platform_welcome_page.header.storefront</note>
       </trans-unit>
       <trans-unit id="ad4d8a3d927782cf037c301c653c0b8d05d57dfe" resname="ibexa_platform_welcome_page.header.title">
         <source>Welcome to %name% %version%</source>
