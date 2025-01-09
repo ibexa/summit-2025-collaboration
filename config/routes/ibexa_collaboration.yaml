@@ -1,0 +1,6 @@
+ibexa.collaboration.rest:
+    resource: '@IbexaCollaborationBundle/Resources/config/routing_rest.yaml'
+    prefix: '%ibexa.rest.path_prefix%'
+
+ibexa.collaboration:
+    resource: '@IbexaCollaborationBundle/Resources/config/routing.yaml'
