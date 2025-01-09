@@ -22,3 +22,36 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Collaboration\Cart\Mapper\CartProxyMapper: ~
+
+    App\Collaboration\Cart\Mapper\CartProxyMapperInterface:
+        alias: App\Collaboration\Cart\Mapper\CartProxyMapper
+
+    App\Collaboration\Cart\Persistence\Gateway\DatabaseGateway:
+        arguments:
+            $connection: '@ibexa.persistence.connection'
+        tags:
+            -   name: ibexa.collaboration.persistence.session.gateway
+                discriminator: !php/const \App\Collaboration\Cart\CartSessionType::IDENTIFIER
+
+    App\Collaboration\Cart\Persistence\Mapper:
+        tags:
+            -   name: ibexa.collaboration.persistence.session.mapper
+                discriminator: !php/const \App\Collaboration\Cart\CartSessionType::IDENTIFIER
+
+    App\Collaboration\Cart\Mapper\CartSessionPersistenceMapper:
+        tags:
+            -   name: ibexa.collaboration.service.session.persistence.mapper
+                type: !php/const \App\Collaboration\Cart\CartSessionType::IDENTIFIER
+
+    App\Collaboration\Cart\Mapper\CartSessionDomainMapper:
+        tags:
+            -   name: ibexa.collaboration.service.session.domain.mapper
+                type: App\Collaboration\Cart\Persistence\Values\CartSession
+
+    App\Collaboration\Cart\PermissionResolverDecorator:
+        decorates: Ibexa\Contracts\ProductCatalog\PermissionResolverInterface
+
+    App\Collaboration\Cart\CartResolverDecorator:
+        decorates: Ibexa\Contracts\Cart\CartResolverInterface
