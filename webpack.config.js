@@ -3,6 +3,9 @@ const path = require('path');
 const getIbexaConfig = require('./ibexa.webpack.config.js');
 const ibexaConfig = getIbexaConfig(Encore);
 const customConfigs = require('./ibexa.webpack.custom.configs.js');
+const {
+    isReactBlockPathCreated,
+} = require('./ibexa.webpack.config.react.blocks.js');
 
 Encore.reset();
 Encore.setOutputPath('public/build/')
@@ -32,6 +35,11 @@ Encore.addEntry('welcome-page-css', [
 Encore.addEntry('welcome-page-js', [
     path.resolve(__dirname, './assets/js/welcome.page.js'),
 ]);
+
+if (isReactBlockPathCreated) {
+    // React Blocks javascript
+    Encore.addEntry('react-blocks-js', './assets/js/react.blocks.js');
+}
 
 Encore.addEntry('app', './assets/app.js');
 
