@@ -4,16 +4,21 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.3",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ibexa/commerce": "~4.6.x-dev",
+        "ibexa/share": "~4.6.x-dev",
+        "ibexa/fieldtype-richtext-rte": "4.6.x-dev",
         "symfony/console": "5.4.*",
         "symfony/dotenv": "5.4.*",
         "symfony/flex": "^1.17|^2",
         "symfony/framework-bundle": "5.4.*",
         "symfony/runtime": "5.4.*",
         "symfony/yaml": "5.4.*"
+    },
+    "require-dev": {
+        "ibexa/code-style": "~2.0.0"
     },
     "config": {
         "allow-plugins": {
@@ -49,6 +54,7 @@
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
             "yarn install": "script",
+            "vendor/bin/ckeditor-rte-install.sh": "script",
             "ibexa:encore:compile --config-name app": "symfony-cmd",
             "bazinga:js-translation:dump %PUBLIC_DIR%/assets --merge-domains": "symfony-cmd",
             "ibexa:encore:compile": "symfony-cmd"
@@ -58,7 +64,8 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "fix-cs": "php-cs-fixer fix --config=.php-cs-fixer.php --show-progress=dots"
     },
     "conflict": {
         "symfony/symfony": "*"
@@ -68,9 +75,24 @@
             "allow-contrib": true,
             "require": "5.4.*",
             "endpoint": "https://api.github.com/repos/ibexa/recipes-dev/contents/index.json?ref=flex/main"
+        },
+        "runtime": {
+            "error_handler": "\\Ibexa\\Contracts\\Core\\MVC\\Symfony\\ErrorHandler\\Php82HideDeprecationsErrorHandler"
         }
     },
     "repositories": {
+        "677ebc046bb2d": {
+            "type": "vcs",
+            "url": "https://github.com/ibexa/share"
+        },
+        "677ebc046bb21": {
+            "type": "vcs",
+            "url": "https://github.com/ibexa/collaboration"
+        },
+        "677ebc046bb22": {
+            "type": "vcs",
+            "url": "https://github.com/ibexa/fieldtype-richtext-rte"
+        },
         "ibexa": {
             "type": "composer",
             "url": "https://updates.ibexa.co"

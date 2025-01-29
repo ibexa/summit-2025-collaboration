@@ -3,10 +3,11 @@
     "@hotwired/stimulus": "^3.0.0",
     "@symfony/stimulus-bridge": "^3.0.0",
     "@symfony/webpack-encore": "^3.0.0",
+    "@babel/preset-react": "^7.0.0",
     "core-js": "^3.0.0",
     "regenerator-runtime": "^0.13.2",
     "webpack-notifier": "^1.6.0",
-    "@babel/preset-react": "^7.0.0",
+    "react-collapsible": "^2.5.0",
     "sass": "^1.49.7",
     "sass-loader": "^13.0.0",
     "@babel/runtime": "^7.13.10",
@@ -21,6 +22,10 @@
     "@ckeditor/ckeditor5-theme-lark": "^40.1.0",
     "@ckeditor/ckeditor5-code-block": "^40.1.0",
     "@svgr/webpack": "^8.1.0"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "license": "UNLICENSED",
   "private": true,

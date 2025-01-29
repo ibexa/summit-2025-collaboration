@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b969216901bfdf08ff2cd91371efe55f",
+    "content-hash": "5dbba58531c4ec94d14791f90cd14713",
     "packages": [
         {
             "name": "alcohol/iso4217",
@@ -3883,6 +3883,103 @@
             "time": "2024-12-16T07:17:10+00:00"
         },
         {
+            "name": "ibexa/collaboration",
+            "version": "4.6.x-dev",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:ibexa/collaboration.git",
+                "reference": "c73f5deeb696e80f63b9eda6522eb67419db45a0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ibexa/collaboration/zipball/c73f5deeb696e80f63b9eda6522eb67419db45a0",
+                "reference": "c73f5deeb696e80f63b9eda6522eb67419db45a0",
+                "shasum": ""
+            },
+            "require": {
+                "ibexa/core": "~4.6.x-dev",
+                "ibexa/core-persistence": "^4.6",
+                "ibexa/core-search": "~4.6.x-dev",
+                "ibexa/doctrine-schema": "^4.6",
+                "ibexa/rest": "~4.6.x-dev",
+                "php": "^7.4 || ^8.0",
+                "symfony/config": "^5.4",
+                "symfony/dependency-injection": "^5.4",
+                "symfony/event-dispatcher": "^5.4",
+                "symfony/event-dispatcher-contracts": "^2.2",
+                "symfony/http-foundation": "^5.4",
+                "symfony/http-kernel": "^5.4",
+                "symfony/uid": "^5.4",
+                "symfony/validator": "^5.4",
+                "symfony/yaml": "^5.4"
+            },
+            "require-dev": {
+                "dama/doctrine-test-bundle": "^v6.7",
+                "ibexa/behat": "~4.6.x-dev",
+                "ibexa/code-style": "~2.0.0",
+                "ibexa/test-core": "~4.6.x-dev",
+                "ibexa/test-rest": "~4.6.x-dev",
+                "matthiasnoback/symfony-dependency-injection-test": "^4.3",
+                "phpstan/phpstan": "^1.10",
+                "phpstan/phpstan-phpunit": "^1.3",
+                "phpstan/phpstan-symfony": "^1.3",
+                "phpunit/phpunit": "^9",
+                "qossmic/deptrac-shim": "^0.24.0 || ^1.0.2"
+            },
+            "type": "ibexa-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "4.6.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Ibexa\\Bundle\\Collaboration\\": "src/bundle/",
+                    "Ibexa\\Contracts\\Collaboration\\": "src/contracts/",
+                    "Ibexa\\Collaboration\\": "src/lib/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Ibexa\\Tests\\Bundle\\Collaboration\\": "tests/bundle/",
+                    "Ibexa\\Tests\\Integration\\Collaboration\\": "tests/integration/",
+                    "Ibexa\\Tests\\Collaboration\\": "tests/lib/"
+                }
+            },
+            "notification-url": "https://updates.ibexa.co/notifystats",
+            "scripts": {
+                "fix-cs": [
+                    "php-cs-fixer fix --config=.php-cs-fixer.php --show-progress=dots"
+                ],
+                "check-cs": [
+                    "@fix-cs --dry-run"
+                ],
+                "test": [
+                    "phpunit -c phpunit.xml.dist"
+                ],
+                "test-integration": [
+                    "phpunit -c phpunit.integration.xml"
+                ],
+                "phpstan": [
+                    "phpstan analyse -c phpstan.neon"
+                ],
+                "deptrac": [
+                    "php vendor/bin/deptrac analyse"
+                ]
+            },
+            "license": [
+                "proprietary"
+            ],
+            "keywords": [
+                "ibexa-dxp"
+            ],
+            "support": {
+                "source": "https://github.com/ibexa/collaboration/tree/4.6",
+                "issues": "https://github.com/ibexa/collaboration/issues"
+            },
+            "time": "2024-12-19T06:43:27+00:00"
+        },
+        {
             "name": "ibexa/commerce",
             "version": "4.6.x-dev",
             "source": {
@@ -4511,12 +4608,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ibexa/core.git",
-                "reference": "90f0c81e83acd62f214adac4fdebb37a64c4edfd"
+                "reference": "cd57d587f05ad7b29750b694a832a420ca7d2384"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ibexa/core/zipball/90f0c81e83acd62f214adac4fdebb37a64c4edfd",
-                "reference": "90f0c81e83acd62f214adac4fdebb37a64c4edfd",
+                "url": "https://api.github.com/repos/ibexa/core/zipball/cd57d587f05ad7b29750b694a832a420ca7d2384",
+                "reference": "cd57d587f05ad7b29750b694a832a420ca7d2384",
                 "shasum": ""
             },
             "require": {
@@ -4645,7 +4742,7 @@
             "support": {
                 "source": "https://github.com/ibexa/core/tree/4.6"
             },
-            "time": "2024-12-20T10:36:02+00:00"
+            "time": "2025-01-09T13:09:12+00:00"
         },
         {
             "name": "ibexa/core-persistence",
@@ -5990,12 +6087,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ibexa/fieldtype-richtext.git",
-                "reference": "640419c510f2a37c3e3fc03fd83d089d2472476e"
+                "reference": "ef64b0ac77cdddc52bbb09d11e44d1e4237b99b1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ibexa/fieldtype-richtext/zipball/640419c510f2a37c3e3fc03fd83d089d2472476e",
-                "reference": "640419c510f2a37c3e3fc03fd83d089d2472476e",
+                "url": "https://api.github.com/repos/ibexa/fieldtype-richtext/zipball/ef64b0ac77cdddc52bbb09d11e44d1e4237b99b1",
+                "reference": "ef64b0ac77cdddc52bbb09d11e44d1e4237b99b1",
                 "shasum": ""
             },
             "require": {
@@ -6069,7 +6166,7 @@
             "support": {
                 "source": "https://github.com/ibexa/fieldtype-richtext/tree/4.6"
             },
-            "time": "2024-12-12T07:53:59+00:00"
+            "time": "2025-01-09T09:10:03+00:00"
         },
         {
             "name": "ibexa/form-builder",
@@ -8064,12 +8161,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:ibexa/product-catalog.git",
-                "reference": "d82e1ab8120ffef62aff76ad83723a8d6cf111f5"
+                "reference": "0f43c6631bac163a46c3f4090eb6336356127af9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ibexa/product-catalog/zipball/d82e1ab8120ffef62aff76ad83723a8d6cf111f5",
-                "reference": "d82e1ab8120ffef62aff76ad83723a8d6cf111f5",
+                "url": "https://api.github.com/repos/ibexa/product-catalog/zipball/0f43c6631bac163a46c3f4090eb6336356127af9",
+                "reference": "0f43c6631bac163a46c3f4090eb6336356127af9",
                 "shasum": ""
             },
             "require": {
@@ -8181,7 +8278,7 @@
                 "source": "https://github.com/ibexa/product-catalog/tree/4.6",
                 "issues": "https://github.com/ibexa/product-catalog/issues"
             },
-            "time": "2024-12-27T10:39:24+00:00"
+            "time": "2025-01-09T08:43:39+00:00"
         },
         {
             "name": "ibexa/rest",
@@ -8661,6 +8758,99 @@
                 "issues": "https://github.com/ibexa/seo/issues"
             },
             "time": "2025-01-08T09:50:31+00:00"
+        },
+        {
+            "name": "ibexa/share",
+            "version": "dev-remove-update",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:ibexa/share.git",
+                "reference": "585309060554751b1cf6efce274790737684798e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ibexa/share/zipball/585309060554751b1cf6efce274790737684798e",
+                "reference": "585309060554751b1cf6efce274790737684798e",
+                "shasum": ""
+            },
+            "require": {
+                "ibexa/admin-ui": "~4.6.x-dev",
+                "ibexa/collaboration": "~4.6.x-dev",
+                "ibexa/core": "~4.6.x-dev",
+                "ibexa/rest": "~4.6.x-dev",
+                "php": "^7.4 || ^8.0",
+                "symfony/config": "^5.4",
+                "symfony/dependency-injection": "^5.4",
+                "symfony/event-dispatcher": "^5.4",
+                "symfony/event-dispatcher-contracts": "^2.2",
+                "symfony/http-foundation": "^5.4",
+                "symfony/http-kernel": "^5.4",
+                "symfony/yaml": "^5.4"
+            },
+            "require-dev": {
+                "dama/doctrine-test-bundle": "^v6.7",
+                "ibexa/behat": "~4.6.x-dev",
+                "ibexa/code-style": "~2.0.0",
+                "ibexa/core-search": "~4.6.x-dev",
+                "ibexa/search": "~4.6.x-dev",
+                "ibexa/test-core": "~4.6.x-dev",
+                "phpstan/phpstan": "^1.10",
+                "phpstan/phpstan-phpunit": "^1.3",
+                "phpstan/phpstan-symfony": "^1.3",
+                "phpunit/phpunit": "^9",
+                "qossmic/deptrac-shim": "^0.24.0 || ^1.0.2"
+            },
+            "type": "ibexa-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "4.6.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Ibexa\\Bundle\\Share\\": "src/bundle/",
+                    "Ibexa\\Contracts\\Share\\": "src/contracts/",
+                    "Ibexa\\Share\\": "src/lib/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Ibexa\\Tests\\Bundle\\Share\\": "tests/bundle/",
+                    "Ibexa\\Tests\\Integration\\Share\\": "tests/integration/",
+                    "Ibexa\\Tests\\Share\\": "tests/lib/"
+                }
+            },
+            "scripts": {
+                "fix-cs": [
+                    "php-cs-fixer fix --config=.php-cs-fixer.php --show-progress=dots"
+                ],
+                "check-cs": [
+                    "@fix-cs --dry-run"
+                ],
+                "test": [
+                    "phpunit -c phpunit.xml.dist"
+                ],
+                "test-integration": [
+                    "phpunit -c phpunit.integration.xml.dist"
+                ],
+                "phpstan": [
+                    "phpstan analyse -c phpstan.neon"
+                ],
+                "deptrac": [
+                    "php vendor/bin/deptrac analyse"
+                ]
+            },
+            "license": [
+                "proprietary"
+            ],
+            "keywords": [
+                "ibexa-dxp"
+            ],
+            "support": {
+                "source": "https://github.com/ibexa/share/tree/remove-update",
+                "issues": "https://github.com/ibexa/share/issues"
+            },
+            "time": "2024-12-19T11:50:44+00:00"
         },
         {
             "name": "ibexa/shipping",
@@ -21549,19 +21739,360 @@
             "time": "2023-08-18T12:36:18+00:00"
         }
     ],
-    "packages-dev": [],
-    "aliases": [],
+    "packages-dev": [
+        {
+            "name": "adamwojs/php-cs-fixer-phpdoc-force-fqcn",
+            "version": "v2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/adamwojs/php-cs-fixer-phpdoc-force-fqcn.git",
+                "reference": "b69a5875d2b67f912715ceac37a5a321701fbe5a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/adamwojs/php-cs-fixer-phpdoc-force-fqcn/zipball/b69a5875d2b67f912715ceac37a5a321701fbe5a",
+                "reference": "b69a5875d2b67f912715ceac37a5a321701fbe5a",
+                "shasum": ""
+            },
+            "require": {
+                "friendsofphp/php-cs-fixer": "^3.0",
+                "php": "^7.1||^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "AdamWojs\\PhpCsFixerPhpdocForceFQCN\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Adam Wójs",
+                    "email": "adam@wojs.pl"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/adamwojs/php-cs-fixer-phpdoc-force-fqcn/issues",
+                "source": "https://github.com/adamwojs/php-cs-fixer-phpdoc-force-fqcn/tree/v2.0"
+            },
+            "time": "2021-08-23T07:54:35+00:00"
+        },
+        {
+            "name": "composer/pcre",
+            "version": "3.3.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/composer/pcre.git",
+                "reference": "b2bed4734f0cc156ee1fe9c0da2550420d99a21e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/composer/pcre/zipball/b2bed4734f0cc156ee1fe9c0da2550420d99a21e",
+                "reference": "b2bed4734f0cc156ee1fe9c0da2550420d99a21e",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4 || ^8.0"
+            },
+            "conflict": {
+                "phpstan/phpstan": "<1.11.10"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.12 || ^2",
+                "phpstan/phpstan-strict-rules": "^1 || ^2",
+                "phpunit/phpunit": "^8 || ^9"
+            },
+            "type": "library",
+            "extra": {
+                "phpstan": {
+                    "includes": [
+                        "extension.neon"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-main": "3.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Composer\\Pcre\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jordi Boggiano",
+                    "email": "j.boggiano@seld.be",
+                    "homepage": "http://seld.be"
+                }
+            ],
+            "description": "PCRE wrapping library that offers type-safe preg_* replacements.",
+            "keywords": [
+                "PCRE",
+                "preg",
+                "regex",
+                "regular expression"
+            ],
+            "support": {
+                "issues": "https://github.com/composer/pcre/issues",
+                "source": "https://github.com/composer/pcre/tree/3.3.2"
+            },
+            "funding": [
+                {
+                    "url": "https://packagist.com",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/composer",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/composer/composer",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2024-11-12T16:29:46+00:00"
+        },
+        {
+            "name": "composer/xdebug-handler",
+            "version": "3.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/composer/xdebug-handler.git",
+                "reference": "6c1925561632e83d60a44492e0b344cf48ab85ef"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/composer/xdebug-handler/zipball/6c1925561632e83d60a44492e0b344cf48ab85ef",
+                "reference": "6c1925561632e83d60a44492e0b344cf48ab85ef",
+                "shasum": ""
+            },
+            "require": {
+                "composer/pcre": "^1 || ^2 || ^3",
+                "php": "^7.2.5 || ^8.0",
+                "psr/log": "^1 || ^2 || ^3"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.0",
+                "phpstan/phpstan-strict-rules": "^1.1",
+                "phpunit/phpunit": "^8.5 || ^9.6 || ^10.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Composer\\XdebugHandler\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "John Stevenson",
+                    "email": "john-stevenson@blueyonder.co.uk"
+                }
+            ],
+            "description": "Restarts a process without Xdebug.",
+            "keywords": [
+                "Xdebug",
+                "performance"
+            ],
+            "support": {
+                "irc": "ircs://irc.libera.chat:6697/composer",
+                "issues": "https://github.com/composer/xdebug-handler/issues",
+                "source": "https://github.com/composer/xdebug-handler/tree/3.0.5"
+            },
+            "funding": [
+                {
+                    "url": "https://packagist.com",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/composer",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/composer/composer",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2024-05-06T16:37:16+00:00"
+        },
+        {
+            "name": "friendsofphp/php-cs-fixer",
+            "version": "v3.54.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer.git",
+                "reference": "2aecbc8640d7906c38777b3dcab6f4ca79004d08"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/2aecbc8640d7906c38777b3dcab6f4ca79004d08",
+                "reference": "2aecbc8640d7906c38777b3dcab6f4ca79004d08",
+                "shasum": ""
+            },
+            "require": {
+                "composer/semver": "^3.4",
+                "composer/xdebug-handler": "^3.0.3",
+                "ext-filter": "*",
+                "ext-json": "*",
+                "ext-tokenizer": "*",
+                "php": "^7.4 || ^8.0",
+                "sebastian/diff": "^4.0 || ^5.0 || ^6.0",
+                "symfony/console": "^5.4 || ^6.0 || ^7.0",
+                "symfony/event-dispatcher": "^5.4 || ^6.0 || ^7.0",
+                "symfony/filesystem": "^5.4 || ^6.0 || ^7.0",
+                "symfony/finder": "^5.4 || ^6.0 || ^7.0",
+                "symfony/options-resolver": "^5.4 || ^6.0 || ^7.0",
+                "symfony/polyfill-mbstring": "^1.28",
+                "symfony/polyfill-php80": "^1.28",
+                "symfony/polyfill-php81": "^1.28",
+                "symfony/process": "^5.4 || ^6.0 || ^7.0",
+                "symfony/stopwatch": "^5.4 || ^6.0 || ^7.0"
+            },
+            "require-dev": {
+                "facile-it/paraunit": "^1.3 || ^2.0",
+                "infection/infection": "^0.27.11",
+                "justinrainbow/json-schema": "^5.2",
+                "keradus/cli-executor": "^2.1",
+                "mikey179/vfsstream": "^1.6.11",
+                "php-coveralls/php-coveralls": "^2.7",
+                "php-cs-fixer/accessible-object": "^1.1",
+                "php-cs-fixer/phpunit-constraint-isidenticalstring": "^1.4",
+                "php-cs-fixer/phpunit-constraint-xmlmatchesxsd": "^1.4",
+                "phpunit/phpunit": "^9.6 || ^10.5.5 || ^11.0.2",
+                "symfony/var-dumper": "^5.4 || ^6.0 || ^7.0",
+                "symfony/yaml": "^5.4 || ^6.0 || ^7.0"
+            },
+            "suggest": {
+                "ext-dom": "For handling output formats in XML",
+                "ext-mbstring": "For handling non-UTF8 characters."
+            },
+            "bin": [
+                "php-cs-fixer"
+            ],
+            "type": "application",
+            "autoload": {
+                "psr-4": {
+                    "PhpCsFixer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Dariusz Rumiński",
+                    "email": "dariusz.ruminski@gmail.com"
+                }
+            ],
+            "description": "A tool to automatically fix PHP code style",
+            "keywords": [
+                "Static code analysis",
+                "fixer",
+                "standards",
+                "static analysis"
+            ],
+            "support": {
+                "issues": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/issues",
+                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.54.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/keradus",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-04-17T08:12:13+00:00"
+        },
+        {
+            "name": "ibexa/code-style",
+            "version": "v2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ibexa/code-style.git",
+                "reference": "02d31dc7e4de520640286b3967db747c85381fcb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ibexa/code-style/zipball/02d31dc7e4de520640286b3967db747c85381fcb",
+                "reference": "02d31dc7e4de520640286b3967db747c85381fcb",
+                "shasum": ""
+            },
+            "require": {
+                "adamwojs/php-cs-fixer-phpdoc-force-fqcn": "^2.0",
+                "friendsofphp/php-cs-fixer": "v3.54.0",
+                "php": ">=7.4"
+            },
+            "replace": {
+                "ezsystems/ezplatform-code-style": "*"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.10.66",
+                "roave/security-advisories": "dev-master"
+            },
+            "type": "internal",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "2.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Ibexa\\CodeStyle\\": "src/lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "(GPL-2.0-only or proprietary)"
+            ],
+            "authors": [
+                {
+                    "name": "Ibexa Engineering",
+                    "email": "ibexa@users.noreply.github.com"
+                }
+            ],
+            "description": "Ibexa Code Style Fixer",
+            "support": {
+                "issues": "https://github.com/ibexa/code-style/issues",
+                "source": "https://github.com/ibexa/code-style/tree/v2.0.0"
+            },
+            "time": "2024-04-23T12:10:59+00:00"
+        }
+    ],
+    "aliases": [
+        {
+            "package": "ibexa/share",
+            "version": "dev-remove-update",
+            "alias": "4.6.x-dev",
+            "alias_normalized": "4.6.9999999.9999999-dev"
+        }
+    ],
     "minimum-stability": "dev",
     "stability-flags": {
-        "ibexa/commerce": 20
+        "ibexa/commerce": 20,
+        "ibexa/share": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.4",
+        "php": ">=8.3",
         "ext-ctype": "*",
         "ext-iconv": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.3.0"
 }

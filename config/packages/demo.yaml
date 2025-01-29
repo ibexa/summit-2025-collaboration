@@ -1,0 +1,8 @@
+ibexa_design_engine:
+    design_list:
+        custom: [custom, storefront, standard]
+
+ibexa:
+    system:
+        site:
+            design: custom
