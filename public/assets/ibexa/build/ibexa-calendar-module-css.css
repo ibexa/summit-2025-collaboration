@@ -59,6 +59,7 @@
 .c-calendar-filters__language-list .ibexa-dropdown__items {
   position: absolute;
   z-index: 1;
+  font-size: 0.875rem;
 }
 
 .c-calendar-header {
@@ -111,6 +112,9 @@
 }
 .c-calendar-view-switcher__radio-input:checked:nth-child(5) ~ .c-calendar-view-switcher__select-slider {
   transform: translateX(140px);
+}
+.c-calendar-view-switcher__view-type-list {
+  font-size: 0.875rem;
 }
 .c-calendar-view-switcher__option {
   display: flex;

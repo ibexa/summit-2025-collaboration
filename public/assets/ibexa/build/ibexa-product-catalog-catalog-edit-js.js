@@ -329,7 +329,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
 /* harmony import */ var _helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
 /* harmony import */ var _urlIcon__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./urlIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/urlIcon.js");
-/* harmony import */ var _inculdedIcon__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./inculdedIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js");
+/* harmony import */ var _includedIcon__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./includedIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
@@ -345,7 +345,7 @@ var Icon = function Icon(props) {
     'ibexa-icon': true
   }, props.extraClasses, true));
   var isIconIncluded = props.useIncludedIcon || (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.isExternalInstance)();
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, isIconIncluded ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_inculdedIcon__WEBPACK_IMPORTED_MODULE_5__["default"], {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, isIconIncluded ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_includedIcon__WEBPACK_IMPORTED_MODULE_5__["default"], {
     cssClass: cssClass,
     name: props.name,
     defaultIconName: props.defaultIconName
@@ -373,9 +373,9 @@ Icon.defaultProps = {
 
 /***/ }),
 
-/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js":
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js":
 /*!*****************************************************************************************!*\
-  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js ***!
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js ***!
   \*****************************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -529,7 +529,7 @@ var iconsMap = {
   'upload-image': _ibexa_admin_ui_src_bundle_Resources_public_img_icons_upload_image_svg__WEBPACK_IMPORTED_MODULE_46__,
   warning: _ibexa_admin_ui_src_bundle_Resources_public_img_icons_warning_svg__WEBPACK_IMPORTED_MODULE_47__
 };
-var InculdedIcon = function InculdedIcon(props) {
+var IncludedIcon = function IncludedIcon(props) {
   var _iconsMap$name;
   var name = props.name,
     cssClass = props.cssClass,
@@ -539,17 +539,17 @@ var InculdedIcon = function InculdedIcon(props) {
     className: cssClass
   });
 };
-InculdedIcon.propTypes = {
+IncludedIcon.propTypes = {
   cssClass: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   name: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   defaultIconName: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string)
 };
-InculdedIcon.defaultProps = {
+IncludedIcon.defaultProps = {
   cssClass: '',
   name: 'about-info',
   defaultIconName: 'about-info'
 };
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (InculdedIcon);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (IncludedIcon);
 
 /***/ }),
 
@@ -617,6 +617,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 var DOTS = '...';
 var KEY_ENTER = 13;
 (function (global, doc, ibexa, Translator, Routing, _ibexa$productCatalog, _ibexa$productCatalog2) {
+  var escapeHTML = ibexa.helpers.text.escapeHTML;
+  var _ibexa$helpers$dom = ibexa.helpers.dom,
+    safelySetInnerHTML = _ibexa$helpers$dom.safelySetInnerHTML,
+    dangerouslyInsertAdjacentHTML = _ibexa$helpers$dom.dangerouslyInsertAdjacentHTML;
   var configuredFiltersNode = doc.querySelector('.ibexa-pc-edit-catalog-filters__configured');
   var configuredFiltersListTogglerBtns = doc.querySelectorAll('.ibexa-pc-edit-catalog-filters__configured-header-toggler');
   var dropdownInstance = ibexa.helpers.objectInstances.getInstance(doc.querySelector('.ibexa-pc-edit-catalog-filters__configured-header-actions .ibexa-dropdown'));
@@ -748,7 +752,16 @@ var KEY_ENTER = 13;
           var _ref5 = _slicedToArray(_ref4, 2),
             key = _ref5[0],
             value = _ref5[1];
-          requestBody.append("products_preview[filters][".concat(requestFilterName, "][").concat(key, "]"), value);
+          if (_typeof(requestFilterValue[key]) === 'object') {
+            Object.entries(requestFilterValue[key]).forEach(function (_ref6) {
+              var _ref7 = _slicedToArray(_ref6, 2),
+                objKey = _ref7[0],
+                objValue = _ref7[1];
+              requestBody.append("products_preview[filters][".concat(requestFilterName, "][").concat(key, "][").concat(objKey, "]"), objValue);
+            });
+          } else {
+            requestBody.append("products_preview[filters][".concat(requestFilterName, "][").concat(key, "]"), value);
+          }
         });
         return;
       }
@@ -782,9 +795,11 @@ var KEY_ENTER = 13;
       response.products.forEach(function (product) {
         var container = doc.createElement('tbody');
         container.insertAdjacentHTML('beforeend', rowTemplate);
-        var filledRow = container.innerHTML.replaceAll('{{ PRODUCT_NAME }}', product.name).replace('{{ PRODUCT_URL }}', product.view_url).replace('{{ PRODUCT_IMG }}', product.thumbnail).replace('{{ PRODUCT_CODE }}', product.code).replace('{{ PRODUCT_TYPE }}', product.type).replace('{{ PRODUCT_CREATED_DATE }}', product.created_at).replace('{{ PRODUCT_STATUS }}', !product.is_available ? 'ibexa-pc-availability-dot--not-available' : '');
-        container.innerHTML = '';
-        container.insertAdjacentHTML('beforeend', filledRow);
+        var productNameHtmlEscaped = escapeHTML(product.name);
+        var productTypeHtmlEscaped = escapeHTML(product.type);
+        var filledRow = container.innerHTML.replaceAll('{{ PRODUCT_NAME }}', productNameHtmlEscaped).replace('{{ PRODUCT_URL }}', product.view_url).replace('{{ PRODUCT_IMG }}', product.thumbnail).replace('{{ PRODUCT_CODE }}', product.code).replace('{{ PRODUCT_TYPE }}', productTypeHtmlEscaped).replace('{{ PRODUCT_CREATED_DATE }}', product.created_at).replace('{{ PRODUCT_STATUS }}', !product.is_available ? 'ibexa-pc-availability-dot--not-available' : '');
+        safelySetInnerHTML(container, '');
+        dangerouslyInsertAdjacentHTML(container, 'beforeend', filledRow);
         if (product.is_available) {
           container.querySelector('.ibexa-badge--status:not(.ibexa-badge--success)').remove();
         } else {
@@ -951,6 +966,8 @@ function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" 
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 
 
+var escapeHTML = window.ibexa.helpers.text.escapeHTML;
+var dangerouslyInsertAdjacentHTML = window.ibexa.helpers.dom.dangerouslyInsertAdjacentHTML;
 var MAX_NUMBER_PRODUCTS_LIST_FILTER_TAGS = 5;
 var doc = window.document;
 var BaseFilterConfig = /*#__PURE__*/function () {
@@ -1117,8 +1134,8 @@ var BaseFilterConfig = /*#__PURE__*/function () {
       tags.forEach(function (_ref) {
         var label = _ref.label,
           value = _ref.value;
-        var renderedFilterTag = _this.tagTemplate.replaceAll('{{ content }}', label);
-        _this.productListFilterTagsContainer.insertAdjacentHTML('beforeend', renderedFilterTag);
+        var renderedFilterTag = _this.tagTemplate.replaceAll('{{ content }}', escapeHTML(label));
+        dangerouslyInsertAdjacentHTML(_this.productListFilterTagsContainer, 'beforeend', renderedFilterTag);
         var lastFilterTag = _this.productListFilterTagsContainer.querySelector('.ibexa-pc-edit-catalog-list-filter-tag:last-of-type');
         lastFilterTag.dataset.value = value;
       });
@@ -1218,7 +1235,7 @@ var BaseFilterConfig = /*#__PURE__*/function () {
       }
       var valuePreviewLabel = this.getValuePreviewLabel();
       var valuePreviewTargetNode = this.filterPreviewHasValue.querySelector('.ibexa-middle-ellipsis__name-ellipsized');
-      valuePreviewTargetNode.innerHTML = valuePreviewLabel;
+      valuePreviewTargetNode.innerText = valuePreviewLabel;
       this.filterPreviewNoValue.classList.add('ibexa-pc-edit-catalog-filter-preview__value-content--hidden');
       this.filterPreviewHasValue.classList.remove('ibexa-pc-edit-catalog-filter-preview__value-content--hidden');
     }
@@ -1241,8 +1258,9 @@ var BaseFilterConfig = /*#__PURE__*/function () {
         var removeBtn = popupMenuItem.querySelector('.ibexa-pc-edit-catalog-tags-popup-menu__item-remove-btn');
         removeBtn.addEventListener('click', _this4.removePopupTag, false);
       });
-      if (this.getItems().length !== 0 || this.isDefault) {
-        this.attachRemoveFilterTagEvents();
+      var items = this.getItems();
+      if (items.length !== 0 || this.isDefault) {
+        this.updateProductsListTags(items);
         this.addPreview();
       }
     }
@@ -1475,6 +1493,8 @@ var DateRangeFilterConfig = /*#__PURE__*/function (_BaseFilterConfig) {
     _this = _callSuper(this, DateRangeFilterConfig, [config]);
     _this.sourceMinInput = _this.configPanelNode.querySelector('.ibexa-pc-edit-config-daterange-filter__field--min .ibexa-picker__form-input');
     _this.sourceMaxInput = _this.configPanelNode.querySelector('.ibexa-pc-edit-config-daterange-filter__field--max .ibexa-picker__form-input');
+    _this.isTimestamp = false;
+    _this.enableTime = false;
     _this.initDatePicker = _this.initDatePicker.bind(_this);
     _this.discardChanges = _this.discardChanges.bind(_this);
     _this.getItems = _this.getItems.bind(_this);
@@ -1484,13 +1504,20 @@ var DateRangeFilterConfig = /*#__PURE__*/function (_BaseFilterConfig) {
   return _createClass(DateRangeFilterConfig, [{
     key: "getItems",
     value: function getItems() {
+      var _this2 = this;
       var minDate = this.sourceMinInput.value;
       var maxDate = this.sourceMaxInput.value;
       if (!minDate && !maxDate) {
         return [];
       }
-      var minDateFormatted = ibexa.helpers.timezone.formatShortDateTime(new Date(minDate), null, ibexa.adminUiConfig.dateFormat.shortDate);
-      var maxDateFormatted = ibexa.helpers.timezone.formatShortDateTime(new Date(maxDate), null, ibexa.adminUiConfig.dateFormat.shortDate);
+      var formatLabelDate = function formatLabelDate(date) {
+        var dateFormat = ibexa.adminUiConfig.dateFormat;
+        var parsedDate = _this2.isTimestamp ? new Date(date * 1000).toString() : new Date(date);
+        var displayedDateFormat = _this2.isTimestamp && _this2.enableTime ? dateFormat.shortDateTime : dateFormat.shortDate;
+        return ibexa.helpers.timezone.formatShortDateTime(parsedDate, null, displayedDateFormat);
+      };
+      var minDateFormatted = formatLabelDate(minDate);
+      var maxDateFormatted = formatLabelDate(maxDate);
       var label = "".concat(minDate ? minDateFormatted : '...', " - ").concat(maxDate ? maxDateFormatted : '...');
       return [{
         minDate: minDate,
@@ -1570,22 +1597,32 @@ var DateRangeFilterConfig = /*#__PURE__*/function (_BaseFilterConfig) {
   }, {
     key: "initDatePicker",
     value: function initDatePicker(input) {
+      var _input$dataset,
+        _input$dataset2,
+        _input$dataset3,
+        _this3 = this;
       var container = input.closest('.ibexa-pc-edit-config-daterange-filter__field');
+      var enableSeconds = ((_input$dataset = input.dataset) === null || _input$dataset === void 0 ? void 0 : _input$dataset.seconds) === '1';
+      var enableTime = !!((_input$dataset2 = input.dataset) !== null && _input$dataset2 !== void 0 && _input$dataset2.enabletime);
       var defaultDate;
+      this.isTimestamp = !!((_input$dataset3 = input.dataset) !== null && _input$dataset3 !== void 0 && _input$dataset3.timestamp);
+      this.enableTime = enableTime;
       if (input.value) {
-        defaultDate = new Date(input.value);
+        defaultDate = this.isTimestamp ? new Date(input.value * 1000) : new Date(input.value);
       }
       var dateTimePickerWidget = new ibexa.core.DateTimePicker({
         container: container,
         onChange: function onChange(timestamps, _ref2) {
           var dates = _ref2.dates;
           var date = ibexa.helpers.timezone.formatShortDateTime(dates[0], null, 'yyyy-MM-dd');
-          input.value = date;
+          input.value = _this3.isTimestamp ? new Date(dates[0]).getTime() / 1000 : date;
         },
         flatpickrConfig: {
-          enableTime: false,
+          enableTime: enableTime,
+          enableSeconds: enableSeconds,
+          time_24hr: enableTime,
           formatDate: function formatDate(date) {
-            return ibexa.helpers.timezone.formatShortDateTime(date, null, ibexa.adminUiConfig.dateFormat.shortDate);
+            return ibexa.helpers.timezone.formatShortDateTime(date, null, enableTime ? ibexa.adminUiConfig.dateFormat.shortDateTime : ibexa.adminUiConfig.dateFormat.shortDate);
           },
           defaultDate: defaultDate
         }
@@ -2236,6 +2273,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _base_filter_config__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base.filter.config */ "./vendor/ibexa/product-catalog/src/bundle/Resources/public/js/filterConfig/base.filter.config.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
 function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
 function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
@@ -2261,13 +2304,13 @@ var TaggifyFilterConfig = /*#__PURE__*/function (_BaseFilterConfig) {
     _this = _callSuper(this, TaggifyFilterConfig, [config]);
     _this.taggifyTags = [];
     _this.taggifyWrapper = _this.configPanelNode.querySelector('.ibexa-pc-taggify__widget');
+    _this.ibexaTaggifyNode = _this.taggifyWrapper.querySelector('.ibexa-taggify');
     _this.sourceInput = _this.configPanelNode.querySelector('.ibexa-pc-taggify__source-input');
     _this.initTaggify = _this.initTaggify.bind(_this);
     _this.updateTaggifyTagsFromInput = _this.updateTaggifyTagsFromInput.bind(_this);
     _this.getTags = _this.getTags.bind(_this);
     _this.getItems = _this.getItems.bind(_this);
     _this.discardChanges = _this.discardChanges.bind(_this);
-    _this.updateSourceValue = _this.updateSourceValue.bind(_this);
     return _this;
   }
   _inherits(TaggifyFilterConfig, _BaseFilterConfig);
@@ -2307,26 +2350,21 @@ var TaggifyFilterConfig = /*#__PURE__*/function (_BaseFilterConfig) {
   }, {
     key: "removeFilterTag",
     value: function removeFilterTag(tag) {
-      var tags = this.sourceInput.value.split(',');
-      var filteredTags = tags.filter(function (tagItem) {
-        return tagItem !== tag.dataset.value;
-      });
-      this.sourceInput.value = filteredTags.join(',');
-      this.sourceInput.dispatchEvent(new Event('change'));
-      this.initTaggify();
+      this.taggify.removeTagWithValue(tag);
       _superPropGet(TaggifyFilterConfig, "removeFilterTag", this, 3)([tag]);
     }
   }, {
     key: "discardChanges",
     value: function discardChanges() {
-      var tags = this.storedItems.map(function (_ref) {
+      var oldTagsValue = this.storedItems.map(function (_ref) {
         var value = _ref.value;
         return value;
       }).join(',');
-      var haveTagsChanged = tags !== this.sourceInput.value;
-      this.sourceInput.value = tags;
-      this.initTaggify();
+      var haveTagsChanged = oldTagsValue !== this.sourceInput.value;
       if (haveTagsChanged) {
+        this.taggify.removeAllTags();
+        this.sourceInput.value = oldTagsValue;
+        this.updateTaggifyTagsFromInput();
         this.sourceInput.dispatchEvent(new Event('change'));
       }
       this.storedItems = [];
@@ -2334,49 +2372,44 @@ var TaggifyFilterConfig = /*#__PURE__*/function (_BaseFilterConfig) {
   }, {
     key: "removePreview",
     value: function removePreview() {
-      this.sourceInput.value = '';
-      this.initTaggify();
-      this.sourceInput.dispatchEvent(new Event('change'));
+      this.taggify.removeAllTags();
       _superPropGet(TaggifyFilterConfig, "removePreview", this, 3)([]);
-    }
-  }, {
-    key: "updateSourceValue",
-    value: function updateSourceValue(event) {
-      this.sourceInput.value = event.detail.tags.map(function (tag) {
-        return tag.label;
-      }).join();
-      this.sourceInput.dispatchEvent(new Event('change'));
     }
   }, {
     key: "updateTaggifyTagsFromInput",
     value: function updateTaggifyTagsFromInput() {
+      var _this2 = this;
       if (this.sourceInput.value) {
-        this.taggify.updateTags(this.sourceInput.value.split(',').map(function (item) {
-          return {
-            id: item.replace(/[^a-zA-Z0-9]/g, '_'),
-            label: item
-          };
-        }));
+        this.sourceInput.value.split(',').forEach(function (tag) {
+          _this2.taggify.addTag(tag, tag);
+        });
       }
     }
   }, {
     key: "initTaggify",
     value: function initTaggify() {
-      this.taggify = new window.Taggify({
-        containerNode: this.taggifyWrapper,
-        displayLabel: false,
-        displayInputValues: false
-      });
-      var taggifyInput = this.taggifyWrapper.querySelector('.taggify__input');
-      this.updateTaggifyTagsFromInput();
-      taggifyInput.addEventListener('keydown', function (event) {
-        if (event.keyCode == 13) {
-          event.preventDefault();
-          return false;
+      var taggifyFilterConfig = this;
+      var GenerateVariantsTaggify = /*#__PURE__*/function (_ibexa$core$Taggify) {
+        function GenerateVariantsTaggify() {
+          _classCallCheck(this, GenerateVariantsTaggify);
+          return _callSuper(this, GenerateVariantsTaggify, arguments);
         }
-      }, false);
-      this.taggifyWrapper.addEventListener('tagsCreated', this.updateSourceValue, false);
-      this.taggifyWrapper.addEventListener('tagRemoved', this.updateSourceValue, false);
+        _inherits(GenerateVariantsTaggify, _ibexa$core$Taggify);
+        return _createClass(GenerateVariantsTaggify, [{
+          key: "afterTagsUpdate",
+          value: function afterTagsUpdate() {
+            var tags = _toConsumableArray(this.tags);
+            taggifyFilterConfig.sourceInput.value = tags.join();
+            taggifyFilterConfig.sourceInput.dispatchEvent(new Event('change'));
+          }
+        }]);
+      }(ibexa.core.Taggify);
+      this.taggify = new GenerateVariantsTaggify({
+        container: this.ibexaTaggifyNode,
+        acceptKeys: [' ', ',']
+      });
+      this.taggify.init();
+      this.updateTaggifyTagsFromInput();
     }
   }, {
     key: "init",
@@ -3169,6 +3202,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _common_components_empty_tree_empty_tree__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../common/components/empty-tree/empty.tree */ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/components/empty-tree/empty.tree.js");
 /* harmony import */ var _common_components_not_translated_info_not_translated_info__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../common/components/not-translated-info/not.translated.info */ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/components/not-translated-info/not.translated.info.js");
 /* harmony import */ var _common_components_name_content_name_content__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../common/components/name-content/name-content */ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/components/name-content/name-content.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -3180,6 +3214,7 @@ function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) 
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
 
 
 
@@ -3288,9 +3323,14 @@ var SelectIbexaTag = function SelectIbexaTag(props) {
     var internalItem = item.internalItem;
     var id = internalItem.id;
     var name = (0,_common_helpers_languages__WEBPACK_IMPORTED_MODULE_7__.getTranslatedName)(item.internalItem, languageCode);
+    var isDisabled = checkIsInputDisabled(item);
+    var labelClassName = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_12__.createCssClassNames)({
+      'c-tt-list-item__link': true,
+      'c-tt-list-item__link--disabled': isDisabled
+    });
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", {
       htmlFor: "ibexa-tb-row-selected-".concat(moduleId, "-").concat(id),
-      className: "c-tt-list-item__link"
+      className: labelClassName
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_components_name_content_name_content__WEBPACK_IMPORTED_MODULE_11__["default"], {
       searchActive: searchActive,
       searchValue: searchValue,
@@ -3317,6 +3357,16 @@ var SelectIbexaTag = function SelectIbexaTag(props) {
       return children;
     })["catch"](window.ibexa.helpers.notification.showErrorNotification);
   };
+  var callbackToggleExpanded = function callbackToggleExpanded(item, _ref) {
+    var isExpanded = _ref.isExpanded,
+      loadMore = _ref.loadMore;
+    if (isExpanded) {
+      var shouldLoadInitialItems = item.subitems && !item.subitems.length;
+      if (shouldLoadInitialItems) {
+        loadMore();
+      }
+    }
+  };
   var renderEmpty = function renderEmpty() {
     if (!isLoaded || (tree === null || tree === void 0 ? void 0 : tree.id) !== undefined) {
       return null;
@@ -3339,7 +3389,7 @@ var SelectIbexaTag = function SelectIbexaTag(props) {
     var unavailableEntriesIds = item.path.split('/').map(function (id) {
       return parseInt(id, 10);
     });
-    return unavailableEntriesIds.includes(taxonomyEntryId);
+    return unavailableEntriesIds.includes(taxonomyEntryId) || item.internalItem.disabled;
   };
   var getSelectedItemsIds = function getSelectedItemsIds() {
     return selectedItems.map(function (item) {
@@ -3373,8 +3423,8 @@ var SelectIbexaTag = function SelectIbexaTag(props) {
             var _rootResponse3 = _slicedToArray(rootResponse, 1),
               rootItem = _rootResponse3[0];
             setSearchTree(rootItem);
-            var hasSubitems = function hasSubitems(_ref) {
-              var subitems = _ref.subitems;
+            var hasSubitems = function hasSubitems(_ref2) {
+              var subitems = _ref2.subitems;
               return !!subitems && subitems.length;
             };
             var allChildren = (0,_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_helpers_tree__WEBPACK_IMPORTED_MODULE_3__.getAllChildren)({
@@ -3408,6 +3458,7 @@ var SelectIbexaTag = function SelectIbexaTag(props) {
       return false;
     },
     loadMoreSubitems: loadMoreSubitems,
+    callbackToggleExpanded: callbackToggleExpanded,
     selectedLimit: isMultiChoice ? undefined : 1,
     dragDisabled: true,
     isResizable: false,
@@ -3461,11 +3512,18 @@ SelectIbexaTag.defaultProps = {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   buildGetMenuActionsList: () => (/* binding */ buildGetMenuActionsList),
 /* harmony export */   getAllChildren: () => (/* binding */ getAllChildren),
 /* harmony export */   getMenuActions: () => (/* binding */ _getMenuActions)
 /* harmony export */ });
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
@@ -3473,16 +3531,20 @@ function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" 
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 
 var EXCLUDED_ACTION_IDS = ['preview'];
+var HIDE_REVEAL_ACTION_ID = 'hide';
 var isActionExcluded = function isActionExcluded(_ref) {
   var action = _ref.action,
     item = _ref.item,
     previewExcludedItemPath = _ref.previewExcludedItemPath;
-  if (!item.internalItem || !EXCLUDED_ACTION_IDS.includes(action.id)) {
+  var internalItem = item.internalItem;
+  if (action.id === HIDE_REVEAL_ACTION_ID && item.internalItem && item.internalItem.isInvisible && !item.internalItem.isHidden) {
+    return true;
+  }
+  if (!internalItem || !EXCLUDED_ACTION_IDS.includes(action.id)) {
     return false;
   }
-  var pathString = item.internalItem.pathString;
-  return previewExcludedItemPath.some(function (excludedPath) {
-    return pathString.startsWith(excludedPath);
+  return previewExcludedItemPath.length && previewExcludedItemPath.some(function (excludedPath) {
+    return internalItem.pathString.startsWith(excludedPath);
   });
 };
 var _getMenuActions = function getMenuActions(_ref2) {
@@ -3493,7 +3555,7 @@ var _getMenuActions = function getMenuActions(_ref2) {
     activeActionsIds = _ref2$activeActionsId === void 0 ? [] : _ref2$activeActionsId,
     _ref2$previewExcluded = _ref2.previewExcludedItemPath,
     previewExcludedItemPath = _ref2$previewExcluded === void 0 ? (_getAdminUiConfig$sit = (_getAdminUiConfig$sit2 = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_0__.getAdminUiConfig)().siteContext) === null || _getAdminUiConfig$sit2 === void 0 ? void 0 : _getAdminUiConfig$sit2.excludedPaths) !== null && _getAdminUiConfig$sit !== void 0 ? _getAdminUiConfig$sit : [] : _ref2$previewExcluded;
-  var filteredActions = previewExcludedItemPath.length && item ? actions.filter(function (action) {
+  var filteredActions = item ? actions.filter(function (action) {
     return !isActionExcluded({
       action: action,
       item: item,
@@ -3535,6 +3597,26 @@ var getAllChildren = function getAllChildren(_ref3) {
   };
   _getAllChildrenHelper([data]);
   return output;
+};
+var buildGetMenuActionsList = function buildGetMenuActionsList(treeBuilderConfig, builtinGetMenuActions) {
+  var _treeBuilderConfig$ge;
+  var unorderedGetMenuActionsList = [{
+    priority: 100,
+    callback: builtinGetMenuActions
+  }].concat(_toConsumableArray((_treeBuilderConfig$ge = treeBuilderConfig === null || treeBuilderConfig === void 0 ? void 0 : treeBuilderConfig.getMenuActions) !== null && _treeBuilderConfig$ge !== void 0 ? _treeBuilderConfig$ge : []));
+  var orderedGetMenuActionsList = unorderedGetMenuActionsList.toSorted(function (_ref4, _ref5) {
+    var priorityA = _ref4.priority;
+    var priorityB = _ref5.priority;
+    return priorityA - priorityB;
+  });
+  return function (menuActionArg) {
+    var output = menuActionArg;
+    orderedGetMenuActionsList.forEach(function (_ref6) {
+      var callback = _ref6.callback;
+      output = callback(output);
+    });
+    return output;
+  };
 };
 
 /***/ }),

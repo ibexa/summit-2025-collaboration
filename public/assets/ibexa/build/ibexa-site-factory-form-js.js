@@ -33,33 +33,17 @@
 
 (function (global, doc, ibexa) {
   var SCROLL_POSITION_TO_FIT = 50;
-  var HEADER_RIGHT_MARGIN = 50;
   var MIN_HEIGHT_DIFF_FOR_FITTING_HEADER = 150;
   var headerNode = doc.querySelector('.ibexa-edit-header');
   var contentNode = doc.querySelector('.ibexa-edit-content');
   if (!headerNode || !contentNode) {
     return;
   }
+  var detailsContainer = headerNode.querySelector('.ibexa-edit-header__container--details');
   var _headerNode$getBoundi = headerNode.getBoundingClientRect(),
     expandedHeaderHeight = _headerNode$getBoundi.height;
   var scrolledContent = doc.querySelector('.ibexa-edit-content > :first-child');
-  var controlZIndex = ibexa.helpers.modal.controlZIndex;
-  var fitEllipsizedTitle = function fitEllipsizedTitle() {
-    var headerBottomRowNode = headerNode.querySelector('.ibexa-edit-header__row--bottom');
-    var titleNode = headerBottomRowNode.querySelector('.ibexa-edit-header__name--ellipsized');
-    var firstMenuEntryNode = headerNode.querySelector('.ibexa-context-menu .ibexa-context-menu__item');
-    var _titleNode$getBoundin = titleNode.getBoundingClientRect(),
-      titleNodeLeft = _titleNode$getBoundin.left,
-      titleNodeWidth = _titleNode$getBoundin.width;
-    var _firstMenuEntryNode$g = firstMenuEntryNode.getBoundingClientRect(),
-      firstMenuEntryNodeLeft = _firstMenuEntryNode$g.left;
-    var bottomRowNodeWidthNew = firstMenuEntryNodeLeft - titleNodeLeft;
-    var titleNodeWidthNew = bottomRowNodeWidthNew - HEADER_RIGHT_MARGIN;
-    headerBottomRowNode.style.width = "".concat(bottomRowNodeWidthNew, "px");
-    if (titleNodeWidth > titleNodeWidthNew) {
-      titleNode.style.width = "".concat(titleNodeWidthNew, "px");
-    }
-  };
+  var controlManyZIndexes = ibexa.helpers.modal.controlManyZIndexes;
   var fitHeader = function fitHeader(event) {
     var _scrolledContent$getB = scrolledContent.getBoundingClientRect(),
       formHeight = _scrolledContent$getB.height;
@@ -71,12 +55,22 @@
     var scrollTop = event.currentTarget.scrollTop;
     var shouldHeaderBeSlim = scrollTop > SCROLL_POSITION_TO_FIT;
     headerNode.classList.toggle('ibexa-edit-header--slim', shouldHeaderBeSlim);
-    if (shouldHeaderBeSlim) {
-      fitEllipsizedTitle();
-    }
+    doc.body.dispatchEvent(new CustomEvent('ibexa:edit-content-change-header-size', {
+      detail: {
+        isHeaderSlim: shouldHeaderBeSlim
+      }
+    }));
   };
+  var items = [{
+    container: headerNode
+  }];
+  if (detailsContainer) {
+    items.push({
+      container: detailsContainer
+    });
+  }
   contentNode.addEventListener('scroll', fitHeader, false);
-  controlZIndex(headerNode);
+  controlManyZIndexes(items, headerNode);
 })(window, window.document, window.ibexa);
 
 /***/ }),
@@ -142,6 +136,10 @@ function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Sym
 function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 (function (global, doc, ibexa) {
+  var _ibexa$helpers$text = ibexa.helpers.text,
+    escapeHTML = _ibexa$helpers$text.escapeHTML,
+    escapeHTMLAttribute = _ibexa$helpers$text.escapeHTMLAttribute;
+  var dangerouslyAppend = ibexa.helpers.dom.dangerouslyAppend;
   var languagesDraggable = [];
   var initLanguagesWidget = function initLanguagesWidget(publicAccessDomainNode) {
     var languageWidget = publicAccessDomainNode.querySelector('.ibexa-sf-edit-widget--public-access-languages');
@@ -191,14 +189,16 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var languageWidget = event.currentTarget.closest('.ibexa-sf-form-languages');
     var languageCode = event.currentTarget.dataset.languageCode;
     var languageName = event.currentTarget.textContent.trim();
+    var languageNameHtmlEscaped = escapeHTML(languageName);
+    var languageCodeHtmlAttributeEscaped = escapeHTMLAttribute(languageCode);
     var languagesListContainer = languageWidget.querySelector('.ibexa-sf-form-languages__items');
     var languageItemTemplate = languagesListContainer.dataset.template;
-    languageItemTemplate = languageItemTemplate.replace(/__language_name__/g, languageName).replace(/__language_code__/g, languageCode);
+    languageItemTemplate = languageItemTemplate.replace(/__language_name__/g, languageNameHtmlEscaped).replace(/__language_code__/g, languageCodeHtmlAttributeEscaped);
     var range = doc.createRange();
     var languageItemHtml = range.createContextualFragment(languageItemTemplate);
     var deleteBtn = languageItemHtml.querySelector('.ibexa-sf-form-languages__delete-language-btn');
     deleteBtn.addEventListener('click', deleteLanguage, false);
-    languagesListContainer.append(languageItemHtml);
+    dangerouslyAppend(languagesListContainer, languageItemHtml);
     languagesDraggable.forEach(function (draggable) {
       var items = languagesListContainer.querySelectorAll('.ibexa-sf-form-languages-item');
       var addedItem = items[items.length - 1];
@@ -439,7 +439,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   var updateDomainName = function updateDomainName(event) {
     var domainName = event.currentTarget.value;
     var labelNode = event.currentTarget.closest('.ibexa-sf-public-access__list-item').querySelector('.ibexa-collapse__header-label');
-    labelNode.innerHTML = domainName;
+    labelNode.innerText = domainName;
   };
   createBtn.addEventListener('click', createPublicAccess, false);
   deleteBtn.addEventListener('click', deletePublicAccess, false);

@@ -1,0 +1,138 @@
+ibexa:
+    repositories:
+        default:
+            product_catalog:
+                regions:
+                    germany:
+                        vat_categories:
+                            standard: 19
+                            reduced: 7
+                            none: 0
+    system:
+        site:
+            languages:
+                - eng-GB
+                - fre-FR
+                - pol-PL
+                - ger-DE
+        admin_group:
+            languages:
+                - eng-GB
+                - fre-FR
+                - pol-PL
+                - ger-DE
+            fieldtypes:
+                ezrichtext:
+                    custom_tags: [factbox, acronym]
+                    toolbar:
+                        custom_tags_group:
+                            buttons:
+                                factbox:
+                                    priority: 5
+                                acronym:
+                                    priority: 6
+                    custom_styles: [highlighted_word, highlighted_block]
+                    classes:
+                        link:
+                            choices: [ regular, special, tip_box, warning_box, testa, testb, testc, testd, teste, testf, note_box, info_box, error_box, alert_box, custom_box, hint_box, debug_mode, user_message, admin_message, promo_banner, feedback_form, main_section, sidebar_box]
+                            default_value: regular
+                            required: false
+                            multiple: false
+                        paragraph:
+                            choices: [ paragraph_regular, paragraph_special, paragraph_important_box, paragraph_warning_special ]
+                            default_value: paragraph_regular
+                            required: false
+                            multiple: true
+                        embedImage:
+                            choices: [ embed_regular, embed_special, embed_box ]
+                            required: false
+                            multiple: false
+
+ibexa_fieldtype_richtext:
+    custom_tags:
+        factbox:
+            template: '@ibexadesign/field_type/ezrichtext/custom_tags/factbox.html.twig'
+            icon: '/bundles/ibexaicons/img/all-icons.svg#information'
+            attributes:
+                name:
+                    type: string
+                    required: false
+                style:
+                    type: choice
+                    required: false
+                    default_value: light
+                    choices: [light, dark]
+                name1:
+                    type: string
+                    required: false
+                number2:
+                    type: number
+                    required: false
+                name3:
+                    type: string
+                    required: false
+                number4:
+                    type: number
+                    required: false
+                name5:
+                    type: string
+                    required: false
+                number6:
+                    type: number
+                    required: false
+                name7:
+                    type: string
+                    required: false
+                number8:
+                    type: number
+                    required: false
+                name9:
+                    type: string
+                    required: false
+                number10:
+                    type: number
+                    required: false
+                name11:
+                    type: string
+                    required: false
+                number12:
+                    type: number
+                    required: false
+                name13:
+                    type: string
+                    required: false
+                number14:
+                    type: number
+                    required: false
+                name15:
+                    type: string
+                    required: false
+                number16:
+                    type: number
+                    required: false
+                name17:
+                    type: string
+                    required: false
+                number18:
+                    type: number
+                    required: false
+                name19:
+                    type: string
+                    required: false
+                number20:
+                    type: number
+                    required: false
+        acronym:
+            template: '@ibexadesign/field_type/ezrichtext/custom_tags/acronym.html.twig'
+            icon: '/bundles/ibexaicons/img/all-icons.svg#about'
+            is_inline: true
+            attributes:
+                explanation:
+                    type: string
+    custom_styles:
+        highlighted_word:
+            template: '@ibexadesign/field_type/ezrichtext/custom_styles/highlighted_word.html.twig'
+            inline: true
+        highlighted_block:
+            template: '@ibexadesign/field_type/ezrichtext/custom_styles/highlighted_block.html.twig'
+            inline: false

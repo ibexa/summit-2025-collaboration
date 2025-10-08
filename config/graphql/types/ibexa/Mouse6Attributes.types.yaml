@@ -1,0 +1,26 @@
+Mouse6Attributes:
+    type: object
+    inherits:
+        - ProductAttributesInterface
+    config:
+        interfaces:
+            - ProductAttributesInterface
+        fields:
+            _all:
+                type: '[AttributeInterface]'
+                resolve: '@=query("AttributesByProduct", value)'
+            mouse_type:
+                type: SelectionAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "mouse_type")'
+            mouse_has_trackball:
+                type: CheckboxAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "mouse_has_trackball")'
+            mouse_number_of_buttons:
+                type: IntegerAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "mouse_number_of_buttons")'
+            mouse_weight:
+                type: FloatAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "mouse_weight")'
+            mouse_witdh:
+                type: FloatAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "mouse_witdh")'

@@ -895,7 +895,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var SELECTOR_TAB = '.ibexa-pb-block-config__tab';
   var errorNodes = _toConsumableArray(doc.querySelectorAll(SELECTOR_INVALID));
   var configForm = doc.querySelector('form[name="block_configuration"]');
-  var requiredInputs = configForm.querySelectorAll('[required="required"]');
+  var requiredInputs = configForm.querySelectorAll('.ibexa-input[required="required"]');
   var validateInput = function validateInput(input) {
     var field = input.closest('.ibexa-field-edit, .form-group');
     return validateIsEmptyField(field);
@@ -2073,13 +2073,15 @@ __webpack_require__.r(__webpack_exports__);
   });
   doc.body.addEventListener('ibexa-attributes-group-added', function (_ref) {
     var detail = _ref.detail;
-    var addedRichtextContainer = detail.container.querySelector('.ibexa-data-source__richtext');
-    if (!addedRichtextContainer) {
+    var addedRichtextContainers = detail.container.querySelectorAll('.ibexa-data-source__richtext');
+    if (!addedRichtextContainers.length) {
       return;
     }
-    var richtextEditor = new ibexa.BaseRichText();
-    richtextEditor.init(addedRichtextContainer);
-    (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_fieldType_validator_richtext_validator__WEBPACK_IMPORTED_MODULE_0__["default"])(addedRichtextContainer, SELECTOR_FIELD, SELECTOR_ERROR_NODE, SELECTOR_INPUT, SELECTOR_LABEL, richtextEditor);
+    addedRichtextContainers.forEach(function (container) {
+      var richtextEditor = new ibexa.BaseRichText();
+      richtextEditor.init(container);
+      (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_fieldType_validator_richtext_validator__WEBPACK_IMPORTED_MODULE_0__["default"])(container, SELECTOR_FIELD, SELECTOR_ERROR_NODE, SELECTOR_INPUT, SELECTOR_LABEL, richtextEditor);
+    });
   }, false);
 })(window, document, window.ibexa);
 
@@ -2541,6 +2543,10 @@ function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 (function (global, doc, ibexa, Translator) {
   var _this = this;
+  var _ibexa$helpers$text = ibexa.helpers.text,
+    escapeHTML = _ibexa$helpers$text.escapeHTML,
+    escapeHTMLAttribute = _ibexa$helpers$text.escapeHTMLAttribute;
+  var dangerouslyInsertAdjacentHTML = ibexa.helpers.dom.dangerouslyInsertAdjacentHTML;
   var segmentations = doc.querySelectorAll('.ibexa-segmentation');
   var token = doc.querySelector('meta[name="CSRF-Token"]').content;
   var siteaccess = doc.querySelector('meta[name="SiteAccess"]').content;
@@ -2728,19 +2734,23 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var optionTemplate = sourceInput.dataset.optionTemplate;
     var selectOptionsFragment = doc.createDocumentFragment();
     options.forEach(function (option) {
+      var optionNameHtmlEscaped = escapeHTML(option.name);
+      var optionNameHtmlAttributeEscaped = escapeHTMLAttribute(option.name);
+      var optionIdHtmlEscaped = escapeHTML(option.id);
+      var optionIdHtmlAttributeEscaped = escapeHTMLAttribute(option.id);
       if (option.subOptions) {
-        var groupName = option.name;
-        var groupId = option.id;
         option.subOptions.forEach(function (subOption) {
+          var subOptionNameHtmlEscaped = escapeHTML(subOption.name);
+          var subOptionIdHtmlAttributeEscaped = escapeHTMLAttribute(subOption.id);
           var optionsContainer = doc.createElement('select');
-          var optionRendered = optionTemplate.replace('{{ group_id }}', groupName).replace('{{ group_name }}', groupId).replace('{{ value }}', subOption.id).replace('{{ label }}', subOption.name);
-          optionsContainer.insertAdjacentHTML('beforeend', optionRendered);
+          var optionRendered = optionTemplate.replace('{{ group_id }}', optionNameHtmlAttributeEscaped).replace('{{ group_name }}', optionIdHtmlEscaped).replace('{{ value }}', subOptionIdHtmlAttributeEscaped).replace('{{ label }}', subOptionNameHtmlEscaped);
+          dangerouslyInsertAdjacentHTML(optionsContainer, 'beforeend', optionRendered);
           selectOptionsFragment.append(optionsContainer.querySelector('option'));
         });
       } else {
         var optionsContainer = doc.createElement('select');
-        var optionRendered = optionTemplate.replace('{{ group_id }}', '').replace('{{ group_name }}', '').replace('{{ value }}', option.id).replace('{{ label }}', option.name);
-        optionsContainer.insertAdjacentHTML('beforeend', optionRendered);
+        var optionRendered = optionTemplate.replace('{{ group_id }}', '').replace('{{ group_name }}', '').replace('{{ value }}', optionIdHtmlAttributeEscaped).replace('{{ label }}', optionNameHtmlEscaped);
+        dangerouslyInsertAdjacentHTML(optionsContainer, 'beforeend', optionRendered);
         selectOptionsFragment.append(optionsContainer.querySelector('option'));
       }
     });
@@ -2754,21 +2764,25 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var itemTemplate = itemsList.dataset.template;
     var dropdownGroupTemplate = sourceInput.dataset.dropdownGroupTemplate;
     options.forEach(function (option) {
+      var optionNameHtmlEscaped = escapeHTML(option.name);
+      var optionIdHtmlAttributeEscaped = escapeHTMLAttribute(option.id);
       if (option.subOptions) {
         var groupsContainer = doc.createElement('ul');
-        var renderedGroup = dropdownGroupTemplate.replace('{{ group_id }}', option.id).replaceAll('{{ group_name }}', option.name);
+        var renderedGroup = dropdownGroupTemplate.replace('{{ group_id }}', optionIdHtmlAttributeEscaped).replaceAll('{{ group_name }}', optionNameHtmlEscaped);
         groupsContainer.insertAdjacentHTML('beforeend', renderedGroup);
         var addedGroup = groupsContainer.querySelector('li.ibexa-dropdown__item-group:last-of-type');
         var groupItemsList = addedGroup.querySelector('.ibexa-dropdown__item-group-list');
         option.subOptions.forEach(function (subOption) {
-          var itemRendered = itemTemplate.replace('{{ value }}', subOption.id).replaceAll('{{ label }}', subOption.name);
-          groupItemsList.insertAdjacentHTML('beforeend', itemRendered);
+          var subOptionNameHtmlEscaped = escapeHTML(subOption.name);
+          var subOptionIdHtmlAttributeEscaped = escapeHTMLAttribute(subOption.id);
+          var itemRendered = itemTemplate.replace('{{ value }}', subOptionIdHtmlAttributeEscaped).replaceAll('{{ label }}', subOptionNameHtmlEscaped);
+          dangerouslyInsertAdjacentHTML(groupItemsList, 'beforeend', itemRendered);
         });
         itemsListFragment.append(groupsContainer.querySelector('li.ibexa-dropdown__item-group'));
       } else {
         var itemsContainer = doc.createElement('ul');
-        var itemRendered = itemTemplate.replace('{{ value }}', option.id).replaceAll('{{ label }}', option.name);
-        itemsContainer.insertAdjacentHTML('beforeend', itemRendered);
+        var itemRendered = itemTemplate.replace('{{ value }}', optionIdHtmlAttributeEscaped).replaceAll('{{ label }}', optionNameHtmlEscaped);
+        dangerouslyInsertAdjacentHTML(itemsContainer, 'beforeend', itemRendered);
         itemsListFragment.append(itemsContainer.querySelector('li'));
       }
     });

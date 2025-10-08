@@ -5,103 +5,128 @@
 .ibexa-data-source--richtext {
   border: 0.0625rem solid #cfd1d3;
   border-radius: 0.625rem;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 .ibexa-field-edit--ezrichtext .ibexa-data-source .ck.ck-content,
 .ibexa-data-source--richtext .ck.ck-content {
   min-height: 6.25rem;
   padding: 0 1.5rem;
 }
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget,
-.ibexa-data-source--richtext .ck-widget {
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck.ck-content ol,
+.ibexa-data-source--richtext .ck.ck-content ol {
+  list-style-type: auto;
+}
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck.ck-content ol ol,
+.ibexa-data-source--richtext .ck.ck-content ol ol {
+  list-style-type: auto;
+}
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck.ck-content ol ol ol,
+.ibexa-data-source--richtext .ck.ck-content ol ol ol {
+  list-style-type: auto;
+}
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck.ck-content ol ol ol ol,
+.ibexa-data-source--richtext .ck.ck-content ol ol ol ol {
+  list-style-type: auto;
+}
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck.ck-content ol ol ol ol ol,
+.ibexa-data-source--richtext .ck.ck-content ol ol ol ol ol {
+  list-style-type: auto;
+}
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget,
+.ibexa-data-source--richtext .ck .ck-widget {
   transition: none;
   border-radius: 0.625rem;
 }
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget:hover, .ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.table:hover,
-.ibexa-data-source--richtext .ck-widget:hover,
-.ibexa-data-source--richtext .ck-widget.table:hover {
-  outline-color: #ae1164;
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget:hover, .ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.table:hover,
+.ibexa-data-source--richtext .ck .ck-widget:hover,
+.ibexa-data-source--richtext .ck .ck-widget.table:hover {
   outline: none;
   border: 0.0625rem solid #ae1164;
 }
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.ck-widget_with-selection-handle .ck-widget__selection-handle, .ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.ck-widget_with-selection-handle:hover .ck-widget__selection-handle,
-.ibexa-data-source--richtext .ck-widget.ck-widget_with-selection-handle .ck-widget__selection-handle,
-.ibexa-data-source--richtext .ck-widget.ck-widget_with-selection-handle:hover .ck-widget__selection-handle {
-  left: -0.0625rem;
-}
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.ck-widget_with-selection-handle:hover .ck-widget__selection-handle, .ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget:not(.ck-widget_selected) > .ck-widget__type-around > .ck-widget__type-around__button,
-.ibexa-data-source--richtext .ck-widget.ck-widget_with-selection-handle:hover .ck-widget__selection-handle,
-.ibexa-data-source--richtext .ck-widget:not(.ck-widget_selected) > .ck-widget__type-around > .ck-widget__type-around__button {
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget:hover .ck.ck-widget__type-around > .ck-widget__type-around__button, .ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.table:hover .ck.ck-widget__type-around > .ck-widget__type-around__button,
+.ibexa-data-source--richtext .ck .ck-widget:hover .ck.ck-widget__type-around > .ck-widget__type-around__button,
+.ibexa-data-source--richtext .ck .ck-widget.table:hover .ck.ck-widget__type-around > .ck-widget__type-around__button {
   background: #ae1164;
 }
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.ck-widget_selected, .ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.ck-widget_selected:hover,
-.ibexa-data-source--richtext .ck-widget.ck-widget_selected,
-.ibexa-data-source--richtext .ck-widget.ck-widget_selected:hover {
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.ck-widget_with-selection-handle .ck-widget__selection-handle, .ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.ck-widget_with-selection-handle:hover .ck-widget__selection-handle,
+.ibexa-data-source--richtext .ck .ck-widget.ck-widget_with-selection-handle .ck-widget__selection-handle,
+.ibexa-data-source--richtext .ck .ck-widget.ck-widget_with-selection-handle:hover .ck-widget__selection-handle {
+  left: -0.0625rem;
+}
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.ck-widget_with-selection-handle:hover .ck-widget__selection-handle, .ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget:not(.ck-widget_selected) > .ck-widget__type-around > .ck-widget__type-around__button,
+.ibexa-data-source--richtext .ck .ck-widget.ck-widget_with-selection-handle:hover .ck-widget__selection-handle,
+.ibexa-data-source--richtext .ck .ck-widget:not(.ck-widget_selected) > .ck-widget__type-around > .ck-widget__type-around__button {
+  background: #ae1164;
+}
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.ck-widget_selected, .ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.ck-widget_selected:hover,
+.ibexa-data-source--richtext .ck .ck-widget.ck-widget_selected,
+.ibexa-data-source--richtext .ck .ck-widget.ck-widget_selected:hover {
   outline-color: #131c26;
   outline: none;
   border: 0.0625rem solid #131c26;
 }
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.ck-widget_with-selection-handle.ck-widget_selected .ck-widget__selection-handle, .ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.ck-widget_with-selection-handle.ck-widget_selected:hover .ck-widget__selection-handle, .ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.ck-widget_selected > .ck-widget__type-around > .ck-widget__type-around__button,
-.ibexa-data-source--richtext .ck-widget.ck-widget_with-selection-handle.ck-widget_selected .ck-widget__selection-handle,
-.ibexa-data-source--richtext .ck-widget.ck-widget_with-selection-handle.ck-widget_selected:hover .ck-widget__selection-handle,
-.ibexa-data-source--richtext .ck-widget.ck-widget_selected > .ck-widget__type-around > .ck-widget__type-around__button {
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.ck-widget_with-selection-handle.ck-widget_selected .ck-widget__selection-handle, .ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.ck-widget_with-selection-handle.ck-widget_selected:hover .ck-widget__selection-handle, .ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.ck-widget_selected > .ck-widget__type-around > .ck-widget__type-around__button,
+.ibexa-data-source--richtext .ck .ck-widget.ck-widget_with-selection-handle.ck-widget_selected .ck-widget__selection-handle,
+.ibexa-data-source--richtext .ck .ck-widget.ck-widget_with-selection-handle.ck-widget_selected:hover .ck-widget__selection-handle,
+.ibexa-data-source--richtext .ck .ck-widget.ck-widget_selected > .ck-widget__type-around > .ck-widget__type-around__button {
   background: #131c26;
 }
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.table,
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget table,
-.ibexa-data-source--richtext .ck-widget.table,
-.ibexa-data-source--richtext .ck-widget table {
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.table,
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget table,
+.ibexa-data-source--richtext .ck .ck-widget.table,
+.ibexa-data-source--richtext .ck .ck-widget table {
   border-radius: 0 0.625rem 0.625rem 0.625rem;
   border-collapse: separate;
   border-spacing: 0;
   border: none;
 }
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.table tbody,
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget table tbody,
-.ibexa-data-source--richtext .ck-widget.table tbody,
-.ibexa-data-source--richtext .ck-widget table tbody {
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.table tbody,
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget table tbody,
+.ibexa-data-source--richtext .ck .ck-widget.table tbody,
+.ibexa-data-source--richtext .ck .ck-widget table tbody {
   border-radius: 0 0.625rem 0.625rem 0.625rem;
 }
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.table td:not(:first-child),
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget table td:not(:first-child),
-.ibexa-data-source--richtext .ck-widget.table td:not(:first-child),
-.ibexa-data-source--richtext .ck-widget table td:not(:first-child) {
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.table td:not(:first-child),
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget table td:not(:first-child),
+.ibexa-data-source--richtext .ck .ck-widget.table td:not(:first-child),
+.ibexa-data-source--richtext .ck .ck-widget table td:not(:first-child) {
   border-left: 0;
 }
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.table tr:not(:first-child) td,
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget table tr:not(:first-child) td,
-.ibexa-data-source--richtext .ck-widget.table tr:not(:first-child) td,
-.ibexa-data-source--richtext .ck-widget table tr:not(:first-child) td {
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.table tr:not(:first-child) td,
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget table tr:not(:first-child) td,
+.ibexa-data-source--richtext .ck .ck-widget.table tr:not(:first-child) td,
+.ibexa-data-source--richtext .ck .ck-widget table tr:not(:first-child) td {
   border-top: 0;
 }
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.table tr:first-child,
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget table tr:first-child,
-.ibexa-data-source--richtext .ck-widget.table tr:first-child,
-.ibexa-data-source--richtext .ck-widget table tr:first-child {
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.table tr:first-child,
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget table tr:first-child,
+.ibexa-data-source--richtext .ck .ck-widget.table tr:first-child,
+.ibexa-data-source--richtext .ck .ck-widget table tr:first-child {
   border-top-right-radius: 0.625rem;
 }
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.table tr:first-child td:last-child,
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget table tr:first-child td:last-child,
-.ibexa-data-source--richtext .ck-widget.table tr:first-child td:last-child,
-.ibexa-data-source--richtext .ck-widget table tr:first-child td:last-child {
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.table tr:first-child td:last-child,
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget table tr:first-child td:last-child,
+.ibexa-data-source--richtext .ck .ck-widget.table tr:first-child td:last-child,
+.ibexa-data-source--richtext .ck .ck-widget table tr:first-child td:last-child {
   border-top-right-radius: 0.625rem;
 }
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.table tr:last-child,
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget table tr:last-child,
-.ibexa-data-source--richtext .ck-widget.table tr:last-child,
-.ibexa-data-source--richtext .ck-widget table tr:last-child {
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.table tr:last-child,
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget table tr:last-child,
+.ibexa-data-source--richtext .ck .ck-widget.table tr:last-child,
+.ibexa-data-source--richtext .ck .ck-widget table tr:last-child {
   border-bottom-left-radius: 0.625rem;
   border-bottom-right-radius: 0.625rem;
 }
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.table tr:last-child td:first-child,
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget table tr:last-child td:first-child,
-.ibexa-data-source--richtext .ck-widget.table tr:last-child td:first-child,
-.ibexa-data-source--richtext .ck-widget table tr:last-child td:first-child {
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.table tr:last-child td:first-child,
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget table tr:last-child td:first-child,
+.ibexa-data-source--richtext .ck .ck-widget.table tr:last-child td:first-child,
+.ibexa-data-source--richtext .ck .ck-widget table tr:last-child td:first-child {
   border-bottom-left-radius: 0.625rem;
 }
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget.table tr:last-child td:last-child,
-.ibexa-field-edit--ezrichtext .ibexa-data-source .ck-widget table tr:last-child td:last-child,
-.ibexa-data-source--richtext .ck-widget.table tr:last-child td:last-child,
-.ibexa-data-source--richtext .ck-widget table tr:last-child td:last-child {
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget.table tr:last-child td:last-child,
+.ibexa-field-edit--ezrichtext .ibexa-data-source .ck .ck-widget table tr:last-child td:last-child,
+.ibexa-data-source--richtext .ck .ck-widget.table tr:last-child td:last-child,
+.ibexa-data-source--richtext .ck .ck-widget table tr:last-child td:last-child {
   border-bottom-right-radius: 0.625rem;
 }
 .ibexa-field-edit--ezrichtext .ibexa-data-source blockquote,
@@ -190,6 +215,10 @@
 .ibexa-data-source--richtext [data-ezalign=center] {
   margin: 1rem auto;
 }
+.ibexa-field-edit--ezrichtext .ibexa-data-source [data-ezalign] + *,
+.ibexa-data-source--richtext [data-ezalign] + * {
+  clear: both;
+}
 .ibexa-field-edit--ezrichtext .ibexa-data-source p,
 .ibexa-data-source--richtext p {
   min-height: 1.5rem;
@@ -251,6 +280,26 @@
 .ibexa-field-edit--ezrichtext .ibexa-data-source li[id]:not(.ibexa-data-source__richtext)::before,
 .ibexa-data-source--richtext li[id]:not(.ibexa-data-source__richtext)::before {
   left: -2.5rem;
+}
+
+.ibexa-data-source--richtext.ibexa-data-source:hover,
+.ibexa-field-edit--ezrichtext .ibexa-data-source:hover {
+  border-color: var(--ibexa-input-hover-border-color, #ae1164);
+}
+.ibexa-data-source--richtext.ibexa-data-source--focused,
+.ibexa-field-edit--ezrichtext .ibexa-data-source--focused {
+  border-color: var(--ibexa-input-focus-border-color, #ae1164);
+  box-shadow: 0 0 0 0.25rem var(--ibexa-input-focus-shadow-color, rgba(174, 17, 100, 0.25));
+}
+.ibexa-data-source--richtext.ibexa-data-source--focused.is-invalid,
+.ibexa-field-edit--ezrichtext .ibexa-data-source--focused.is-invalid {
+  box-shadow: none;
+  border-color: var(--ibexa-input-invalid-border-color, #db0032);
+}
+.ibexa-data-source--richtext.ibexa-data-source--focused .ck.ck-editor__editable.ck-focused:not(.ck-editor__nested-editable),
+.ibexa-field-edit--ezrichtext .ibexa-data-source--focused .ck.ck-editor__editable.ck-focused:not(.ck-editor__nested-editable) {
+  border: none;
+  box-shadow: none;
 }
 
 .ibexa-field-edit--ezrichtext.ibexa-field-edit--nontranslatable .ibexa-data-source .ibexa-data-source__richtext {
@@ -379,9 +428,10 @@
   width: 100%;
 }
 .ibexa-custom-panel__content--overflow-with-scroll.ibexa-ckeditor-balloon-form__fields .ck.ck-labeled-field-view .ck.ck-dropdown .ck.ck-button {
-  display: block;
+  display: flex;
 }
-.ibexa-custom-panel__content--overflow-with-scroll.ibexa-ckeditor-balloon-form__fields .ck.ck-labeled-field-view .ck.ck-dropdown .ck.ck-button .ck.ck-button__label {
+.ibexa-custom-panel__content--overflow-with-scroll.ibexa-ckeditor-balloon-form__fields .ck.ck-labeled-field-view .ck.ck-dropdown .ck.ck-button .ck.ck-button__label,
+.ibexa-custom-panel__content--overflow-with-scroll.ibexa-ckeditor-balloon-form__fields .ck.ck-labeled-field-view .ck.ck-dropdown .ck.ck-button .ibexa-ckeditor-dropdown-selected-items {
   width: calc(100% - 1.25rem);
   height: fit-content;
   white-space: normal;
@@ -454,16 +504,94 @@
 }
 .ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck-input-text {
   border-radius: 0.3125rem;
+  width: 100%;
 }
 .ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-dropdown {
   border: 0.0625rem solid #cfd1d3;
   border-radius: 0.3125rem;
+  width: 100%;
+  max-width: 18rem;
+}
+.ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-dropdown .ibexa-ckeditor-dropdown-selected-items {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  width: 12.375rem;
+  overflow: hidden;
+  position: relative;
+}
+.ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-dropdown .ibexa-ckeditor-dropdown-selected-items__item {
+  display: inline-block;
+  white-space: nowrap;
+  background: #f3f3f6;
+  border: 0.0625rem solid #f3f3f6;
+  border-radius: 0.625rem;
+  margin-right: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  padding: 0 0.5rem;
+}
+.ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-dropdown .ck-list {
+  padding: 0.25rem;
+}
+.ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-dropdown .ck-list__item {
+  border-radius: 0.625rem;
+}
+.ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-dropdown .ck-list__item:hover {
+  color: #131c26;
+  background-color: #f3f3f6;
+}
+.ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-dropdown .ck-list__item:hover .ck-button {
+  background-color: transparent;
 }
 .ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-dropdown .ck-button.ck-dropdown__button .ck-button__label {
-  width: 12.375rem;
+  width: 100%;
   display: inline-block;
 }
+.ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-dropdown .ck-dropdown__panel--multiple .ck.ck-button__toggle {
+  display: none;
+}
+.ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-dropdown .ck-dropdown__panel--multiple .ck.ck-button .ibexa-ckeditor-input--checkbox {
+  flex-shrink: 0;
+  appearance: none;
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  outline: none;
+  border: 0.0625rem solid #a0a4a8;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.125rem;
+  margin-right: 1rem;
+}
+.ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-dropdown .ck-dropdown__panel--multiple .ck.ck-button .ibexa-ckeditor-input--checkbox::after {
+  content: " ";
+  position: absolute;
+  top: 0.1875rem;
+  left: 0.1875rem;
+  display: block;
+  width: 0.5rem;
+  height: 0.3125rem;
+  border-left: 0.125rem solid transparent;
+  border-bottom: 0.125rem solid transparent;
+  transform: rotate(-45deg);
+}
+.ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-dropdown .ck-dropdown__panel--multiple .ck.ck-button .ibexa-ckeditor-input--checkbox:hover {
+  border-color: #ae1164;
+}
+.ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-dropdown .ck-dropdown__panel--multiple .ck.ck-button .ibexa-ckeditor-input--checkbox:focus {
+  border-color: #ae1164;
+  box-shadow: 0 0 0 0.25rem rgba(174, 17, 100, 0.25);
+}
+.ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-dropdown .ck-dropdown__panel--multiple .ck.ck-button .ibexa-ckeditor-input--checkbox:checked {
+  border-color: #ae1164;
+  background-color: #ae1164;
+}
+.ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-dropdown .ck-dropdown__panel--multiple .ck.ck-button .ibexa-ckeditor-input--checkbox:checked::after {
+  border-color: #ffffff;
+}
 .ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-button.ck-switchbutton {
+  margin-top: 0.5rem;
   background: transparent;
 }
 .ck.ck-reset_all .ibexa-ckeditor-balloon-form__fields .ck-labeled-field-view .ck.ck-button.ck-switchbutton.ck-on .ck-button__toggle__inner {
@@ -486,6 +614,9 @@
 .ck.ck-reset_all .ibexa-ckeditor-balloon-form .ck.ck-button {
   cursor: pointer;
 }
+.ck.ck-reset_all .ibexa-ckeditor-balloon-form .ck.ck-button + .ck-button {
+  margin-left: 0.5rem;
+}
 .ck.ck-reset_all .ibexa-ckeditor-balloon-form .ck.ck-button.ck-button-save {
   color: #ffffff;
   fill: #ffffff;
@@ -493,7 +624,6 @@
   border-width: 0;
   padding: 0rem 1rem;
   border-radius: 0.625rem;
-  margin-right: 0.5rem;
 }
 .ck.ck-reset_all .ibexa-ckeditor-balloon-form .ck.ck-button.ck-button-save:hover {
   color: #ffffff;
@@ -508,9 +638,6 @@
   background-image: none;
   background-color: #e0e0e8;
   box-shadow: none;
-}
-.ck.ck-reset_all .ibexa-ckeditor-balloon-form .ck.ck-button.ck-button-revert {
-  margin-right: 0.5rem;
 }
 .ck.ck-reset_all .ibexa-ckeditor-balloon-form .ck.ck-button.ck-button-cancel, .ck.ck-reset_all .ibexa-ckeditor-balloon-form .ck.ck-button.ck-button-revert, .ck.ck-reset_all .ibexa-ckeditor-balloon-form .ck.ck-button.ibexa-btn--select-content {
   color: #ae1164;
@@ -539,10 +666,10 @@
   padding: 0.5rem 1rem;
 }
 .ck.ck-reset_all .ck-toolbar-container {
-  z-index: calc(var(--ck-z-modal) - 1);
+  z-index: calc(var(--ck-z-modal) + 50);
 }
 .ck.ck-reset_all .ck-toolbar-container.ck-balloon-panel_with-arrow {
-  z-index: calc(var(--ck-z-modal) + 1);
+  z-index: calc(var(--ck-z-modal) + 55);
 }
 .ck.ck-reset_all .ck-toolbar-container.ck-balloon-panel {
   box-shadow: 0rem 0.125rem 0.5rem 0 rgba(224, 224, 232, 0.15);
@@ -576,6 +703,7 @@
 }
 .ibexa-ckeditor-measurement .ck.ck-labeled-field-view {
   height: 2rem;
+  min-width: 4.375rem;
 }
 .ibexa-ckeditor-measurement .ck.ck-labeled-field-view:first-child {
   margin-right: 0.5rem;
@@ -584,15 +712,35 @@
   height: 2rem;
 }
 .ibexa-ckeditor-measurement .ck.ck-labeled-field-view__input-wrapper .ck-input {
-  min-width: 10rem;
+  min-width: 7.5rem;
+}
+.ibexa-ckeditor-measurement .ck.ck-labeled-field-view__input-wrapper .ck.ck-dropdown .ck-button {
+  height: 2rem;
 }
 .ibexa-ckeditor-measurement .ck.ck-labeled-field-view__input-wrapper .ck.ck-dropdown .ck-button.ck-dropdown__button .ck.ck-button__label {
   width: 2.5rem;
 }
+.ibexa-ckeditor-measurement .ck.ck-labeled-field-view__input-wrapper .ck.ck-dropdown .ck-dropdown__panel.ck-dropdown__panel-visible {
+  background: #ffffff;
+  border: 0.0625rem solid #e0e0e8;
+  border-radius: 0.625rem;
+  max-height: fit-content;
+}
+.ibexa-ckeditor-measurement .ck.ck-labeled-field-view__input-wrapper .ck.ck-dropdown .ck-list {
+  border: 0.0625rem solid #b5e5f0;
+  position: relative;
+  z-index: inherit;
+}
 .ibexa-ckeditor-measurement .ck.ck-labeled-field-view__input-wrapper .ck.ck-dropdown .ck-list__item {
   min-width: 4.5rem;
+  padding: 0.25rem;
+  background-color: #ffffff;
 }
 
+.ibexa-ckeditor-campaign .ck.ck-labeled-field-view .ck-dropdown__panel-visible {
+  width: 100%;
+  overflow-x: hidden;
+}
 .ibexa-ckeditor-campaign .ck.ck-labeled-field-view .ck-list__group .ck.ck-label {
   position: relative;
 }
@@ -603,7 +751,7 @@
   width: 12.875rem;
 }
 .ibexa-ckeditor-campaign .ck.ck-labeled-field-view .ck.ck-labeled-field-view__input-wrapper .ck.ck-dropdown .ck-button.ck-dropdown__button.ck-button_with-text .ck-button__label {
-  width: 13rem;
+  width: 17.375rem;
 }
 .ibexa-ckeditor-campaign .ck.ck-labeled-field-view .ck.ck-labeled-field-view__input-wrapper .ck.ck-dropdown .ck-list__item .ck-button .ck-button__label {
   display: flex;
@@ -613,6 +761,7 @@
 .ibexa-ckeditor-campaign .ck.ck-labeled-field-view .ck.ck-labeled-field-view__input-wrapper .ck.ck-dropdown .ck-list__item .ck-button .ck-button__label .ibexa-ckeditor-campaign__item-date-wrapper {
   display: flex;
   align-items: center;
+  margin-left: 0.25rem;
 }
 .ibexa-ckeditor-campaign .ck.ck-labeled-field-view .ck.ck-labeled-field-view__input-wrapper .ck.ck-dropdown .ck-list__item .ck-button .ck-button__label .ibexa-ckeditor-campaign__item-date-wrapper .ck-icon {
   fill: #71767c;
@@ -628,9 +777,15 @@
   color: #71767c;
 }
 
+.ibexa-custom-panel .ibexa-ckeditor-campaign .ibexa-ckeditor-campaign__label-text {
+  white-space: normal;
+  word-break: break-word;
+}
+
 .ck-reset.ck .ibexa-ckeditor-campaign-filter-input {
   padding: 0.5rem;
   position: relative;
+  width: 18.125rem;
 }
 .ck-reset.ck .ibexa-ckeditor-campaign-filter-input .ck.ck-input {
   width: 100%;

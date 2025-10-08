@@ -117,8 +117,7 @@
 .ibexa-pc-edit__product-stock-row {
   margin-bottom: 0.25rem;
 }
-.ibexa-pc-edit .ibexa-dropdown,
-.ibexa-pc-edit .ibexa-input--textarea {
+.ibexa-pc-edit .ibexa-dropdown {
   width: 80%;
 }
 .ibexa-pc-edit .ibexa-input-text-wrapper {
@@ -196,6 +195,22 @@
 }
 .ibexa-pc-attributes-sidebar__list {
   list-style: none;
+}
+.ibexa-pc-attributes-sidebar__list-empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #131c26;
+  font-size: 1.125rem;
+  font-weight: 600;
+  text-align: center;
+}
+.ibexa-pc-attributes-sidebar__list-empty--hidden {
+  display: none;
+}
+.ibexa-pc-attributes-sidebar__list-empty-image {
+  display: block;
+  margin-bottom: 0.9375rem;
 }
 
 .ibexa-available-attribute-item {
@@ -430,6 +445,9 @@
 .ibexa-pc-added-attributes-group .ibexa-collapse__extra-action-button--remove-attributes-group {
   margin-left: auto;
 }
+.ibexa-pc-added-attributes-group .ibexa-collapse__extra-action-button--remove-attributes-group:disabled {
+  border-color: transparent;
+}
 .ibexa-pc-added-attributes-group .ibexa-table {
   table-layout: fixed;
 }
@@ -539,11 +557,19 @@
   text-align: center;
 }
 .ibexa-pc-assigned-attribute--in-removing {
-  opacity: 0;
+  animation: in-remove-animation 0.4s;
 }
 .ibexa-pc-assigned-attribute .ibexa-table__cell {
   height: 3rem;
   padding: 0.125rem 0.75rem;
+}
+@keyframes in-remove-animation {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .ibexa-pc-attributes-drop-zone {
@@ -726,7 +752,6 @@
 }
 .ibexa-pc-product-variants .ibexa-generate-variants .ibexa-table {
   margin-top: 0;
-  border-bottom: 0.0625rem solid #cfd1d3;
 }
 .ibexa-pc-product-variants .ibexa-generate-variants .ibexa-table__row > .ibexa-table__cell:first-child {
   width: 33%;
@@ -853,6 +878,15 @@
   margin-bottom: 0;
 }
 
+.ibexa-attribute-edit--integer .ibexa-input-text-wrapper--type-number .ibexa-input--text {
+  max-width: 7.0625rem;
+}
+.ibexa-attribute-edit--integer .ibexa-input-text-wrapper__actions {
+  right: 4rem;
+}
+.ibexa-attribute-edit--choice {
+  max-width: 50%;
+}
 .ibexa-attribute-edit--color .ibexa-attribute-edit__input-wrapper {
   display: flex;
 }
@@ -909,6 +943,10 @@
 }
 .ibexa-pc-details-catalog-tab-products .ibexa-pc-edit-catalog-list-filter__name {
   font-weight: bold;
+}
+.ibexa-pc-details-catalog-tab-products .ibexa-pc-edit-catalog-list-filter__tags {
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
 }
 
 .ibexa-pc-edit-section {
@@ -1127,8 +1165,10 @@
 }
 .ibexa-pc-edit-config-choice-filter__search-input {
   width: 100%;
-  margin-bottom: 1rem;
   border-radius: 0.625rem;
+}
+.ibexa-pc-edit-config-choice-filter__toggle-selection-wrapper {
+  margin-top: 1rem;
 }
 .ibexa-pc-edit-config-choice-filter .ibexa-pc-config-panel__body {
   height: calc(100vh - 8.125rem);
@@ -1180,8 +1220,8 @@
   margin-right: 0.25rem;
   margin-top: 0.25rem;
   padding: 0.0625rem 1.5625rem 0.0625rem 0.5rem;
-  background: #f3f3f6;
-  border: 0.0625rem solid #f3f3f6;
+  background: #ececf1;
+  border: 0.0625rem solid #ececf1;
   border-radius: 0.625rem;
 }
 .ibexa-pc-edit-config-taggify-filter .taggify__btn--remove {
@@ -1416,66 +1456,6 @@
 }
 .ibexa-pc-config-panel--hidden {
   display: none;
-}
-
-.ibexa-pc-taggify__widget {
-  display: flex;
-  flex-wrap: wrap;
-  height: auto;
-  min-height: 3rem;
-  padding: 0 0.5rem 0.25rem 0.25rem;
-  border: 0.0625rem solid #cfd1d3;
-}
-.ibexa-pc-taggify__widget--focused {
-  border-color: #ae1164;
-  box-shadow: 0 0 0.1875rem 0 rgba(174, 17, 100, 0.75);
-}
-.ibexa-pc-taggify__widget.is-invalid.taggify {
-  color: #db0032;
-  background-image: none;
-  border-color: #db0032;
-  background-color: #fbe5ea;
-  box-shadow: none;
-}
-.ibexa-pc-taggify .taggify__wrapper {
-  flex: 1 1 auto;
-  order: 2;
-}
-.ibexa-pc-taggify .taggify__input {
-  display: block;
-  width: 100%;
-  height: 100%;
-  margin-top: 0.1875rem;
-  border: 0 none;
-  outline: none;
-  background: transparent;
-}
-.ibexa-pc-taggify .taggify__tags {
-  order: 1;
-  display: flex;
-  flex-wrap: wrap;
-}
-.ibexa-pc-taggify .taggify__tag {
-  font-size: 0.75rem;
-  font-weight: normal;
-  color: #131c26;
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.5rem;
-  margin-right: 0.25rem;
-  margin-top: 0.25rem;
-  padding: 0.0625rem 1.5625rem 0.0625rem 0.5rem;
-  background: #f3f3f6;
-  border: 0.0625rem solid #f3f3f6;
-  border-radius: 0.625rem;
-}
-.ibexa-pc-taggify .taggify__btn--remove {
-  position: absolute;
-  right: 0;
-  color: #131c26;
-  background: none;
-  border: 0 none;
 }
 
 .ibexa-pc-product-assets-collection {
@@ -1819,8 +1799,14 @@
 .ibexa-pc-product-assets__create-collection-modal .modal-dialog {
   max-width: 49.375rem;
 }
+.ibexa-pc-product-assets__create-collection-modal .modal-dialog .modal-header,
+.ibexa-pc-product-assets__create-collection-modal .modal-dialog .ibexa-modal__subheader .modal-footer {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
 .ibexa-pc-product-assets__create-collection-modal-attributes-list {
   max-height: calc(100vh - 18.75rem);
+  padding: 0 0 0.25rem 0.25rem;
   overflow: auto;
 }
 .ibexa-pc-product-assets__drag-ghost-placeholder-container {

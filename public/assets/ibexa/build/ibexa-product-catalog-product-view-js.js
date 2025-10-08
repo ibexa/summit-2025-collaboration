@@ -76,14 +76,18 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 /*!*************************************************************************!*\
   !*** ./public/bundles/ibexaadminui/js/scripts/sidebar/extra.actions.js ***!
   \*************************************************************************/
-/***/ (() => {
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_object_instances__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances.js");
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
 function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
 (function (global, doc, ibexa) {
   var CLASS_HIDDEN = 'ibexa-extra-actions--hidden';
   var CLASS_EXPANDED = 'ibexa-context-menu--expanded';
@@ -92,6 +96,42 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var btns = _toConsumableArray(doc.querySelectorAll('.ibexa-btn--extra-actions'));
   var menu = doc.querySelector('.ibexa-context-menu');
   var backdrop = new ibexa.core.Backdrop();
+  var formsInitialData = new Map();
+  var saveInitialFormData = function saveInitialFormData(extraActionsContainer) {
+    var extraActionsInputs = extraActionsContainer.querySelectorAll('input, select');
+    extraActionsInputs.forEach(function (node) {
+      var value = node.type === 'radio' || node.type === 'checkbox' ? node.checked : node.value;
+      formsInitialData.set(node, value);
+    });
+  };
+  var restoreInitialFormData = function restoreInitialFormData(extraActionsContainer) {
+    if (formsInitialData.size === 0) {
+      return;
+    }
+    var extraActionsInputs = extraActionsContainer.querySelectorAll('input, select');
+    extraActionsInputs.forEach(function (node) {
+      var value = formsInitialData.get(node);
+      var prevValue = node.value;
+      if (node.type === 'radio' || node.type === 'checkbox') {
+        prevValue = node.checked;
+        node.checked = value;
+      } else if (node.tagName === 'SELECT') {
+        var dropdownContainer = node.closest('.ibexa-dropdown');
+        if (dropdownContainer) {
+          var dropdownInstance = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_object_instances__WEBPACK_IMPORTED_MODULE_0__.getInstance)(dropdownContainer);
+          dropdownInstance.selectOption(value);
+        } else {
+          node.value = value;
+        }
+      } else {
+        node.value = value;
+      }
+      if (value !== prevValue) {
+        node.dispatchEvent(new CustomEvent('change'));
+      }
+    });
+    formsInitialData.clear();
+  };
   var haveHiddenPart = function haveHiddenPart(element) {
     return element.classList.contains(CLASS_HIDDEN) && !element.classList.contains(CLASS_PREVENT_SHOW);
   };
@@ -106,6 +146,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     doc.body.dispatchEvent(new CustomEvent('ibexa-extra-actions:after-close'));
     removeBackdrop();
+    restoreInitialFormData(actions);
   };
   var toggleExtraActionsWidget = function toggleExtraActionsWidget(widgetData) {
     var actions = doc.querySelector(".ibexa-extra-actions[data-actions=\"".concat(widgetData.actions, "\"]"));
@@ -128,9 +169,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       backdrop.show();
       doc.body.addEventListener('click', _detectClickOutside, false);
       doc.body.classList.add('ibexa-scroll-disabled');
+      saveInitialFormData(actions);
     } else {
       doc.body.removeEventListener('click', _detectClickOutside);
       removeBackdrop();
+      restoreInitialFormData(actions);
     }
     if (focusElement) {
       focusElement.focus();
@@ -170,6 +213,35 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 
 /***/ }),
 
+/***/ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances.js":
+/*!**************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances.js ***!
+  \**************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   clearInstance: () => (/* binding */ clearInstance),
+/* harmony export */   getInstance: () => (/* binding */ getInstance),
+/* harmony export */   setInstance: () => (/* binding */ setInstance)
+/* harmony export */ });
+var setInstance = function setInstance(domElement, instance) {
+  if (domElement.ibexaInstance) {
+    throw new Error('Instance for this DOM element already exists!');
+  }
+  domElement.ibexaInstance = instance;
+};
+var getInstance = function getInstance(domElement) {
+  return domElement.ibexaInstance;
+};
+var clearInstance = function clearInstance(domElement) {
+  delete domElement.ibexaInstance;
+};
+
+
+/***/ }),
+
 /***/ "./vendor/ibexa/product-catalog/src/bundle/Resources/public/js/details.language.switcher.js":
 /*!**************************************************************************************************!*\
   !*** ./vendor/ibexa/product-catalog/src/bundle/Resources/public/js/details.language.switcher.js ***!
@@ -195,27 +267,58 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   \******************************************************************************************/
 /***/ (() => {
 
-(function (global, doc, Taggify) {
-  var taggifyWidgets = doc.querySelectorAll('.ibexa-pc-taggify .ibexa-pc-taggify__widget');
-  var updateValue = function updateValue(event) {
-    var sourceInput = event.currentTarget.closest('.ibexa-pc-taggify').querySelector('.ibexa-pc-taggify__source-input');
-    sourceInput.value = event.detail.tags.map(function (tag) {
-      return tag.label;
-    }).join();
-    sourceInput.dispatchEvent(new Event('change'));
-  };
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+function _possibleConstructorReturn(t, e) { if (e && ("object" == _typeof(e) || "function" == typeof e)) return e; if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined"); return _assertThisInitialized(t); }
+function _assertThisInitialized(e) { if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); return e; }
+function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+function _getPrototypeOf(t) { return _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function (t) { return t.__proto__ || Object.getPrototypeOf(t); }, _getPrototypeOf(t); }
+function _inherits(t, e) { if ("function" != typeof e && null !== e) throw new TypeError("Super expression must either be null or a function"); t.prototype = Object.create(e && e.prototype, { constructor: { value: t, writable: !0, configurable: !0 } }), Object.defineProperty(t, "prototype", { writable: !1 }), e && _setPrototypeOf(t, e); }
+function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) { return t.__proto__ = e, t; }, _setPrototypeOf(t, e); }
+(function (global, doc, ibexa) {
+  var taggifyWidgets = doc.querySelectorAll('.ibexa-pc-taggify');
+  var GenerateVariantsTaggify = /*#__PURE__*/function (_ibexa$core$Taggify) {
+    "use strict";
+
+    function GenerateVariantsTaggify(config, field) {
+      var _this;
+      _classCallCheck(this, GenerateVariantsTaggify);
+      _this = _callSuper(this, GenerateVariantsTaggify, [config]);
+      _this.field = field;
+      return _this;
+    }
+    _inherits(GenerateVariantsTaggify, _ibexa$core$Taggify);
+    return _createClass(GenerateVariantsTaggify, [{
+      key: "afterTagsUpdate",
+      value: function afterTagsUpdate() {
+        var sourceInput = this.field.querySelector('.ibexa-pc-taggify__source-input');
+        var tags = _toConsumableArray(this.tags);
+        sourceInput.value = tags.join();
+        sourceInput.dispatchEvent(new Event('change'));
+      }
+    }]);
+  }(ibexa.core.Taggify);
   var initTaggify = function initTaggify(field) {
-    new Taggify({
-      containerNode: field,
-      displayLabel: false,
-      displayInputValues: false,
-      hotKeys: [32, 188]
-    });
-    field.addEventListener('tagsCreated', updateValue, false);
-    field.addEventListener('tagRemoved', updateValue, false);
+    var ibexaTaggifyNode = field.querySelector('.ibexa-taggify');
+    var taggify = new GenerateVariantsTaggify({
+      container: ibexaTaggifyNode,
+      acceptKeys: [' ', ',']
+    }, field);
+    taggify.init();
   };
   taggifyWidgets.forEach(initTaggify);
-})(window, window.document, window.Taggify);
+})(window, window.document, window.ibexa);
 
 /***/ }),
 
@@ -393,6 +496,13 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var filteredFiles = _toConsumableArray(files).filter(function (file) {
       return file.type.includes('image');
     });
+    if (filteredFiles.length === 0) {
+      ibexa.helpers.notification.showErrorNotification(Translator.trans(/*@Desc("The uploaded file types are not allowed")*/'product.asset.disallowed_type.message', {}, 'ibexa_product_catalog'));
+      return;
+    }
+    if (filteredFiles.length !== files.length) {
+      ibexa.helpers.notification.showWarningNotification(Translator.trans(/*@Desc("One or more files have an unsupported file type")*/'product.asset.not.all.disallowed_type.message', {}, 'ibexa_product_catalog'));
+    }
     var uploadedAssets = filteredFiles.map(uploadAsset);
     toggleLoaderVisibility(collectionNode);
     Promise.all(uploadedAssets).then(function (assets) {

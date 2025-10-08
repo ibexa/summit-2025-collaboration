@@ -12,21 +12,29 @@
     value: 60
 
 -
-    name: ref__corporate_account__sales_reps_user_group__location_id
+    name: ref__checkout__customers_user_group__location_id
     value: 64
 
 -
-    name: ref__corporate_account__sales_reps_user_group__content_id
+    name: ref__checkout__customers_user_group__content_id
     value: 63
 
 -
-    name: ref__corporate_account__content_id
+    name: ref__corporate_account__sales_reps_user_group__location_id
+    value: 65
+
+-
+    name: ref__corporate_account__sales_reps_user_group__content_id
     value: 64
 
 -
+    name: ref__corporate_account__content_id
+    value: 65
+
+-
     name: ref__role__company_admin__role_id
-    value: 19
+    value: 20
 
 -
     name: ref__role__company_buyer__role_id
-    value: 20
+    value: 21

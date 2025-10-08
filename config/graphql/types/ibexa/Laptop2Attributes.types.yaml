@@ -1,0 +1,65 @@
+Laptop2Attributes:
+    type: object
+    inherits:
+        - ProductAttributesInterface
+    config:
+        interfaces:
+            - ProductAttributesInterface
+        fields:
+            _all:
+                type: '[AttributeInterface]'
+                resolve: '@=query("AttributesByProduct", value)'
+            processor:
+                type: SelectionAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "processor")'
+            memory:
+                type: IntegerAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "memory")'
+            max_memory:
+                type: IntegerAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "max_memory")'
+            memory_slots:
+                type: IntegerAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "memory_slots")'
+            disk_size:
+                type: IntegerAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "disk_size")'
+            additional_drive_possible:
+                type: CheckboxAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "additional_drive_possible")'
+            optical_drive_available:
+                type: CheckboxAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "optical_drive_available")'
+            touch_screen:
+                type: CheckboxAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "touch_screen")'
+            screen_type:
+                type: SelectionAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "screen_type")'
+            screen_resolution:
+                type: SelectionAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "screen_resolution")'
+            screen_refresh_rate:
+                type: IntegerAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "screen_refresh_rate")'
+            screen_brightness:
+                type: IntegerAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "screen_brightness")'
+            graphic_card:
+                type: SelectionAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "graphic_card")'
+            graphics_card_power:
+                type: IntegerAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "graphics_card_power")'
+            graphics_card_memory:
+                type: IntegerAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "graphics_card_memory")'
+            camera:
+                type: IntegerAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "camera")'
+            battery_type:
+                type: SelectionAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "battery_type")'
+            operating_system:
+                type: SelectionAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "operating_system")'

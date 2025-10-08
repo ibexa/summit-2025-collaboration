@@ -14,6 +14,15 @@
             "config/routes/annotations.yaml"
         ]
     },
+    "doctrine/deprecations": {
+        "version": "1.1",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.0",
+            "ref": "87424683adc81d7dc305eefec1fced883084aab9"
+        }
+    },
     "doctrine/doctrine-bundle": {
         "version": "2.7",
         "recipe": {
@@ -999,6 +1008,15 @@
     "ibexa/templated-uri-bundle": {
         "version": "v3.3.2.2"
     },
+    "ibexa/test-fixtures": {
+        "version": "4.6",
+        "recipe": {
+            "repo": "github.com/ibexa/recipes-dev",
+            "branch": "master",
+            "version": "4.6",
+            "ref": "b175398fb96b485a1c0274f049b17ebf0ddd7053"
+        }
+    },
     "ibexa/tree-builder": {
         "version": "4.6",
         "recipe": {
@@ -1007,6 +1025,16 @@
             "version": "4.6",
             "ref": "575fa895eb28f9d0b7e65e02ba9e3bcb16782094"
         }
+    },
+    "ibexa/twig-components": {
+        "version": "4.6",
+        "recipe": {
+            "repo": "github.com/ibexa/recipes-dev",
+            "branch": "master",
+            "version": "4.6",
+            "ref": "f2a0508673feab7662ca3bea9e3163f37f09bb09"
+        },
+        "files": []
     },
     "ibexa/user": {
         "version": "4.6",
@@ -1230,6 +1258,18 @@
         },
         "files": [
             "config/packages/lock.yaml"
+        ]
+    },
+    "symfony/mailer": {
+        "version": "5.4",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "4.3",
+            "ref": "09051cfde49476e3c12cd3a0e44289ace1c75a4f"
+        },
+        "files": [
+            "config/packages/mailer.yaml"
         ]
     },
     "symfony/monolog-bundle": {

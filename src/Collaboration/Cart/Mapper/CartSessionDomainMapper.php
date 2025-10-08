@@ -40,6 +40,8 @@ final class CartSessionDomainMapper implements SessionDomainMapperInterface
             $data->getToken(),
             $this->userDomainMapper->createUserProxy($data->getOwnerId()),
             $this->participantCollectionDomainMapper->createParticipantCollectionProxy($data->getId()),
+            $data->isActive(),
+            $data->hasPublicLink(),
             $data->getCreatedAt(),
             $data->getUpdatedAt(),
         );

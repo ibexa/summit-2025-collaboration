@@ -1,0 +1,4 @@
+Virtual0ProductType:
+    type: object
+    inherits:
+        - BaseProductType

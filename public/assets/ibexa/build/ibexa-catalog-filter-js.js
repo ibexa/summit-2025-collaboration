@@ -1143,6 +1143,12 @@ var TaxonomyTreeBase = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.forwar
       isContainer: !!(0,_common_helpers_getters__WEBPACK_IMPORTED_MODULE_7__.getTotal)(item)
     };
   };
+  var checkIsDisabled = function checkIsDisabled(item) {
+    return item.internalItem.disabled;
+  };
+  var checkIsInputDisabled = function checkIsInputDisabled(item) {
+    return item.internalItem.disabled;
+  };
   var onItemsMoved = loadTreeToState;
   var expandAllItems = function expandAllItems(rootItem) {
     var _treeBuilderModuleRef2;
@@ -1216,6 +1222,8 @@ var TaxonomyTreeBase = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.forwar
     subId: subId,
     tree: tree,
     buildItem: buildItem,
+    checkIsDisabled: checkIsDisabled,
+    checkIsInputDisabled: checkIsInputDisabled,
     loadMoreSubitems: loadMoreSubitems,
     callbackToggleExpanded: callbackToggleExpanded,
     isLoading: !isLoaded,
@@ -1326,11 +1334,18 @@ var saveData = function saveData(_ref2) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   buildGetMenuActionsList: () => (/* binding */ buildGetMenuActionsList),
 /* harmony export */   getAllChildren: () => (/* binding */ getAllChildren),
 /* harmony export */   getMenuActions: () => (/* binding */ _getMenuActions)
 /* harmony export */ });
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
@@ -1338,16 +1353,20 @@ function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" 
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 
 var EXCLUDED_ACTION_IDS = ['preview'];
+var HIDE_REVEAL_ACTION_ID = 'hide';
 var isActionExcluded = function isActionExcluded(_ref) {
   var action = _ref.action,
     item = _ref.item,
     previewExcludedItemPath = _ref.previewExcludedItemPath;
-  if (!item.internalItem || !EXCLUDED_ACTION_IDS.includes(action.id)) {
+  var internalItem = item.internalItem;
+  if (action.id === HIDE_REVEAL_ACTION_ID && item.internalItem && item.internalItem.isInvisible && !item.internalItem.isHidden) {
+    return true;
+  }
+  if (!internalItem || !EXCLUDED_ACTION_IDS.includes(action.id)) {
     return false;
   }
-  var pathString = item.internalItem.pathString;
-  return previewExcludedItemPath.some(function (excludedPath) {
-    return pathString.startsWith(excludedPath);
+  return previewExcludedItemPath.length && previewExcludedItemPath.some(function (excludedPath) {
+    return internalItem.pathString.startsWith(excludedPath);
   });
 };
 var _getMenuActions = function getMenuActions(_ref2) {
@@ -1358,7 +1377,7 @@ var _getMenuActions = function getMenuActions(_ref2) {
     activeActionsIds = _ref2$activeActionsId === void 0 ? [] : _ref2$activeActionsId,
     _ref2$previewExcluded = _ref2.previewExcludedItemPath,
     previewExcludedItemPath = _ref2$previewExcluded === void 0 ? (_getAdminUiConfig$sit = (_getAdminUiConfig$sit2 = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_0__.getAdminUiConfig)().siteContext) === null || _getAdminUiConfig$sit2 === void 0 ? void 0 : _getAdminUiConfig$sit2.excludedPaths) !== null && _getAdminUiConfig$sit !== void 0 ? _getAdminUiConfig$sit : [] : _ref2$previewExcluded;
-  var filteredActions = previewExcludedItemPath.length && item ? actions.filter(function (action) {
+  var filteredActions = item ? actions.filter(function (action) {
     return !isActionExcluded({
       action: action,
       item: item,
@@ -1400,6 +1419,26 @@ var getAllChildren = function getAllChildren(_ref3) {
   };
   _getAllChildrenHelper([data]);
   return output;
+};
+var buildGetMenuActionsList = function buildGetMenuActionsList(treeBuilderConfig, builtinGetMenuActions) {
+  var _treeBuilderConfig$ge;
+  var unorderedGetMenuActionsList = [{
+    priority: 100,
+    callback: builtinGetMenuActions
+  }].concat(_toConsumableArray((_treeBuilderConfig$ge = treeBuilderConfig === null || treeBuilderConfig === void 0 ? void 0 : treeBuilderConfig.getMenuActions) !== null && _treeBuilderConfig$ge !== void 0 ? _treeBuilderConfig$ge : []));
+  var orderedGetMenuActionsList = unorderedGetMenuActionsList.toSorted(function (_ref4, _ref5) {
+    var priorityA = _ref4.priority;
+    var priorityB = _ref5.priority;
+    return priorityA - priorityB;
+  });
+  return function (menuActionArg) {
+    var output = menuActionArg;
+    orderedGetMenuActionsList.forEach(function (_ref6) {
+      var callback = _ref6.callback;
+      output = callback(output);
+    });
+    return output;
+  };
 };
 
 /***/ }),

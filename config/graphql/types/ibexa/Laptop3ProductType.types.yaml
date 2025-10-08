@@ -1,0 +1,4 @@
+Laptop3ProductType:
+    type: object
+    inherits:
+        - BaseProductType

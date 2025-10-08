@@ -15,12 +15,12 @@ CustomerItemType:
             userAccount:
                 type: MatrixFieldDefinition
                 resolve: '@=value.getFieldDefinition("user_account")'
-            customerGroup:
-                type: MatrixFieldDefinition
-                resolve: '@=value.getFieldDefinition("customer_group")'
             image:
                 type: BinaryFieldDefinition
                 resolve: '@=value.getFieldDefinition("image")'
+            customerGroup:
+                type: MatrixFieldDefinition
+                resolve: '@=value.getFieldDefinition("customer_group")'
             billingAddress:
                 type: MatrixFieldDefinition
                 resolve: '@=value.getFieldDefinition("billing_address")'

@@ -61,6 +61,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     attachModalListeners(wrapper, form, btns);
   };
   var changeHandler = function changeHandler(form, btns, event) {
+    var _event$detail$sendImm, _event$detail, _event$target$closest;
+    var sendImmediately = (_event$detail$sendImm = event === null || event === void 0 || (_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.sendImmediately) !== null && _event$detail$sendImm !== void 0 ? _event$detail$sendImm : false;
     var contentIdInput = form.querySelector('.ibexa-extra-actions__form-field--content-info');
     var locationInput = form.querySelector('.ibexa-extra-actions__form-field--location');
     var contentId = contentIdInput.value;
@@ -72,18 +74,30 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       languageCode: languageCode,
       locationId: locationId
     });
+    var activeLanguageItem = (_event$target$closest = event.target.closest('.ibexa-instant-filter__group-item')) === null || _event$target$closest === void 0 ? void 0 : _event$target$closest.querySelector('.ibexa-label');
+    var allLanguageItems = form.querySelectorAll('.ibexa-instant-filter__group-item .ibexa-label');
+    var submitBtn = form.querySelector('.ibexa-extra-actions__confirm-btn');
+    allLanguageItems.forEach(function (item) {
+      item.classList.remove('ibexa-label--active');
+    });
     fetch(checkVersionDraftLink, {
       credentials: 'same-origin'
     }).then(function (response) {
       if (response.status === 409) {
         response.text().then(showModal.bind(null, form, btns));
+        submitBtn.disabled = true;
+        return;
       } else if (response.status === 200) {
         if (form.querySelector('#user_edit_version_info')) {
           redirectToUserEdit(languageCode, contentId, form);
           return;
         }
-        form.submit();
+        if (sendImmediately) {
+          form.submit();
+        }
       }
+      submitBtn.disabled = false;
+      activeLanguageItem === null || activeLanguageItem === void 0 || activeLanguageItem.classList.add('ibexa-label--active');
     });
   };
   var attachEventsToEditActionsWidget = function attachEventsToEditActionsWidget(container) {

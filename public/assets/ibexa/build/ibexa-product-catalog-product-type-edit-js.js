@@ -30,19 +30,21 @@ function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 (function (global, doc, ibexa, bootstrap, Translator) {
   var currentlyDraggedItem = null;
-  var REMOVE_ATTRIBUTE_DELAY_TIME = 400;
   var HIGHLIGHT_GROUP_TIME = 3000;
   var ATTRIBUTE_DRAG_TYPE = 'item';
   var GROUP_DRAG_TYPE = 'group';
   var dropZoneContainer = doc.querySelector('.ibexa-pc-attributes-drop-zone');
   var emptyDropZoneMessageNode = doc.querySelector('.ibexa-pc-attributes-empty-drop-zone');
-  var availableAttributesGroups = doc.querySelectorAll('.ibexa-available-attribute-item-group');
   var availableAttributesForDrag = doc.querySelectorAll('.ibexa-available-attribute-item-group, ibexa-available-attribute-item');
   var attributesGroups = doc.querySelectorAll('.ibexa-pc-added-attributes-group');
   var assignedAttributes = doc.querySelectorAll('.ibexa-pc-assigned-attribute');
   var filterAttributesInput = doc.querySelector('.ibexa-pc-attributes-sidebar__filter');
   var filterVatRatesInput = doc.querySelector('.ibexa-pc-assigned-vat-rates__filter');
   var availableAttributesGroupTogglers = doc.querySelectorAll('.ibexa-available-attribute-item-group__header-toggler');
+  var availableAttributesGroups = _toConsumableArray(doc.querySelectorAll('.ibexa-available-attribute-item-group:not(.ibexa-available-attribute-item-group--hidden)'));
+  if (availableAttributesGroups.length > 0) {
+    doc.querySelector('.ibexa-pc-attributes-sidebar__list-empty').classList.add('ibexa-pc-attributes-sidebar__list-empty--hidden');
+  }
   var searchAttribute = function searchAttribute(event) {
     var filterInput = event.currentTarget;
     var attributeFilterQueryLowerCase = filterInput.value.toLowerCase();
@@ -102,30 +104,43 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var removeAttribute = function removeAttribute(event) {
     var attributeNodeToRemove = event.currentTarget.closest('.ibexa-pc-assigned-attribute');
     var addedAttributesGroupNode = attributeNodeToRemove.closest('.ibexa-pc-added-attributes-group');
+    var removeAttributesGroupBtn = addedAttributesGroupNode.querySelector('.ibexa-collapse__extra-action-button--remove-attributes-group');
     var attributeId = attributeNodeToRemove.dataset.attributeId;
     var availableAttribute = doc.querySelector(".ibexa-available-attribute-item__content[data-attribute-id=\"".concat(attributeId, "\"]"));
     var availableAttributesGroup = availableAttribute.closest('.ibexa-available-attribute-item-group');
     var collapseGroupInstance = bootstrap.Collapse.getOrCreateInstance(addedAttributesGroupNode.querySelector('.ibexa-collapse__body'), {
       toggle: false
     });
-    var _toggleItemAfterRemove = function toggleItemAfterRemove() {
+    var afterRemoveItem = function afterRemoveItem(animationEndEvent) {
+      animationEndEvent.stopPropagation();
+      attributeNodeToRemove.remove();
+      toggleAvailableAttributeStatus(availableAttribute.closest('.ibexa-available-attribute-item__content'));
+      availableAttributesGroup.classList.remove('ibexa-available-attribute-item-group--hidden');
+      availableAttributesGroup.draggable = shouldHideAddedGroup(addedAttributesGroupNode) ? false : true;
+      removeAttributesGroupBtn.disabled = false;
+      if (shouldHideAddedGroup(addedAttributesGroupNode)) {
+        addedAttributesGroupNode.classList.add('ibexa-pc-added-attributes-group--remove-animation');
+        collapseGroupInstance.hide();
+        addedAttributesGroupNode.addEventListener('animationend', _toggleGroupVisibility, false);
+      }
+    };
+    var _toggleGroupVisibility = function toggleGroupVisibility() {
       addedAttributesGroupNode.classList.remove('ibexa-pc-added-attributes-group--remove-animation');
       addedAttributesGroupNode.classList.add('ibexa-collapse--hidden');
       emptyDropZoneMessageNode.classList.toggle('ibexa-pc-attributes-empty-drop-zone--hidden', shouldHideEmptyDropZoneMessage());
-      addedAttributesGroupNode.removeEventListener('animationend', _toggleItemAfterRemove, false);
+      addedAttributesGroupNode.removeEventListener('animationend', _toggleGroupVisibility, false);
+      availableAttributesGroup.classList.remove('ibexa-available-attribute-item-group--hidden');
       collapseGroupInstance.show();
+      availableAttributesGroup.draggable = true;
     };
+    availableAttributesGroup.draggable = false;
+    removeAttributesGroupBtn.disabled = true;
     attributeNodeToRemove.classList.add('ibexa-pc-assigned-attribute--in-removing');
-    setTimeout(function () {
-      attributeNodeToRemove.remove();
-    }, REMOVE_ATTRIBUTE_DELAY_TIME);
-    if (shouldHideAddedGroup(addedAttributesGroupNode)) {
-      addedAttributesGroupNode.classList.add('ibexa-pc-added-attributes-group--remove-animation');
-      collapseGroupInstance.hide();
-      addedAttributesGroupNode.addEventListener('animationend', _toggleItemAfterRemove, false);
+    attributeNodeToRemove.addEventListener('animationend', afterRemoveItem, false);
+    availableAttributesGroups.push(availableAttributesGroup);
+    if (availableAttributesGroups.length > 0) {
+      doc.querySelector('.ibexa-pc-attributes-sidebar__list-empty').classList.toggle('ibexa-pc-attributes-sidebar__list-empty--hidden', true);
     }
-    toggleAvailableAttributeStatus(availableAttribute.closest('.ibexa-available-attribute-item__content'));
-    availableAttributesGroup.classList.remove('ibexa-available-attribute-item-group--hidden');
   };
   var replacePrototypePlaceholder = function replacePrototypePlaceholder(inputNode, attributeGroupId, attributeIndex) {
     inputNode.id = inputNode.id.replace('__name__', attributeGroupId).replace('__name__', attributeIndex);
@@ -152,14 +167,14 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     attributeDefinitionWrapper.dataset.attributeId = attributeId;
     attributeDefinitionWrapper.dataset.attributePosition = attributePosition;
     var identifierLabel = Translator.trans(/*@Desc("Id: %identifier%")*/'attributes.assigned.identifier.label', {
-      identifier: attributeId
+      identifier: ibexa.helpers.text.escapeHTML(attributeId)
     }, 'ibexa_product_catalog');
-    nameLabelNode.innerHTML = attributeName;
+    nameLabelNode.innerText = attributeName;
     nameLabelNode.title = attributeName;
     itemIdentifierNode.innerHTML = identifierLabel;
     itemIdentifierNode.title = identifierLabel;
     nameInputNode.value = attributeId;
-    typeNode.innerHTML = attributeType;
+    typeNode.innerText = attributeType;
     if (discriminatorAttributeTypesMap[attributeType] === false) {
       attributeDefinitionWrapper.querySelector('.ibexa-pc-assigned-attribute__item--discriminator .ibexa-toggle.ibexa-toggle--checkbox').classList.add('ibexa-toggle--is-disabled');
       discriminatorInputNode.disabled = true;
@@ -199,6 +214,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var isAttributeAssigned = function isAttributeAssigned(attributeId) {
     return !!dropZoneContainer.querySelector("[data-attribute-id=\"".concat(attributeId, "\"]"));
   };
+  var removeFromRemainingGroups = function removeFromRemainingGroups(sourceAttributeGroup) {
+    var remainingGroups = availableAttributesGroups.filter(function (group) {
+      return group.dataset.groupId !== sourceAttributeGroup.dataset.groupId;
+    });
+    if (!remainingGroups.length) {
+      doc.querySelector('.ibexa-pc-attributes-sidebar__list-empty').classList.remove('ibexa-pc-attributes-sidebar__list-empty--hidden');
+    }
+    availableAttributesGroups = remainingGroups;
+  };
   var addAttribute = function addAttribute() {
     var _currentlyDraggedItem = currentlyDraggedItem.dataset,
       attributeId = _currentlyDraggedItem.attributeId,
@@ -215,7 +239,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var targetInsertContainer = targetAttributesGroup.querySelector('.ibexa-pc-added-attributes-group__list .ibexa-table__body');
     targetInsertContainer.insertBefore(attributeToAssign, findAttributeAfterPosition(targetAttributesGroup, attributePosition));
     toggleAvailableAttributeStatus(currentlyDraggedItem);
-    sourceAttributeGroup.classList.toggle('ibexa-available-attribute-item-group--hidden', shouldHideAvailableGroup(sourceAttributeGroup));
+    if (shouldHideAvailableGroup(sourceAttributeGroup)) {
+      sourceAttributeGroup.classList.toggle('ibexa-available-attribute-item-group--hidden', true);
+      removeFromRemainingGroups(sourceAttributeGroup);
+    }
     emptyDropZoneMessageNode.classList.toggle('ibexa-pc-attributes-empty-drop-zone--hidden', shouldHideEmptyDropZoneMessage());
   };
   var addGroup = function addGroup() {
@@ -238,6 +265,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       toggleAvailableAttributeStatus(availableAttribute);
     });
     sourceAttributeGroup.classList.toggle('ibexa-available-attribute-item-group--hidden', true);
+    removeFromRemainingGroups(sourceAttributeGroup);
     emptyDropZoneMessageNode.classList.toggle('ibexa-pc-attributes-empty-drop-zone--hidden', shouldHideEmptyDropZoneMessage());
   };
   var AttributesDraggable = /*#__PURE__*/function (_ibexa$core$Draggable) {
@@ -375,6 +403,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }, false);
   });
   filterAttributesInput.addEventListener('keyup', searchAttribute, false);
+  filterAttributesInput.addEventListener('input', searchAttribute, false);
   if (filterVatRatesInput) {
     filterVatRatesInput.addEventListener('keyup', searchVatRates, false);
     filterVatRatesInput.addEventListener('input', searchVatRates, false);

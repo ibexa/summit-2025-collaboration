@@ -286,6 +286,66 @@ var getIconPath = function getIconPath(path, iconSet) {
 
 /***/ }),
 
+/***/ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/modal.helper.js":
+/*!**********************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/modal.helper.js ***!
+  \**********************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   controlManyZIndexes: () => (/* binding */ controlManyZIndexes),
+/* harmony export */   controlZIndex: () => (/* binding */ controlZIndex)
+/* harmony export */ });
+var controlZIndex = function controlZIndex(container) {
+  var initialZIndex = container.style.zIndex;
+  container.addEventListener('show.bs.modal', function () {
+    container.style.zIndex = 'initial';
+  });
+  container.addEventListener('hide.bs.modal', function () {
+    container.style.zIndex = initialZIndex;
+  });
+  document.body.dispatchEvent(new CustomEvent('ibexa-control-z-index:events-attached'));
+};
+var controlManyZIndexes = function controlManyZIndexes(items, listenerContainer) {
+  var listenersAbortController = new AbortController();
+  var containersInitialZIndexes = new Map();
+  var removeControlManyZIndexesListeners = function removeControlManyZIndexesListeners() {
+    listenersAbortController.abort();
+    listenerContainer.dispatchEvent(new CustomEvent('ibexa-control-z-index:events-detached'));
+  };
+  items.forEach(function (_ref) {
+    var container = _ref.container;
+    containersInitialZIndexes.set(container, container.style.zIndex);
+  });
+  listenerContainer.addEventListener('show.bs.modal', function () {
+    items.forEach(function (_ref2) {
+      var container = _ref2.container,
+        _ref2$zIndex = _ref2.zIndex,
+        zIndex = _ref2$zIndex === void 0 ? 'initial' : _ref2$zIndex;
+      container.style.zIndex = zIndex;
+    });
+  }, {
+    signal: listenersAbortController.signal
+  });
+  listenerContainer.addEventListener('hide.bs.modal', function () {
+    items.forEach(function (_ref3) {
+      var container = _ref3.container;
+      container.style.zIndex = containersInitialZIndexes.get(container);
+    });
+  }, {
+    signal: listenersAbortController.signal
+  });
+  listenerContainer.dispatchEvent(new CustomEvent('ibexa-control-z-index:events-attached'));
+  return {
+    removeControlManyZIndexesListeners: removeControlManyZIndexesListeners
+  };
+};
+
+
+/***/ }),
+
 /***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js":
 /*!***********************************************************************************************!*\
   !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js ***!
@@ -338,7 +398,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
 /* harmony import */ var _helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
 /* harmony import */ var _urlIcon__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./urlIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/urlIcon.js");
-/* harmony import */ var _inculdedIcon__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./inculdedIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js");
+/* harmony import */ var _includedIcon__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./includedIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
@@ -354,7 +414,7 @@ var Icon = function Icon(props) {
     'ibexa-icon': true
   }, props.extraClasses, true));
   var isIconIncluded = props.useIncludedIcon || (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.isExternalInstance)();
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, isIconIncluded ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_inculdedIcon__WEBPACK_IMPORTED_MODULE_5__["default"], {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, isIconIncluded ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_includedIcon__WEBPACK_IMPORTED_MODULE_5__["default"], {
     cssClass: cssClass,
     name: props.name,
     defaultIconName: props.defaultIconName
@@ -382,9 +442,9 @@ Icon.defaultProps = {
 
 /***/ }),
 
-/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js":
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js":
 /*!*****************************************************************************************!*\
-  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js ***!
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js ***!
   \*****************************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -539,7 +599,7 @@ var iconsMap = {
   'upload-image': _ibexa_admin_ui_src_bundle_Resources_public_img_icons_upload_image_svg__WEBPACK_IMPORTED_MODULE_46__,
   warning: _ibexa_admin_ui_src_bundle_Resources_public_img_icons_warning_svg__WEBPACK_IMPORTED_MODULE_47__
 };
-var InculdedIcon = function InculdedIcon(props) {
+var IncludedIcon = function IncludedIcon(props) {
   var _iconsMap$name;
   var name = props.name,
     cssClass = props.cssClass,
@@ -549,17 +609,17 @@ var InculdedIcon = function InculdedIcon(props) {
     className: cssClass
   });
 };
-InculdedIcon.propTypes = {
+IncludedIcon.propTypes = {
   cssClass: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   name: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   defaultIconName: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string)
 };
-InculdedIcon.defaultProps = {
+IncludedIcon.defaultProps = {
   cssClass: '',
   name: 'about-info',
   defaultIconName: 'about-info'
 };
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (InculdedIcon);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (IncludedIcon);
 
 /***/ }),
 
@@ -1117,7 +1177,11 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 /*!******************************************************************************************************!*\
   !*** ./vendor/ibexa/page-builder/src/bundle/Resources/public/js/page.builder.fields.config.panel.js ***!
   \******************************************************************************************************/
-/***/ (() => {
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_modal_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/modal.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/modal.helper.js");
 
 (function (global, doc, ibexa) {
   var EXCLUDED_VALIDATOR_NAMES = ['EzLandingPageValidator', 'EzLandingPageLayoutValidator'];
@@ -1143,6 +1207,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     clientX: null,
     resizing: false
   };
+  var storedControlZIndex;
   var startResizing = function startResizing(_ref) {
     var clientX = _ref.clientX;
     clientXWhenStartDraging.clientX = clientX;
@@ -1183,9 +1248,16 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     doc.addEventListener('keyup', closeConfigPanelByKeyboard, false);
     configPanelCloseBtn.addEventListener('click', _closeConfigPanel, false);
     window.addEventListener('resize', fitFooter, false);
+    storedControlZIndex = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_modal_helper__WEBPACK_IMPORTED_MODULE_0__.controlManyZIndexes)([{
+      container: fieldsConfigPanel,
+      zIndex: 1
+    }, {
+      container: fieldsConfigPanelTogglerBtn
+    }], doc.body);
     return true;
   };
   var _closeConfigPanel = function closeConfigPanel() {
+    var _storedControlZIndex;
     fieldsConfigPanel.classList.add('ibexa-pb-config-panel--closed');
     fieldsConfigPanelTogglerBtn.classList.remove('ibexa-btn--selected');
     fieldsConfigPanelTogglerBtn.style.zIndex = 0;
@@ -1197,6 +1269,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     doc.removeEventListener('keyup', closeConfigPanelByKeyboard);
     configPanelCloseBtn.removeEventListener('click', _closeConfigPanel, false);
     window.removeEventListener('resize', fitFooter, false);
+    (_storedControlZIndex = storedControlZIndex) === null || _storedControlZIndex === void 0 || _storedControlZIndex.removeControlManyZIndexesListeners();
     return true;
   };
   var toggleFieldsConfigPanel = function toggleFieldsConfigPanel() {
@@ -1220,10 +1293,16 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     }
   };
   var closeConfigPanelByClickOutside = function closeConfigPanelByClickOutside(event) {
-    return event.target.classList.contains('ibexa-backdrop') && _closeConfigPanel();
+    if (!event.target.classList.contains('ibexa-backdrop')) {
+      return;
+    }
+    doc.dispatchEvent(new CustomEvent('ibexa-pb-config-panel-close'));
   };
   var closeConfigPanelByKeyboard = function closeConfigPanelByKeyboard(event) {
-    return event.key === CLOSE_CONFIG_PANEL_KEY && _closeConfigPanel();
+    if (event.key !== CLOSE_CONFIG_PANEL_KEY) {
+      return;
+    }
+    doc.dispatchEvent(new CustomEvent('ibexa-pb-config-panel-close'));
   };
   fieldsConfigPanelTogglerBtn.addEventListener('click', toggleFieldsConfigPanel, false);
   fieldsConfigPanel.style.width = "".concat(configPanelWidth, "px");
@@ -2553,7 +2632,8 @@ var EventMarker = /*#__PURE__*/function (_Component) {
     _this.handleClick = _this.handleClick.bind(_this);
     _this.renderDot = _this.renderDot.bind(_this);
     _this.showTooltip = _this.showTooltip.bind(_this);
-    _this.hideTooltip = _this.hideTooltip.bind(_this);
+    _this.hideTooltipWithDelay = _this.hideTooltipWithDelay.bind(_this);
+    _this.hideImmediately = _this.hideImmediately.bind(_this);
     _this._refMarker = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createRef)();
     _this._refTooltip = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createRef)();
     _this.hideTooltipTimeout = null;
@@ -2574,13 +2654,37 @@ var EventMarker = /*#__PURE__*/function (_Component) {
   }, {
     key: "showTooltip",
     value: function showTooltip() {
+      var _this2 = this;
+      var iframes = document.querySelectorAll('iframe');
       this.toggleTooltipVisibility(true);
-      window.document.body.addEventListener('mousemove', this.hideTooltip, false);
+      iframes.forEach(function (iframe) {
+        if (iframe.contentDocument) {
+          iframe.contentDocument.body.addEventListener('mousemove', _this2.hideTooltipWithDelay, false);
+        }
+      });
+      window.document.body.addEventListener('mousemove', this.hideTooltipWithDelay, false);
+      window.document.body.addEventListener('ibexa-pb-timeline:tooltip-opened', this.hideImmediately, false);
+      window.document.body.dispatchEvent(new CustomEvent('ibexa-pb-timeline:tooltip-opened', {
+        bubbles: true,
+        detail: {
+          marker: this._refMarker.current
+        }
+      }));
     }
   }, {
-    key: "hideTooltip",
-    value: function hideTooltip(event) {
-      var _this2 = this;
+    key: "hideImmediately",
+    value: function hideImmediately(event) {
+      var isCurrentMarker = event.detail.marker === this._refMarker.current;
+      if (isCurrentMarker) {
+        return;
+      }
+      this.toggleTooltipVisibility(false);
+      window.document.body.removeEventListener('ibexa-pb-timeline:tooltip-opened', this.hideImmediately, false);
+    }
+  }, {
+    key: "hideTooltipWithDelay",
+    value: function hideTooltipWithDelay(event) {
+      var _this3 = this;
       var eventMarker = event.target.closest('.c-pb-event-marker');
       var eventTooltip = event.target.closest('.c-pb-event-tooltip');
       var isCurrentMarker = eventMarker === this._refMarker.current;
@@ -2590,8 +2694,14 @@ var EventMarker = /*#__PURE__*/function (_Component) {
         return;
       }
       this.hideTooltipTimeout = window.setTimeout(function () {
-        _this2.toggleTooltipVisibility(false);
-        window.document.body.removeEventListener('mousemove', _this2.hideTooltip, false);
+        var iframes = document.querySelectorAll('iframe');
+        _this3.toggleTooltipVisibility(false);
+        window.document.body.removeEventListener('mousemove', _this3.hideTooltipWithDelay, false);
+        iframes.forEach(function (iframe) {
+          if (iframe.contentDocument) {
+            iframe.contentDocument.body.removeEventListener('mousemove', _this3.hideTooltipWithDelay, false);
+          }
+        });
       }, 200);
     }
   }, {

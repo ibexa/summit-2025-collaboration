@@ -98,4 +98,6 @@ return [
     Ibexa\Bundle\ConnectorQualifio\IbexaConnectorQualifioBundle::class => ['all' => true],
     Ibexa\Bundle\Collaboration\IbexaCollaborationBundle::class => ['all' => true],
     Ibexa\Bundle\Share\IbexaShareBundle::class => ['all' => true],
+    Ibexa\Bundle\TwigComponents\IbexaTwigComponentsBundle::class => ['all' => true],
+    Ibexa\Bundle\TestFixtures\IbexaTestFixturesBundle::class => ['all' => true],
 ];

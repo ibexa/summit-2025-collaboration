@@ -1,0 +1,17 @@
+Virtual2Attributes:
+    type: object
+    inherits:
+        - ProductAttributesInterface
+    config:
+        interfaces:
+            - ProductAttributesInterface
+        fields:
+            _all:
+                type: '[AttributeInterface]'
+                resolve: '@=query("AttributesByProduct", value)'
+            digital_format:
+                type: SelectionAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "digital_format")'
+            can_be_used_offline:
+                type: CheckboxAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "can_be_used_offline")'

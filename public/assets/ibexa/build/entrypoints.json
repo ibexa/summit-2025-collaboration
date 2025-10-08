@@ -279,6 +279,12 @@
         "/assets/ibexa/build/ibexa-admin-ui-edit-base-js.js"
       ]
     },
+    "ibexa-admin-notifications-list-js": {
+      "js": [
+        "/assets/ibexa/build/runtime.js",
+        "/assets/ibexa/build/ibexa-admin-notifications-list-js.js"
+      ]
+    },
     "ibexa-admin-ui-layout-css": {
       "js": [
         "/assets/ibexa/build/runtime.js",
@@ -582,10 +588,37 @@
         "/assets/ibexa/build/ibexa-catalog-filter-js.js"
       ]
     },
+    "ibexa-products-selector-js": {
+      "js": [
+        "/assets/ibexa/build/runtime.js",
+        "/assets/ibexa/build/ibexa-products-selector-js.js"
+      ]
+    },
+    "ibexa-variants-viewer-css": {
+      "js": [
+        "/assets/ibexa/build/runtime.js",
+        "/assets/ibexa/build/ibexa-variants-viewer-css.js"
+      ],
+      "css": [
+        "/assets/ibexa/build/ibexa-variants-viewer-css.css"
+      ]
+    },
+    "ibexa-variants-viewer-js": {
+      "js": [
+        "/assets/ibexa/build/runtime.js",
+        "/assets/ibexa/build/ibexa-variants-viewer-js.js"
+      ]
+    },
     "ibexa-taxonomy-location-view-js": {
       "js": [
         "/assets/ibexa/build/runtime.js",
         "/assets/ibexa/build/ibexa-taxonomy-location-view-js.js"
+      ]
+    },
+    "ibexa-taxonomy-limitation-picker-js": {
+      "js": [
+        "/assets/ibexa/build/runtime.js",
+        "/assets/ibexa/build/ibexa-taxonomy-limitation-picker-js.js"
       ]
     },
     "ibexa-site-context-preview-not-available-css": {
@@ -1108,6 +1141,21 @@
       ],
       "css": [
         "/assets/ibexa/build/ibexa-shipment-view-css.css"
+      ]
+    },
+    "ibexa-connect-action-edit-js": {
+      "js": [
+        "/assets/ibexa/build/runtime.js",
+        "/assets/ibexa/build/ibexa-connect-action-edit-js.js"
+      ]
+    },
+    "ibexa-connect-action-edit-css": {
+      "js": [
+        "/assets/ibexa/build/runtime.js",
+        "/assets/ibexa/build/ibexa-connect-action-edit-css.js"
+      ],
+      "css": [
+        "/assets/ibexa/build/ibexa-connect-action-edit-css.css"
       ]
     },
     "ibexa-qualifio-css": {

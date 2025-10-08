@@ -1,0 +1,4 @@
+Mouse6ProductType:
+    type: object
+    inherits:
+        - BaseProductType

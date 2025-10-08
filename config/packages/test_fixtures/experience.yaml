@@ -1,0 +1,17 @@
+ibexa_site_factory:
+    enabled: true 
+    update_roles: [Anonymous, Administrator] 
+    templates:
+        site_template:
+            siteaccess_group: site_factory_group
+            name: Example Site
+            thumbnail: /bundles/ibexasitefactory/img/template-placeholder.png	    
+        site_template2:
+            siteaccess_group: site_factory_group
+            name: Example Site2
+            thumbnail: /bundles/ibexasitefactory/img/template-placeholder.png 
+
+ibexa:
+    siteaccess:
+        match:
+            '@Ibexa\SiteFactory\SiteAccessMatcher': ~

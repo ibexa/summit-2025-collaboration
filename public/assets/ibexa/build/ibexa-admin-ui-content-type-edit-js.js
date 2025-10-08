@@ -401,10 +401,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var validateInput = function validateInput(input) {
     var isInputEmpty = !input.value;
     var field = input.closest('.form-group');
-    var labelNode = field.querySelector('.ibexa-label');
-    var errorNode = field.querySelector('.ibexa-form-error');
+    var labelNode = field === null || field === void 0 ? void 0 : field.querySelector('.ibexa-label');
+    var errorNode = field === null || field === void 0 ? void 0 : field.querySelector('.ibexa-form-error');
     input.classList.toggle('is-invalid', isInputEmpty);
-    if (errorNode) {
+    if (errorNode && labelNode) {
       errorNode.innerHTML = '';
       if (isInputEmpty) {
         var fieldName = labelNode.innerHTML;
@@ -415,21 +415,42 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     isEditFormValid = isEditFormValid && !isInputEmpty;
   };
+  var validateMatrixColumns = function validateMatrixColumns(columnSettingsNode) {
+    var columns = columnSettingsNode.querySelectorAll('.ibexa-matrix-settings__column');
+    var requiredInputs = columnSettingsNode.querySelectorAll('.ibexa-input[required]');
+    var hasAddedColumns = columns.length > 0;
+    var hasEmptyRequiredInputs = _toConsumableArray(requiredInputs).some(function (input) {
+      return !input.value;
+    });
+    var isValid = hasAddedColumns && !hasEmptyRequiredInputs;
+    var errorNode = columnSettingsNode.querySelector('.ibexa-form-error');
+    errorNode.toggleAttribute('hidden', hasAddedColumns);
+    return isValid;
+  };
   var validateForm = function validateForm() {
     var fieldDefinitionsStatuses = {};
+    var matrixColumnsSettingsNodes = doc.querySelectorAll('.ibexa-matrix-settings__columns');
     isEditFormValid = true;
     inputsToValidate = editForm.querySelectorAll(SELECTOR_INPUTS_TO_VALIDATE);
     inputsToValidate.forEach(function (input) {
       var fieldDefinition = input.closest('.ibexa-collapse--field-definition');
       if (fieldDefinition) {
+        var _fieldDefinitionsStat;
         var fieldDefinitionIdentifier = fieldDefinition.dataset.fieldDefinitionIdentifier;
         var isInputEmpty = !input.value;
-        if (!fieldDefinitionsStatuses[fieldDefinitionIdentifier]) {
-          fieldDefinitionsStatuses[fieldDefinitionIdentifier] = [];
-        }
+        (_fieldDefinitionsStat = fieldDefinitionsStatuses[fieldDefinitionIdentifier]) !== null && _fieldDefinitionsStat !== void 0 ? _fieldDefinitionsStat : fieldDefinitionsStatuses[fieldDefinitionIdentifier] = [];
         fieldDefinitionsStatuses[fieldDefinitionIdentifier].push(isInputEmpty);
       }
       validateInput(input);
+    });
+    matrixColumnsSettingsNodes.forEach(function (columnSettingsNode) {
+      var _fieldDefinitionsStat2;
+      var fieldDefinition = columnSettingsNode.closest('.ibexa-collapse--field-definition');
+      var fieldDefinitionIdentifier = fieldDefinition.dataset.fieldDefinitionIdentifier;
+      var hasError = !validateMatrixColumns(columnSettingsNode);
+      (_fieldDefinitionsStat2 = fieldDefinitionsStatuses[fieldDefinitionIdentifier]) !== null && _fieldDefinitionsStat2 !== void 0 ? _fieldDefinitionsStat2 : fieldDefinitionsStatuses[fieldDefinitionIdentifier] = [];
+      fieldDefinitionsStatuses[fieldDefinitionIdentifier].push(hasError);
+      isEditFormValid = isEditFormValid && !hasError;
     });
     Object.entries(fieldDefinitionsStatuses).forEach(function (_ref8) {
       var _ref9 = _slicedToArray(_ref8, 2),
@@ -449,8 +470,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   };
   var scrollToInvalidInput = function scrollToInvalidInput() {
     var firstInvalidInput = editForm.querySelector('.ibexa-input.is-invalid');
-    var fieldDefinition = firstInvalidInput.closest('.ibexa-collapse--field-definition');
-    var scrollToNode = fieldDefinition !== null && fieldDefinition !== void 0 ? fieldDefinition : firstInvalidInput;
+    var firstInvalidFieldDefinition = editForm.querySelector('.ibexa-collapse--field-definition.is-invalid');
+    var scrollToNode = firstInvalidFieldDefinition !== null && firstInvalidFieldDefinition !== void 0 ? firstInvalidFieldDefinition : firstInvalidInput;
     scrollToNode.scrollIntoView({
       behavior: 'smooth'
     });
@@ -622,6 +643,13 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     });
     draggable.init();
     draggableGroups.push(draggable);
+  });
+  doc.body.addEventListener('ibexa-fieldtype-matrix:added-column', function (event) {
+    var columnNode = event.detail.columnNode;
+    var inputs = columnNode.querySelectorAll('.ibexa-input[required]');
+    inputs.forEach(function (input) {
+      attachValidateEvents(input);
+    });
   });
   fieldDefinitionsGroups.forEach(function (group) {
     return group.addEventListener('click', function () {
@@ -824,6 +852,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
   var SELECTOR_ADD_COLUMN = '.ibexa-btn--add-column';
   var SELECTOR_REMOVE_COLUMN = '.ibexa-btn--remove-column';
   var SELECTOR_TEMPLATE = '.ibexa-matrix-settings__column-template';
+  var ERROR_NODE_SELECTOR = '.ibexa-form-error';
   var NUMBER_PLACEHOLDER = /__number__/g;
   var getNextIndex = function getNextIndex(parentNode) {
     return parentNode.dataset.nextIndex++;
@@ -851,7 +880,14 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     }
     node.insertAdjacentHTML('beforeend', template.replace(NUMBER_PLACEHOLDER, getNextIndex(node)));
     initColumns(settingsNode);
+    validateColumnsNumber(settingsNode);
     node.closest('.ibexa-table').dispatchEvent(new CustomEvent('ibexa-refresh-main-table-checkbox'));
+    doc.body.dispatchEvent(new CustomEvent('ibexa-inputs:added'));
+    doc.body.dispatchEvent(new CustomEvent('ibexa-fieldtype-matrix:added-column', {
+      detail: {
+        columnNode: node.querySelector("".concat(SELECTOR_COLUMN, ":last-of-type"))
+      }
+    }));
   };
   var removeItems = function removeItems(event) {
     var _settingsNode$querySe;
@@ -876,6 +912,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
         checkbox.closest(SELECTOR_COLUMN).remove();
       });
       node.closest('.ibexa-table').dispatchEvent(new CustomEvent('ibexa-refresh-main-table-checkbox'));
+      validateColumnsNumber(settingsNode);
     }, 0);
     initColumns(settingsNode);
   };
@@ -895,6 +932,11 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
     container.querySelector(SELECTOR_ADD_COLUMN).addEventListener('click', addItem, false);
     container.querySelector(SELECTOR_REMOVE_COLUMN).addEventListener('click', removeItems, false);
     initColumns(container);
+  };
+  var validateColumnsNumber = function validateColumnsNumber(settingsNode) {
+    var columns = settingsNode.querySelectorAll(SELECTOR_COLUMN);
+    var errorNode = settingsNode.querySelector(ERROR_NODE_SELECTOR);
+    errorNode.toggleAttribute('hidden', columns.length > 0);
   };
   doc.querySelectorAll(SELECTOR_SETTINGS_COLUMNS).forEach(function (container) {
     initComponent(container);
@@ -933,10 +975,12 @@ function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 (function (global, doc, ibexa, Translator) {
   var toggleItemSelect = function toggleItemSelect(event) {
-    var itemCheckbox = event.currentTarget;
-    var groupContent = itemCheckbox.closest('.ibexa-page-select-items__group-content');
-    var itemClassMethod = itemCheckbox.checked ? 'add' : 'remove';
-    itemCheckbox.closest('.ibexa-page-select-items__item').classList[itemClassMethod]('ibexa-page-select-items__item--selected');
+    var item = event.currentTarget;
+    var itemCheckbox = item.querySelector('.ibexa-input--checkbox');
+    var groupContent = item.closest('.ibexa-page-select-items__group-content');
+    var isSelected = item.classList.contains('ibexa-page-select-items__item--selected');
+    itemCheckbox.checked = !isSelected;
+    item.classList.toggle('ibexa-page-select-items__item--selected');
     updateGroupHeader(groupContent);
   };
   var toggleGroupItemsSelect = function toggleGroupItemsSelect(event) {
@@ -974,8 +1018,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   doc.querySelectorAll('.ibexa-page-select-items__select-all-items').forEach(function (groupCheckbox) {
     groupCheckbox.addEventListener('change', toggleGroupItemsSelect, false);
   });
-  doc.querySelectorAll('.ibexa-page-select-items__item .ibexa-input--checkbox').forEach(function (itemCheckbox) {
-    itemCheckbox.addEventListener('change', toggleItemSelect, false);
+  doc.querySelectorAll('.ibexa-page-select-items__item').forEach(function (item) {
+    item.addEventListener('click', toggleItemSelect, false);
   });
   doc.body.addEventListener('ibexa-drop-field-definition', function (event) {
     var nodes = event.detail.nodes;

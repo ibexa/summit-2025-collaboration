@@ -57,6 +57,7 @@ var UserInvitationModal = /*#__PURE__*/function () {
     this.fileInput = this.modal.querySelector('.ibexa-user-invitation-modal__file-input');
     this.fakeSubmitBtn = this.modal.querySelector('.ibexa-user-invitation-modal__fake-submit-btn');
     this.realSubmitBtn = this.modal.querySelector('.ibexa-user-invitation-modal__real-submit-btn');
+    this.form = this.modal.querySelector('.ibexa-user-invitation-modal__form');
     this.lastScrolledToEntryWithIssue = null;
     this.attachEntryListeners = this.attachEntryListeners.bind(this);
     this.preventDefaultAction = this.preventDefaultAction.bind(this);
@@ -504,6 +505,7 @@ var UserInvitationModal = /*#__PURE__*/function () {
     key: "init",
     value: function init() {
       var _this4 = this;
+      var ENTER_KEY_CODE = 13;
       this.initialEntries = this.entriesContainer.querySelectorAll('.ibexa-user-invitation-modal__entry');
       this.entryCounter = this.initialEntries.length;
       this.initialEntries.forEach(function (initialEntry) {
@@ -552,6 +554,11 @@ var UserInvitationModal = /*#__PURE__*/function () {
         }
       }, false);
       this.updateModalTitle();
+      this.form.addEventListener('keydown', function (event) {
+        if (event.keyCode === ENTER_KEY_CODE) {
+          event.preventDefault();
+        }
+      }, false);
     }
   }]);
 }();

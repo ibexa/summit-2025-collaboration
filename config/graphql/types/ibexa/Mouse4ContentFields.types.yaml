@@ -1,0 +1,34 @@
+Mouse4ContentFields:
+    type: object
+    inherits:
+        - ProductContentFieldsInterface
+    config:
+        interfaces:
+            - ProductContentFieldsInterface
+        fields:
+            _all:
+                type: '[ProductContentField]'
+                resolve: '@=query("ContentFieldsByProduct", value)'
+            mainImage:
+                type: ImageFieldValue
+                resolve: '@=resolver("DomainImageAssetFieldValue", [resolver("ContentFieldByProduct", [value, "main_image", args])])'
+                args:
+                    language: { type: RepositoryLanguage }
+            description:
+                type: RichTextFieldValue
+                resolve: '@=resolver("ContentFieldByProduct", [value, "description", args])'
+                args:
+                    language: { type: RepositoryLanguage }
+            name:
+                type: String
+                resolve: '@=resolver("ContentFieldByProduct", [value, "name", args])'
+                args:
+                    language: { type: RepositoryLanguage }
+            productCategory:
+                type: String
+                resolve: '@=resolver("ContentFieldByProduct", [value, "product_category", args])'
+            image:
+                type: ImageFieldValue
+                resolve: '@=resolver("DomainImageAssetFieldValue", [resolver("ContentFieldByProduct", [value, "image", args])])'
+                args:
+                    language: { type: RepositoryLanguage }

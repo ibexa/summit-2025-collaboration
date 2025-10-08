@@ -63,8 +63,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       dateInputNodes.forEach(function (dateInputNode) {
         if (!dateInputNode.disabled) {
           var datePickerNode = dateInputNode.closest('.ibexa-picker');
-          var datePickerInstance = ibexa.helpers.objectInstances.getInstance(datePickerNode);
-          datePickerInstance.clear();
+          if (datePickerNode) {
+            var datePickerInstance = ibexa.helpers.objectInstances.getInstance(datePickerNode);
+            datePickerInstance.clear();
+          }
+          var dateTimeRangeSingleNode = dateInputNode.closest('.ibexa-date-time-range-single');
+          if (dateTimeRangeSingleNode) {
+            var dateTimeRangeSingleInstance = ibexa.helpers.objectInstances.getInstance(dateTimeRangeSingleNode);
+            dateTimeRangeSingleInstance.clearDates();
+          }
         }
       });
       dropdownNodes.forEach(function (dropdownNode) {
@@ -81,13 +88,21 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     };
     var handleFormClear = function handleFormClear() {
       clearForm();
-      clearBtn.disabled = true;
-      applyBtn.disabled = !checkFieldsValuesChanged();
-      applyBtn.click();
+      if (clearBtn) {
+        clearBtn.disabled = true;
+      }
+      if (applyBtn) {
+        applyBtn.disabled = !checkFieldsValuesChanged();
+        applyBtn.click();
+      }
     };
     var handleInputChange = function handleInputChange() {
-      clearBtn.disabled = checkAreFiltersCleared();
-      applyBtn.disabled = !checkFieldsValuesChanged();
+      if (clearBtn) {
+        clearBtn.disabled = checkAreFiltersCleared();
+      }
+      if (applyBtn) {
+        applyBtn.disabled = !checkFieldsValuesChanged();
+      }
     };
     dropdownNodes.forEach(function (dropdownNode) {
       var dropdown = dropdownNode.ibexaInstance;

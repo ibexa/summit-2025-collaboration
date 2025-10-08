@@ -16,6 +16,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var validateIsEmptyField = ibexa.helpers.formValidation.validateIsEmptyField;
   var submitBtn = doc.querySelector('.ibexa-pc-edit__submit-btn');
   var editForm = doc.querySelector('.ibexa-pc-edit__form');
+  var isCustomValidation = editForm.dataset.isCustomValidation;
+  if (isCustomValidation) {
+    return;
+  }
   var fieldsToValidate = editForm.querySelectorAll('.ibexa-pc-edit__form-field-required');
   var validateForm = function validateForm(event) {
     event.preventDefault();

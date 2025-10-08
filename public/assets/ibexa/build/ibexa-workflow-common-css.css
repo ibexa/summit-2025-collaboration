@@ -198,11 +198,6 @@
   background: #ffffff;
 }
 
-.ibexa-workflow-unlock-accept {
-  display: flex;
-  justify-content: space-between;
-}
-
 .ibexa-workflow-diagram {
   width: 100%;
 }

@@ -236,11 +236,15 @@ function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf 
       value: function validateInteger(_ref2) {
         var currentTarget = _ref2.currentTarget;
         var label = currentTarget.closest(SELECTOR_INTEGER_FIELD).querySelector(SELECTOR_LABEL).innerHTML;
-        var isError = !Number.isInteger(Number(currentTarget.value));
+        var isRequired = currentTarget.required;
+        var isEmpty = !currentTarget.value;
+        var isError = isEmpty && isRequired || !Number.isInteger(Number(currentTarget.value));
         var result = {
           isError: isError
         };
-        if (isError) {
+        if (isEmpty) {
+          result.errorMessage = ibexa.errors.emptyField.replace('{fieldName}', label);
+        } else if (isError) {
           result.errorMessage = ibexa.errors.isNotInteger.replace('{fieldName}', label);
         }
         return result;

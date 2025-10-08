@@ -1,0 +1,9 @@
+Mouse2ProductConnection:
+    type: relay-connection
+    config:
+        nodeType: Mouse2Product
+        connectionFields:
+            sliceSize:
+                type: Int!
+            orderBy:
+                type: String

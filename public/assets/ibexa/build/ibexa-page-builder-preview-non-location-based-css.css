@@ -486,6 +486,7 @@
   flex-direction: row;
   flex-wrap: nowrap;
   width: 100%;
+  height: calc(100vh - 8.6875rem);
 }
 .ibexa-pb-app__landingpage {
   flex: 0 0 100vw;

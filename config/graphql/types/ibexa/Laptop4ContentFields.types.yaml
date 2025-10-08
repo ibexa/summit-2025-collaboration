@@ -1,0 +1,64 @@
+Laptop4ContentFields:
+    type: object
+    inherits:
+        - ProductContentFieldsInterface
+    config:
+        interfaces:
+            - ProductContentFieldsInterface
+        fields:
+            _all:
+                type: '[ProductContentField]'
+                resolve: '@=query("ContentFieldsByProduct", value)'
+            name:
+                type: String
+                resolve: '@=resolver("ContentFieldByProduct", [value, "name", args])'
+                args:
+                    language: { type: RepositoryLanguage }
+            intro:
+                type: RichTextFieldValue
+                resolve: '@=resolver("ContentFieldByProduct", [value, "intro", args])'
+                args:
+                    language: { type: RepositoryLanguage }
+            description:
+                type: RichTextFieldValue
+                resolve: '@=resolver("ContentFieldByProduct", [value, "description", args])'
+                args:
+                    language: { type: RepositoryLanguage }
+            longMarketingDescription:
+                type: RichTextFieldValue
+                resolve: '@=resolver("ContentFieldByProduct", [value, "long_marketing_description", args])'
+                args:
+                    language: { type: RepositoryLanguage }
+            otherLongMarketingDescription:
+                type: RichTextFieldValue
+                resolve: '@=resolver("ContentFieldByProduct", [value, "other_long_marketing_description", args])'
+                args:
+                    language: { type: RepositoryLanguage }
+            mainImage:
+                type: ImageFieldValue
+                resolve: '@=resolver("DomainImageAssetFieldValue", [resolver("ContentFieldByProduct", [value, "main_image", args])])'
+                args:
+                    language: { type: RepositoryLanguage }
+            image:
+                type: ImageFieldValue
+                resolve: '@=resolver("DomainImageAssetFieldValue", [resolver("ContentFieldByProduct", [value, "image", args])])'
+                args:
+                    language: { type: RepositoryLanguage }
+            image2:
+                type: ImageFieldValue
+                resolve: '@=resolver("DomainImageAssetFieldValue", [resolver("ContentFieldByProduct", [value, "image2", args])])'
+                args:
+                    language: { type: RepositoryLanguage }
+            image3:
+                type: ImageFieldValue
+                resolve: '@=resolver("DomainImageAssetFieldValue", [resolver("ContentFieldByProduct", [value, "image3", args])])'
+                args:
+                    language: { type: RepositoryLanguage }
+            image4:
+                type: ImageFieldValue
+                resolve: '@=resolver("DomainImageAssetFieldValue", [resolver("ContentFieldByProduct", [value, "image4", args])])'
+                args:
+                    language: { type: RepositoryLanguage }
+            productCategory:
+                type: String
+                resolve: '@=resolver("ContentFieldByProduct", [value, "product_category", args])'

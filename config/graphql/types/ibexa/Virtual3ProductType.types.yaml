@@ -1,0 +1,4 @@
+Virtual3ProductType:
+    type: object
+    inherits:
+        - BaseProductType

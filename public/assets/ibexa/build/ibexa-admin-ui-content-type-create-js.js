@@ -401,10 +401,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var validateInput = function validateInput(input) {
     var isInputEmpty = !input.value;
     var field = input.closest('.form-group');
-    var labelNode = field.querySelector('.ibexa-label');
-    var errorNode = field.querySelector('.ibexa-form-error');
+    var labelNode = field === null || field === void 0 ? void 0 : field.querySelector('.ibexa-label');
+    var errorNode = field === null || field === void 0 ? void 0 : field.querySelector('.ibexa-form-error');
     input.classList.toggle('is-invalid', isInputEmpty);
-    if (errorNode) {
+    if (errorNode && labelNode) {
       errorNode.innerHTML = '';
       if (isInputEmpty) {
         var fieldName = labelNode.innerHTML;
@@ -415,21 +415,42 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     isEditFormValid = isEditFormValid && !isInputEmpty;
   };
+  var validateMatrixColumns = function validateMatrixColumns(columnSettingsNode) {
+    var columns = columnSettingsNode.querySelectorAll('.ibexa-matrix-settings__column');
+    var requiredInputs = columnSettingsNode.querySelectorAll('.ibexa-input[required]');
+    var hasAddedColumns = columns.length > 0;
+    var hasEmptyRequiredInputs = _toConsumableArray(requiredInputs).some(function (input) {
+      return !input.value;
+    });
+    var isValid = hasAddedColumns && !hasEmptyRequiredInputs;
+    var errorNode = columnSettingsNode.querySelector('.ibexa-form-error');
+    errorNode.toggleAttribute('hidden', hasAddedColumns);
+    return isValid;
+  };
   var validateForm = function validateForm() {
     var fieldDefinitionsStatuses = {};
+    var matrixColumnsSettingsNodes = doc.querySelectorAll('.ibexa-matrix-settings__columns');
     isEditFormValid = true;
     inputsToValidate = editForm.querySelectorAll(SELECTOR_INPUTS_TO_VALIDATE);
     inputsToValidate.forEach(function (input) {
       var fieldDefinition = input.closest('.ibexa-collapse--field-definition');
       if (fieldDefinition) {
+        var _fieldDefinitionsStat;
         var fieldDefinitionIdentifier = fieldDefinition.dataset.fieldDefinitionIdentifier;
         var isInputEmpty = !input.value;
-        if (!fieldDefinitionsStatuses[fieldDefinitionIdentifier]) {
-          fieldDefinitionsStatuses[fieldDefinitionIdentifier] = [];
-        }
+        (_fieldDefinitionsStat = fieldDefinitionsStatuses[fieldDefinitionIdentifier]) !== null && _fieldDefinitionsStat !== void 0 ? _fieldDefinitionsStat : fieldDefinitionsStatuses[fieldDefinitionIdentifier] = [];
         fieldDefinitionsStatuses[fieldDefinitionIdentifier].push(isInputEmpty);
       }
       validateInput(input);
+    });
+    matrixColumnsSettingsNodes.forEach(function (columnSettingsNode) {
+      var _fieldDefinitionsStat2;
+      var fieldDefinition = columnSettingsNode.closest('.ibexa-collapse--field-definition');
+      var fieldDefinitionIdentifier = fieldDefinition.dataset.fieldDefinitionIdentifier;
+      var hasError = !validateMatrixColumns(columnSettingsNode);
+      (_fieldDefinitionsStat2 = fieldDefinitionsStatuses[fieldDefinitionIdentifier]) !== null && _fieldDefinitionsStat2 !== void 0 ? _fieldDefinitionsStat2 : fieldDefinitionsStatuses[fieldDefinitionIdentifier] = [];
+      fieldDefinitionsStatuses[fieldDefinitionIdentifier].push(hasError);
+      isEditFormValid = isEditFormValid && !hasError;
     });
     Object.entries(fieldDefinitionsStatuses).forEach(function (_ref8) {
       var _ref9 = _slicedToArray(_ref8, 2),
@@ -449,8 +470,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   };
   var scrollToInvalidInput = function scrollToInvalidInput() {
     var firstInvalidInput = editForm.querySelector('.ibexa-input.is-invalid');
-    var fieldDefinition = firstInvalidInput.closest('.ibexa-collapse--field-definition');
-    var scrollToNode = fieldDefinition !== null && fieldDefinition !== void 0 ? fieldDefinition : firstInvalidInput;
+    var firstInvalidFieldDefinition = editForm.querySelector('.ibexa-collapse--field-definition.is-invalid');
+    var scrollToNode = firstInvalidFieldDefinition !== null && firstInvalidFieldDefinition !== void 0 ? firstInvalidFieldDefinition : firstInvalidInput;
     scrollToNode.scrollIntoView({
       behavior: 'smooth'
     });
@@ -622,6 +643,13 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     });
     draggable.init();
     draggableGroups.push(draggable);
+  });
+  doc.body.addEventListener('ibexa-fieldtype-matrix:added-column', function (event) {
+    var columnNode = event.detail.columnNode;
+    var inputs = columnNode.querySelectorAll('.ibexa-input[required]');
+    inputs.forEach(function (input) {
+      attachValidateEvents(input);
+    });
   });
   fieldDefinitionsGroups.forEach(function (group) {
     return group.addEventListener('click', function () {

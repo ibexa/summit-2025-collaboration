@@ -334,34 +334,44 @@ function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyri
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 
-var getErrorMessage = function getErrorMessage(response) {
+var defaultGetErrorMessage = function defaultGetErrorMessage() {
+  var error = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return error.errorMessage;
+};
+var getErrorMessageObject = function getErrorMessageObject(response) {
   var responseErrorMessage = response.json().then(function (jsonResponse) {
     var _jsonResponse$ErrorMe;
-    return (_jsonResponse$ErrorMe = jsonResponse.ErrorMessage) === null || _jsonResponse$ErrorMe === void 0 ? void 0 : _jsonResponse$ErrorMe.errorMessage;
+    return (_jsonResponse$ErrorMe = jsonResponse.ErrorMessage) !== null && _jsonResponse$ErrorMe !== void 0 ? _jsonResponse$ErrorMe : jsonResponse;
   });
   return responseErrorMessage;
 };
 var handleRequest = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(response) {
-    var Translator, responseErrorMessage, errorMessage, defaultErrorMsg;
+    var getErrorMessage,
+      Translator,
+      responseErrorMessageObject,
+      errorMessage,
+      defaultErrorMsg,
+      _args = arguments;
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
+          getErrorMessage = _args.length > 1 && _args[1] !== undefined ? _args[1] : defaultGetErrorMessage;
           if (response.ok) {
-            _context.next = 8;
+            _context.next = 9;
             break;
           }
           Translator = (0,_context_helper__WEBPACK_IMPORTED_MODULE_0__.getTranslator)();
-          _context.next = 4;
-          return getErrorMessage(response);
-        case 4:
-          responseErrorMessage = _context.sent;
-          errorMessage = responseErrorMessage || response.statusText;
+          _context.next = 5;
+          return getErrorMessageObject(response);
+        case 5:
+          responseErrorMessageObject = _context.sent;
+          errorMessage = getErrorMessage(responseErrorMessageObject) || response.statusText;
           defaultErrorMsg = Translator.trans(/*@Desc("Something went wrong. Try to refresh the page or contact your administrator.")*/'error.request.default_msg');
           throw Error(errorMessage || defaultErrorMsg);
-        case 8:
-          return _context.abrupt("return", response);
         case 9:
+          return _context.abrupt("return", response);
+        case 10:
         case "end":
           return _context.stop();
       }
@@ -372,13 +382,13 @@ var handleRequest = /*#__PURE__*/function () {
   };
 }();
 var getJsonFromResponse = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(response) {
+  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(response, getErrorMessage) {
     var parsedRequest;
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
           _context2.next = 2;
-          return handleRequest(response);
+          return handleRequest(response, getErrorMessage);
         case 2:
           parsedRequest = _context2.sent;
           return _context2.abrupt("return", parsedRequest.json());
@@ -388,7 +398,7 @@ var getJsonFromResponse = /*#__PURE__*/function () {
       }
     }, _callee2);
   }));
-  return function getJsonFromResponse(_x2) {
+  return function getJsonFromResponse(_x2, _x3) {
     return _ref2.apply(this, arguments);
   };
 }();
@@ -409,7 +419,7 @@ var getTextFromResponse = /*#__PURE__*/function () {
       }
     }, _callee3);
   }));
-  return function getTextFromResponse(_x3) {
+  return function getTextFromResponse(_x4) {
     return _ref3.apply(this, arguments);
   };
 }();
@@ -430,7 +440,7 @@ var getStatusFromResponse = /*#__PURE__*/function () {
       }
     }, _callee4);
   }));
-  return function getStatusFromResponse(_x4) {
+  return function getStatusFromResponse(_x5) {
     return _ref4.apply(this, arguments);
   };
 }();
@@ -536,41 +546,47 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 var _window = window,
   doc = _window.document;
-var lastInsertTooltipTarget = null;
 var TOOLTIPS_SELECTOR = '[title], [data-tooltip-title]';
 var observerConfig = {
   childList: true,
-  subtree: true
+  subtree: true,
+  attributes: true,
+  attributeFilter: ['title', 'data-tooltip-title', 'data-tooltip-extra-class', 'data-tooltip-manual-reparsing']
 };
+var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
 var resizeEllipsisObserver = new ResizeObserver(function (entries) {
   entries.forEach(function (entry) {
     parse(entry.target);
   });
 });
 var observer = new MutationObserver(function (mutationsList) {
-  if (lastInsertTooltipTarget) {
-    mutationsList.forEach(function (mutation) {
-      var addedNodes = mutation.addedNodes,
-        removedNodes = mutation.removedNodes;
-      if (addedNodes.length) {
-        addedNodes.forEach(function (addedNode) {
-          if (addedNode instanceof Element) {
-            parse(addedNode);
-          }
-        });
+  mutationsList.forEach(function (mutation) {
+    var type = mutation.type,
+      target = mutation.target,
+      addedNodes = mutation.addedNodes,
+      removedNodes = mutation.removedNodes;
+    if (type === 'attributes') {
+      var tooltipManualReparsing = target.dataset.tooltipManualReparsing;
+      if (!tooltipManualReparsing) {
+        parse(target.parentElement);
       }
-      if (removedNodes.length) {
-        removedNodes.forEach(function (removedNode) {
-          if (removedNode.classList && !removedNode.classList.contains('ibexa-tooltip')) {
-            lastInsertTooltipTarget = null;
-            doc.querySelectorAll('.ibexa-tooltip.show').forEach(function (tooltipNode) {
-              tooltipNode.remove();
-            });
-          }
+    }
+    addedNodes.forEach(function (addedNode) {
+      if (addedNode instanceof Element && !(addedNode !== null && addedNode !== void 0 && addedNode.classList.contains('ibexa-tooltip'))) {
+        parse(addedNode);
+      }
+    });
+    removedNodes.forEach(function (removedNode) {
+      if (removedNode.classList && !removedNode.classList.contains('ibexa-tooltip')) {
+        var triggeredNodes = removedNode.querySelectorAll("[data-bs-original-title]");
+        triggeredNodes.forEach(function (triggerBtn) {
+          var _tooltipInstance$tip;
+          var tooltipInstance = bootstrap.Tooltip.getOrCreateInstance(triggerBtn);
+          tooltipInstance === null || tooltipInstance === void 0 || (_tooltipInstance$tip = tooltipInstance.tip) === null || _tooltipInstance$tip === void 0 || _tooltipInstance$tip.remove();
         });
       }
     });
-  }
+  });
 });
 var modifyPopperConfig = function modifyPopperConfig(iframe, defaultBsPopperConfig) {
   if (!iframe) {
@@ -644,9 +660,13 @@ var isTitleEllipsized = function isTitleEllipsized(node) {
   var textHeight = getTextHeight(title, styles);
   return textHeight > nodeHeight;
 };
+var getContainer = function getContainer(tooltipNode) {
+  var tooltipContainerSelector = tooltipNode.dataset.tooltipContainerSelector;
+  var container = tooltipNode.closest(tooltipContainerSelector);
+  return container !== null && container !== void 0 ? container : doc.body;
+};
 var initializeTooltip = function initializeTooltip(tooltipNode, hasEllipsisStyle) {
   var _tooltipNode$dataset$, _tooltipNode$dataset$2, _tooltipNode$dataset$3;
-  var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
   var _tooltipNode$dataset = tooltipNode.dataset,
     delayShow = _tooltipNode$dataset.delayShow,
     delayHide = _tooltipNode$dataset.delayHide;
@@ -659,7 +679,7 @@ var initializeTooltip = function initializeTooltip(tooltipNode, hasEllipsisStyle
   var placement = (_tooltipNode$dataset$2 = tooltipNode.dataset.tooltipPlacement) !== null && _tooltipNode$dataset$2 !== void 0 ? _tooltipNode$dataset$2 : 'bottom';
   var trigger = (_tooltipNode$dataset$3 = tooltipNode.dataset.tooltipTrigger) !== null && _tooltipNode$dataset$3 !== void 0 ? _tooltipNode$dataset$3 : 'hover';
   var useHtml = tooltipNode.dataset.tooltipUseHtml !== undefined;
-  var container = tooltipNode.dataset.tooltipContainerSelector ? tooltipNode.closest(tooltipNode.dataset.tooltipContainerSelector) : 'body';
+  var container = getContainer(tooltipNode);
   var iframe = document.querySelector(tooltipNode.dataset.tooltipIframeSelector);
   new bootstrap.Tooltip(tooltipNode, {
     delay: delay,
@@ -669,9 +689,6 @@ var initializeTooltip = function initializeTooltip(tooltipNode, hasEllipsisStyle
     popperConfig: modifyPopperConfig.bind(null, iframe),
     html: useHtml,
     template: "<div class=\"tooltip ibexa-tooltip ".concat(extraClass, "\">\n                        <div class=\"tooltip-arrow ibexa-tooltip__arrow\"></div>\n                        <div class=\"tooltip-inner ibexa-tooltip__inner\"></div>\n                   </div>")
-  });
-  tooltipNode.addEventListener('inserted.bs.tooltip', function (event) {
-    lastInsertTooltipTarget = event.currentTarget;
   });
   if ((0,_browser_helper__WEBPACK_IMPORTED_MODULE_0__.isSafari)()) {
     if (tooltipNode.children) {
@@ -694,7 +711,6 @@ var parse = function parse() {
   if (!baseElement) {
     return;
   }
-  var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
   var tooltipNodes = _toConsumableArray(baseElement.querySelectorAll(TOOLTIPS_SELECTOR));
   if (baseElement instanceof Element) {
     tooltipNodes.push(baseElement);
@@ -750,7 +766,6 @@ var hideAll = function hideAll() {
   if (!baseElement) {
     return;
   }
-  var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
   var tooltipsNode = baseElement.querySelectorAll(TOOLTIPS_SELECTOR);
   var _iterator2 = _createForOfIteratorHelper(tooltipsNode),
     _step2;
@@ -939,7 +954,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
 /* harmony import */ var _helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
 /* harmony import */ var _urlIcon__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./urlIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/urlIcon.js");
-/* harmony import */ var _inculdedIcon__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./inculdedIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js");
+/* harmony import */ var _includedIcon__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./includedIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
@@ -955,7 +970,7 @@ var Icon = function Icon(props) {
     'ibexa-icon': true
   }, props.extraClasses, true));
   var isIconIncluded = props.useIncludedIcon || (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.isExternalInstance)();
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, isIconIncluded ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_inculdedIcon__WEBPACK_IMPORTED_MODULE_5__["default"], {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, isIconIncluded ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_includedIcon__WEBPACK_IMPORTED_MODULE_5__["default"], {
     cssClass: cssClass,
     name: props.name,
     defaultIconName: props.defaultIconName
@@ -983,9 +998,9 @@ Icon.defaultProps = {
 
 /***/ }),
 
-/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js":
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js":
 /*!*****************************************************************************************!*\
-  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js ***!
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js ***!
   \*****************************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -1139,7 +1154,7 @@ var iconsMap = {
   'upload-image': _ibexa_admin_ui_src_bundle_Resources_public_img_icons_upload_image_svg__WEBPACK_IMPORTED_MODULE_46__,
   warning: _ibexa_admin_ui_src_bundle_Resources_public_img_icons_warning_svg__WEBPACK_IMPORTED_MODULE_47__
 };
-var InculdedIcon = function InculdedIcon(props) {
+var IncludedIcon = function IncludedIcon(props) {
   var _iconsMap$name;
   var name = props.name,
     cssClass = props.cssClass,
@@ -1149,17 +1164,17 @@ var InculdedIcon = function InculdedIcon(props) {
     className: cssClass
   });
 };
-InculdedIcon.propTypes = {
+IncludedIcon.propTypes = {
   cssClass: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   name: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   defaultIconName: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string)
 };
-InculdedIcon.defaultProps = {
+IncludedIcon.defaultProps = {
   cssClass: '',
   name: 'about-info',
   defaultIconName: 'about-info'
 };
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (InculdedIcon);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (IncludedIcon);
 
 /***/ }),
 
@@ -1467,6 +1482,7 @@ SimpleDropdown.defaultProps = {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   COLOR_VARIANTS: () => (/* binding */ COLOR_VARIANTS),
 /* harmony export */   SIZES: () => (/* binding */ SIZES),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
@@ -1487,20 +1503,27 @@ var SIZES = {
   MEDIUM: 'medium',
   LARGE: 'large'
 };
+var COLOR_VARIANTS = {
+  PRIMARY: 'primary',
+  LIGHT: 'light'
+};
 var Spinner = function Spinner(_ref) {
-  var size = _ref.size;
-  var className = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty({
+  var size = _ref.size,
+    colorVariant = _ref.colorVariant;
+  var className = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty(_defineProperty({
     'c-spinner': true
-  }, "c-spinner--".concat(size), true));
+  }, "c-spinner--".concat(size), true), "c-spinner--".concat(colorVariant), true));
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: className
   });
 };
 Spinner.propTypes = {
-  size: prop_types__WEBPACK_IMPORTED_MODULE_1___default().oneOf(Object.values(SIZES))
+  size: prop_types__WEBPACK_IMPORTED_MODULE_1___default().oneOf(Object.values(SIZES)),
+  colorVariant: prop_types__WEBPACK_IMPORTED_MODULE_1___default().oneOf(Object.values(COLOR_VARIANTS))
 };
 Spinner.defaultProps = {
-  size: SIZES.MEDIUM
+  size: SIZES.MEDIUM,
+  colorVariant: COLOR_VARIANTS.PRIMARY
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Spinner);
 
@@ -1885,8 +1908,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _common_simple_dropdown_simple_dropdown__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../common/simple-dropdown/simple.dropdown */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/simple-dropdown/simple.dropdown.js");
-/* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper.js");
+/* harmony import */ var _common_simple_dropdown_simple_dropdown__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../common/simple-dropdown/simple.dropdown */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/simple-dropdown/simple.dropdown.js");
+/* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -1897,27 +1922,37 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
+
 var SortSwitcher = function SortSwitcher(_ref) {
-  var isDisabled = _ref.isDisabled;
-  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SortingContext),
+  var isDisabled = _ref.isDisabled,
+    disabledConfig = _ref.disabledConfig;
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SortingContext),
     _useContext2 = _slicedToArray(_useContext, 2),
     sorting = _useContext2[0],
     setSorting = _useContext2[1];
-  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SortOrderContext),
+  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SortOrderContext),
     _useContext4 = _slicedToArray(_useContext3, 2),
     sortOrder = _useContext4[0],
     setSortOrder = _useContext4[1];
-  var selectedOption = _universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SORTING_OPTIONS.find(function (option) {
+  var selectedOption = _universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SORTING_OPTIONS.find(function (option) {
     return option.sortClause === sorting && option.sortOrder === sortOrder;
   });
   var onOptionClick = function onOptionClick(option) {
     setSorting(option.sortClause);
     setSortOrder(option.sortOrder);
   };
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-sort-switcher"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_simple_dropdown_simple_dropdown__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    options: _universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SORTING_OPTIONS,
+  var disabledParams = {};
+  if (isDisabled && disabledConfig) {
+    disabledParams.title = disabledConfig.disabledInfoTooltipLabel;
+  }
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", _extends({
+    ref: function ref(node) {
+      return (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_2__.parse)(node);
+    },
+    className: "c-sort-switcher",
+    "data-tooltip-container-selector": ".c-udw-tab"
+  }, disabledParams), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_simple_dropdown_simple_dropdown__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    options: _universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SORTING_OPTIONS,
     selectedOption: selectedOption,
     onOptionClick: onOptionClick,
     isDisabled: isDisabled,
@@ -1925,10 +1960,12 @@ var SortSwitcher = function SortSwitcher(_ref) {
   }));
 };
 SortSwitcher.propTypes = {
-  isDisabled: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool)
+  isDisabled: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  disabledConfig: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object)
 };
 SortSwitcher.defaultProps = {
-  isDisabled: false
+  isDisabled: false,
+  disabledConfig: null
 };
 var SortSwitcherMenuButton = {
   id: 'sort-switcher',
@@ -2032,49 +2069,129 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
-/* harmony import */ var _common_icon_icon__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
-/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
-var _this = undefined;
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
 
-
+var MIN_ITEMS_WITH_SEARCH = 10;
 var TranslationSelectorButton = function TranslationSelectorButton(_ref) {
   var hideTranslationSelector = _ref.hideTranslationSelector,
     selectTranslation = _ref.selectTranslation,
     version = _ref.version,
     isOpen = _ref.isOpen;
-  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__.getTranslator)();
-  var adminUiConfig = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__.getAdminUiConfig)();
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__.getTranslator)();
+  var adminUiConfig = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__.getAdminUiConfig)();
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+    _useState2 = _slicedToArray(_useState, 2),
+    filterQuery = _useState2[0],
+    setFilterQuery = _useState2[1];
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+    _useState4 = _slicedToArray(_useState3, 2),
+    activeLanguage = _useState4[0],
+    setActiveLanguage = _useState4[1];
   var languageCodes = version ? version.VersionInfo.languageCodes.split(',') : [];
+  var isSearchEnabled = languageCodes.length >= MIN_ITEMS_WITH_SEARCH;
   var editTranslationLabel = Translator.trans(/*@Desc("Select translation")*/'meta_preview.edit_translation', {}, 'ibexa_universal_discovery_widget');
-  var className = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)({
+  var resetLanguageSelector = function resetLanguageSelector() {
+    setFilterQuery('');
+    setActiveLanguage('');
+  };
+  var getLanguageName = function getLanguageName(languageCode) {
+    var lowerCase = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+    var language = window.ibexa.adminUiConfig.languages.mappings[languageCode];
+    if (!language) {
+      return null;
+    }
+    return lowerCase ? language.name.toLowerCase() : language.name;
+  };
+  var filteredLanguageCodes = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    if (!filterQuery) {
+      return languageCodes;
+    }
+    var filterQueryLowerCase = filterQuery.toLowerCase();
+    return languageCodes.filter(function (languageCode) {
+      var languageNameLowerCase = getLanguageName(languageCode);
+      return languageNameLowerCase.includes(filterQueryLowerCase);
+    });
+  }, [filterQuery]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (!isOpen) {
+      resetLanguageSelector();
+    }
+  }, [isOpen]);
+  var containerClassName = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)({
     'c-translation-selector': true,
-    'c-translation-selector--hidden': !isOpen
+    'ibexa-extra-actions': true,
+    'ibexa-extra-actions--edit': true,
+    'ibexa-extra-actions--full-height': true,
+    'ibexa-extra-actions--hidden': !isOpen,
+    'ibexa-extra-actions--has-search': isSearchEnabled
   });
+  var searchInputWrapperClassName = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)({
+    'ibexa-instant-filter__input-wrapper': true,
+    'ibexa-instant-filter__input-wrapper--hidden': !isSearchEnabled
+  });
+  var renderLanguages = function renderLanguages() {
+    return filteredLanguageCodes.map(function (languageCode) {
+      var languageNodeClassName = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)({
+        'ibexa-instant-filter__item': true,
+        'ibexa-instant-filter__item--active': activeLanguage === languageCode
+      });
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+        type: "button",
+        key: languageCode,
+        className: languageNodeClassName,
+        onClick: function onClick() {
+          return setActiveLanguage(languageCode);
+        }
+      }, adminUiConfig.languages.mappings[languageCode].name);
+    });
+  };
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: className
+    className: containerClassName
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-translation-selector__header"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", {
-    className: "c-translation-selector__title"
-  }, "".concat(editTranslationLabel, " (").concat(languageCodes.length, ")")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
-    className: "c-translation-selector__close-button btn",
+    className: "ibexa-extra-actions__header"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h2", {
+    className: "ibexa-extra-actions__header-content"
+  }, editTranslationLabel)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-extra-actions__content"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-instant-filter"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: searchInputWrapperClassName
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
+    type: "text",
+    className: "ibexa-instant-filter__input ibexa-input ibexa-input--text form-control",
+    placeholder: Translator.trans(/*@Desc("Search...")*/'instant.filter.languages.placeholder', {}, 'ibexa_universal_discovery_widget'),
+    value: filterQuery,
+    onChange: function onChange(event) {
+      return setFilterQuery(event.target.value);
+    }
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-instant-filter__desc"
+  }, Translator.trans(/*@Desc("Languages")*/'meta_preview.instant.filter.languages.select_language.desc', {}, 'ibexa_universal_discovery_widget')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-instant-filter__items"
+  }, renderLanguages()))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-extra-actions__confirm-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    type: "submit",
+    className: "btn ibexa-extra-actions__confirm-btn ibexa-btn ibexa-btn--primary",
+    disabled: !activeLanguage,
+    onClick: function onClick() {
+      return selectTranslation(activeLanguage);
+    }
+  }, Translator.trans(/*@Desc("Edit")*/'meta_preview.edit.languages.edit', {}, 'ibexa_universal_discovery_widget')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
     type: "button",
+    className: "btn ibexa-btn--close ibexa-btn ibexa-btn--secondary",
     onClick: hideTranslationSelector
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_3__["default"], {
-    name: "discard",
-    extraClasses: "ibexa-icon--small"
-  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-translation-selector__languages-wrapper"
-  }, languageCodes.map(function (languageCode) {
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-      key: languageCode,
-      className: "c-translation-selector__language",
-      onClick: selectTranslation.bind(_this, languageCode)
-    }, adminUiConfig.languages.mappings[languageCode].name);
-  })));
+  }, Translator.trans(/*@Desc("Discard")*/'meta_preview.edit.languages.discard', {}, 'ibexa_universal_discovery_widget'))));
 };
 TranslationSelectorButton.propTypes = {
   hideTranslationSelector: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func).isRequired,
@@ -2136,14 +2253,17 @@ var TreeItemToggleSelection = function TreeItemToggleSelection(_ref) {
   if (!isUDW) {
     return null;
   }
-  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SelectedLocationsContext),
-    _useContext2 = _slicedToArray(_useContext, 2),
-    selectedLocations = _useContext2[0],
-    dispatchSelectedLocationsAction = _useContext2[1];
-  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.MultipleConfigContext),
-    _useContext4 = _slicedToArray(_useContext3, 2),
-    multiple = _useContext4[0],
-    multipleItemsLimit = _useContext4[1];
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SelectionConfigContext),
+    isInitLocationsDeselectionBlocked = _useContext.isInitLocationsDeselectionBlocked,
+    initSelectedLocationsIds = _useContext.initSelectedLocationsIds;
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SelectedLocationsContext),
+    _useContext3 = _slicedToArray(_useContext2, 2),
+    selectedLocations = _useContext3[0],
+    dispatchSelectedLocationsAction = _useContext3[1];
+  var _useContext4 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.MultipleConfigContext),
+    _useContext5 = _slicedToArray(_useContext4, 2),
+    multiple = _useContext5[0],
+    multipleItemsLimit = _useContext5[1];
   var containersOnly = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.ContainersOnlyContext);
   var allowedContentTypes = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.AllowedContentTypesContext);
   var restInfo = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.RestInfoContext);
@@ -2152,6 +2272,8 @@ var TreeItemToggleSelection = function TreeItemToggleSelection(_ref) {
   });
   var isNotSelectable = containersOnly && !isContainer || allowedContentTypes && !allowedContentTypes.includes(contentTypeIdentifier);
   var isSelectionBlocked = multipleItemsLimit !== 0 && !isSelected && selectedLocations.length >= multipleItemsLimit;
+  var isInitSelectedLocation = initSelectedLocationsIds.includes(locationId);
+  var isDeselectionBlocked = isSelected && isInitSelectedLocation && isInitLocationsDeselectionBlocked;
   var location = {
     id: locationId
   };
@@ -2175,7 +2297,7 @@ var TreeItemToggleSelection = function TreeItemToggleSelection(_ref) {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_toggle_selection_toggle_selection__WEBPACK_IMPORTED_MODULE_5__["default"], {
     location: location,
     multiple: multiple,
-    isDisabled: isSelectionBlocked,
+    isDisabled: isSelectionBlocked || isDeselectionBlocked,
     isHidden: isNotSelectable
   }), isNotSelectable && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "c-list-item__prefix-actions-item-empty"
@@ -2232,7 +2354,9 @@ var ViewSwitcher = function ViewSwitcher(_ref) {
     _useContext2 = _slicedToArray(_useContext, 2),
     currentView = _useContext2[0],
     setCurrentView = _useContext2[1];
-  var selectedOption = _universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.VIEWS.find(function (option) {
+  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.ViewContext),
+    views = _useContext3.views;
+  var selectedOption = views.find(function (option) {
     return option.value === currentView;
   });
   var onOptionClick = function onOptionClick(_ref2) {
@@ -2242,7 +2366,7 @@ var ViewSwitcher = function ViewSwitcher(_ref) {
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "c-udw-view-switcher"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_simple_dropdown_simple_dropdown__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    options: _universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.VIEWS,
+    options: views,
     selectedOption: selectedOption,
     onOptionClick: onOptionClick,
     isDisabled: isDisabled,
@@ -2582,6 +2706,157 @@ var useLoadedLocationsReducer = function useLoadedLocationsReducer() {
 
 /***/ }),
 
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer.js":
+/*!******************************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer.js ***!
+  \******************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ADD_SELECTED_ITEMS: () => (/* binding */ ADD_SELECTED_ITEMS),
+/* harmony export */   CHANGE_MULTIPLE_SETTING: () => (/* binding */ CHANGE_MULTIPLE_SETTING),
+/* harmony export */   CLEAR_SELECTED_ITEMS: () => (/* binding */ CLEAR_SELECTED_ITEMS),
+/* harmony export */   REMOVE_SELECTED_ITEMS: () => (/* binding */ REMOVE_SELECTED_ITEMS),
+/* harmony export */   TOGGLE_SELECTED_ITEMS: () => (/* binding */ TOGGLE_SELECTED_ITEMS),
+/* harmony export */   UPDATE_SELECTED_ITEMS: () => (/* binding */ UPDATE_SELECTED_ITEMS),
+/* harmony export */   useSelectedItemsReducer: () => (/* binding */ useSelectedItemsReducer)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+var ADD_SELECTED_ITEMS = 'ADD_SELECTED_ITEMS';
+var UPDATE_SELECTED_ITEMS = 'UPDATE_SELECTED_ITEMS';
+var REMOVE_SELECTED_ITEMS = 'REMOVE_SELECTED_ITEMS';
+var TOGGLE_SELECTED_ITEMS = 'TOGGLE_SELECTED_ITEMS';
+var CLEAR_SELECTED_ITEMS = 'CLEAR_SELECTED_ITEMS';
+var CHANGE_MULTIPLE_SETTING = 'CHANGE_MULTIPLE_SETTING';
+var checkIsItemSelected = function checkIsItemSelected(selectedItems, item) {
+  return selectedItems.some(function (selectedItem) {
+    return selectedItem.type === item.type && selectedItem.id === item.id;
+  });
+};
+var filterOutSelectedItems = function filterOutSelectedItems(selectedItems, items) {
+  return items.filter(function (item) {
+    return !checkIsItemSelected(selectedItems, item);
+  });
+};
+var checkIsValidSelection = function checkIsValidSelection(items, isMultiple, multipleItemsLimit) {
+  return !isMultiple && items.length > 1 || isMultiple && multipleItemsLimit !== 0 && items.length > multipleItemsLimit;
+};
+var selectedItemsReducer = function selectedItemsReducer(state, action) {
+  var items = state.items,
+    isMultiple = state.isMultiple,
+    multipleItemsLimit = state.multipleItemsLimit;
+  switch (action.type) {
+    case ADD_SELECTED_ITEMS:
+      {
+        var oldItemsWithoutNewItems = filterOutSelectedItems(action.items, items);
+        var newItems = [].concat(_toConsumableArray(oldItemsWithoutNewItems), _toConsumableArray(action.items));
+        if (checkIsValidSelection(newItems, isMultiple, multipleItemsLimit)) {
+          throw new Error('useSelectedItemsReducer ADD_SELECTED_ITEMS: cannot select more than one item with single select.');
+        }
+        return _objectSpread(_objectSpread({}, state), {}, {
+          items: newItems
+        });
+      }
+    case UPDATE_SELECTED_ITEMS:
+      {
+        var updatedSelectedItems = _toConsumableArray(items);
+        var _iterator = _createForOfIteratorHelper(action.items),
+          _step;
+        try {
+          var _loop = function _loop() {
+            var updatedItem = _step.value;
+            var updatedItemIndex = updatedSelectedItems.findIndex(function (selectedItem) {
+              return selectedItem.type === updatedItem.type && selectedItem.id === updatedItem.id;
+            });
+            if (updatedItemIndex > -1) {
+              updatedSelectedItems[updatedItemIndex] = updatedItem;
+            }
+          };
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            _loop();
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+        return _objectSpread(_objectSpread({}, state), {}, {
+          items: updatedSelectedItems
+        });
+      }
+    case REMOVE_SELECTED_ITEMS:
+      return _objectSpread(_objectSpread({}, state), {}, {
+        items: filterOutSelectedItems(action.itemsIdsWithTypes, items)
+      });
+    case TOGGLE_SELECTED_ITEMS:
+      {
+        var oldItemsWithoutDeselectedItems = filterOutSelectedItems(action.items, items);
+        var newItemsWithoutDeselectedItems = filterOutSelectedItems(items, action.items);
+        var _newItems = [].concat(_toConsumableArray(oldItemsWithoutDeselectedItems), _toConsumableArray(newItemsWithoutDeselectedItems));
+        if (checkIsValidSelection(_newItems, isMultiple, multipleItemsLimit)) {
+          throw new Error('useSelectedItemsReducer ADD_SELECTED_ITEMS: cannot select more than one item with single select.');
+        }
+        return _objectSpread(_objectSpread({}, state), {}, {
+          items: _newItems
+        });
+      }
+    case CLEAR_SELECTED_ITEMS:
+      return _objectSpread(_objectSpread({}, state), {}, {
+        items: []
+      });
+    case CHANGE_MULTIPLE_SETTING:
+      if (!action.isMultiple && items.length > 1) {
+        throw new Error('useSelectedItemsReducer CHANGE_MULTIPLE_SETTING: cannot set to single select when multiple items are selected.');
+      }
+      return _objectSpread(_objectSpread({}, state), {}, {
+        isMultiple: action.isMultiple
+      });
+    default:
+      throw new Error();
+  }
+};
+var useSelectedItemsReducer = function useSelectedItemsReducer(_ref) {
+  var _ref$items = _ref.items,
+    items = _ref$items === void 0 ? [] : _ref$items,
+    isMultiple = _ref.isMultiple,
+    multipleItemsLimit = _ref.multipleItemsLimit;
+  var initialState = {
+    isMultiple: isMultiple,
+    multipleItemsLimit: multipleItemsLimit,
+    items: items
+  };
+  var _useReducer = (0,react__WEBPACK_IMPORTED_MODULE_0__.useReducer)(selectedItemsReducer, initialState),
+    _useReducer2 = _slicedToArray(_useReducer, 2),
+    selectedItems = _useReducer2[0].items,
+    dispatchSelectedItemsAction = _useReducer2[1];
+  return {
+    selectedItems: selectedItems,
+    dispatchSelectedItemsAction: dispatchSelectedItemsAction
+  };
+};
+
+/***/ }),
+
 /***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedLocationsReducer.js":
 /*!**********************************************************************************************************************!*\
   !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedLocationsReducer.js ***!
@@ -2871,7 +3146,7 @@ var findLocationsBySearchQuery = function findLocationsBySearchQuery(_ref5, call
     useAlwaysAvailable = _ref5$useAlwaysAvaila === void 0 ? true : _ref5$useAlwaysAvaila;
   var body = {
     ViewInput: {
-      identifier: "udw-locations-by-search-query-".concat(query.FullTextCriterion),
+      identifier: "udw-locations-by-search-query-".concat(encodeURIComponent(query.FullTextCriterion)),
       "public": false,
       useAlwaysAvailable: useAlwaysAvailable,
       LocationQuery: {
@@ -2925,6 +3200,10 @@ var findLocationsById = function findLocationsById(_ref7, callback) {
     siteaccess = _ref7.siteaccess,
     accessToken = _ref7.accessToken,
     id = _ref7.id,
+    _ref7$noLanguageCode = _ref7.noLanguageCode,
+    noLanguageCode = _ref7$noLanguageCode === void 0 ? false : _ref7$noLanguageCode,
+    _ref7$useAlwaysAvaila = _ref7.useAlwaysAvailable,
+    useAlwaysAvailable = _ref7$useAlwaysAvaila === void 0 ? undefined : _ref7$useAlwaysAvaila,
     _ref7$limit = _ref7.limit,
     limit = _ref7$limit === void 0 ? QUERY_LIMIT : _ref7$limit,
     _ref7$offset = _ref7.offset,
@@ -2945,10 +3224,16 @@ var findLocationsById = function findLocationsById(_ref7, callback) {
         },
         limit: limit,
         offset: offset
-      }
+      },
+      useAlwaysAvailable: useAlwaysAvailable
     }
   };
-  addLanguageCodeToCreateViewEndpoint(body);
+  if (useAlwaysAvailable !== undefined) {
+    body.ViewInput.useAlwaysAvailable = useAlwaysAvailable;
+  }
+  if (!noLanguageCode) {
+    addLanguageCodeToCreateViewEndpoint(body);
+  }
   var request = new Request("".concat(instanceUrl).concat(ENDPOINT_CREATE_VIEW), {
     method: 'POST',
     headers: (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_request_helper_js__WEBPACK_IMPORTED_MODULE_0__.getRequestHeaders)({
@@ -3131,6 +3416,10 @@ var loadContentInfo = function loadContentInfo(_ref13, callback) {
     siteaccess = _ref13.siteaccess,
     accessToken = _ref13.accessToken,
     contentId = _ref13.contentId,
+    _ref13$noLanguageCode = _ref13.noLanguageCode,
+    noLanguageCode = _ref13$noLanguageCode === void 0 ? false : _ref13$noLanguageCode,
+    _ref13$useAlwaysAvail = _ref13.useAlwaysAvailable,
+    useAlwaysAvailable = _ref13$useAlwaysAvail === void 0 ? undefined : _ref13$useAlwaysAvail,
     _ref13$limit = _ref13.limit,
     limit = _ref13$limit === void 0 ? QUERY_LIMIT : _ref13$limit,
     _ref13$offset = _ref13.offset,
@@ -3150,10 +3439,16 @@ var loadContentInfo = function loadContentInfo(_ref13, callback) {
         },
         limit: limit,
         offset: offset
-      }
+      },
+      useAlwaysAvailable: useAlwaysAvailable
     }
   };
-  addLanguageCodeToCreateViewEndpoint(body);
+  if (useAlwaysAvailable !== undefined) {
+    body.ViewInput.useAlwaysAvailable = useAlwaysAvailable;
+  }
+  if (!noLanguageCode) {
+    addLanguageCodeToCreateViewEndpoint(body);
+  }
   var request = new Request("".concat(instanceUrl).concat(ENDPOINT_CREATE_VIEW), {
     method: 'POST',
     headers: (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_request_helper_js__WEBPACK_IMPORTED_MODULE_0__.getRequestHeaders)({
@@ -3307,6 +3602,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   BlockFetchLocationHookContext: () => (/* binding */ BlockFetchLocationHookContext),
 /* harmony export */   CancelContext: () => (/* binding */ CancelContext),
 /* harmony export */   ConfirmContext: () => (/* binding */ ConfirmContext),
+/* harmony export */   ConfirmItemsContext: () => (/* binding */ ConfirmItemsContext),
 /* harmony export */   ContainersOnlyContext: () => (/* binding */ ContainersOnlyContext),
 /* harmony export */   ContentOnTheFlyConfigContext: () => (/* binding */ ContentOnTheFlyConfigContext),
 /* harmony export */   ContentOnTheFlyDataContext: () => (/* binding */ ContentOnTheFlyDataContext),
@@ -3325,7 +3621,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   SNACKBAR_ACTIONS: () => (/* binding */ SNACKBAR_ACTIONS),
 /* harmony export */   SORTING_OPTIONS: () => (/* binding */ SORTING_OPTIONS),
 /* harmony export */   SearchTextContext: () => (/* binding */ SearchTextContext),
+/* harmony export */   SelectedItemsContext: () => (/* binding */ SelectedItemsContext),
 /* harmony export */   SelectedLocationsContext: () => (/* binding */ SelectedLocationsContext),
+/* harmony export */   SelectionConfigContext: () => (/* binding */ SelectionConfigContext),
 /* harmony export */   SnackbarActionsContext: () => (/* binding */ SnackbarActionsContext),
 /* harmony export */   SortOrderContext: () => (/* binding */ SortOrderContext),
 /* harmony export */   SortingContext: () => (/* binding */ SortingContext),
@@ -3336,6 +3634,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TitleContext: () => (/* binding */ TitleContext),
 /* harmony export */   UDWContext: () => (/* binding */ UDWContext),
 /* harmony export */   VIEWS: () => (/* binding */ VIEWS),
+/* harmony export */   ViewContext: () => (/* binding */ ViewContext),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
@@ -3350,6 +3649,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _services_universal_discovery_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./services/universal.discovery.service */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/services/universal.discovery.service.js");
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper.js");
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./hooks/useSelectedItemsReducer */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 var _document$querySelect, _document$querySelect2;
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
@@ -3373,9 +3673,11 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
+
 var _window = window,
   document = _window.document;
 var CLASS_SCROLL_DISABLED = 'ibexa-scroll-disabled';
+var SEARCH_TAB_ID = 'search';
 var defaultRestInfo = {
   accsessToken: null,
   instanceUrl: window.location.origin,
@@ -3496,6 +3798,7 @@ var TabsContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createConte
 var TitleContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var CancelContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var ConfirmContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var ConfirmItemsContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var SortingContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var SortOrderContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var CurrentViewContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
@@ -3504,6 +3807,8 @@ var StartingLocationIdContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0
 var LoadedLocationsMapContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var RootLocationIdContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var SelectedLocationsContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var SelectionConfigContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var SelectedItemsContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var CreateContentWidgetContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var ContentOnTheFlyDataContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var ContentOnTheFlyConfigContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
@@ -3514,7 +3819,9 @@ var DropdownPortalRefContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0_
 var SuggestionsStorageContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var GridActiveLocationIdContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var SnackbarActionsContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var ViewContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_9__.getTranslator)();
   var restInfo = props.restInfo;
   var adminUiConfig = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_9__.getAdminUiConfig)();
   var tabs = adminUiConfig.universalDiscoveryWidget.tabs;
@@ -3598,6 +3905,12 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
     _useSelectedLocations2 = _slicedToArray(_useSelectedLocations, 2),
     selectedLocations = _useSelectedLocations2[0],
     dispatchSelectedLocationsAction = _useSelectedLocations2[1];
+  var _useSelectedItemsRedu = (0,_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_10__.useSelectedItemsReducer)({
+      isMultiple: props.multiple,
+      multipleItemsLimit: props.multipleItemsLimit
+    }),
+    selectedItems = _useSelectedItemsRedu.selectedItems,
+    dispatchSelectedItemsAction = _useSelectedItemsRedu.dispatchSelectedItemsAction;
   var activeTabConfig = tabs.find(function (tab) {
     return tab.id === activeTab;
   });
@@ -3606,6 +3919,16 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
     'm-ud': true,
     'm-ud--locations-selected': !!selectedLocations.length && props.allowConfirmation
   });
+  var selectionConfigValue = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    var _props$deselectAlertT;
+    var deselectAlertTitle = (_props$deselectAlertT = props.deselectAlertTitle) !== null && _props$deselectAlertT !== void 0 ? _props$deselectAlertT : Translator.trans(/*@Desc("Items already added to the list are marked as selected and unable to deselect.")*/'init_selected_locations.alert.title', {}, 'ibexa_universal_discovery_widget');
+    return {
+      isInitLocationsDeselectionBlocked: props.isInitLocationsDeselectionBlocked,
+      initSelectedLocationsIds: props.selectedLocations,
+      initSelectedItems: props.initSelectedItems,
+      deselectAlertTitle: deselectAlertTitle
+    };
+  }, []);
   var loadPermissions = function loadPermissions() {
     var locationIds = selectedLocations.filter(function (item) {
       return !item.permissions;
@@ -3613,7 +3936,7 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
       return item.location.id;
     }).join(',');
     if (!locationIds) {
-      return Promise.resolve([]);
+      return Promise.resolve(null);
     }
     return new Promise(function (resolve) {
       (0,_services_universal_discovery_service__WEBPACK_IMPORTED_MODULE_7__.loadLocationsWithPermissions)(_objectSpread(_objectSpread({}, restInfo), {}, {
@@ -3632,12 +3955,14 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
     if (!locationsWithoutVersion.length) {
       return Promise.resolve([]);
     }
-    var contentId = locationsWithoutVersion.map(function (item) {
+    var contentIds = locationsWithoutVersion.map(function (item) {
       return item.location.ContentInfo.Content._id;
     }).join(',');
     return new Promise(function (resolve) {
       (0,_services_universal_discovery_service__WEBPACK_IMPORTED_MODULE_7__.loadContentInfo)(_objectSpread(_objectSpread({}, restInfo), {}, {
-        contentId: contentId,
+        noLanguageCode: true,
+        useAlwaysAvailable: true,
+        contentId: contentIds,
         signal: signal
       }), function (response) {
         return resolve(response);
@@ -3653,9 +3978,9 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
     }, {});
   }, [adminUiConfig.contentTypes]);
   var onConfirm = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
-    var selectedItems = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : selectedLocations;
+    var selection = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : selectedLocations;
     loadVersions().then(function (locationsWithVersions) {
-      var clonedSelectedLocation = (0,_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_3__["default"])(selectedItems);
+      var clonedSelectedLocation = (0,_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_3__["default"])(selection);
       if (Array.isArray(locationsWithVersions)) {
         locationsWithVersions.forEach(function (content) {
           var clonedLocation = clonedSelectedLocation.find(function (clonedItem) {
@@ -3674,7 +3999,17 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
       });
       props.onConfirm(updatedLocations);
     });
-  }, [selectedLocations, contentTypesInfoMap]);
+  }, [selectedLocations, contentTypesInfoMap, props.onConfirm]);
+  var onItemsConfirm = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
+    var selection = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : selectedItems;
+    return props.onItemsConfirm(selection);
+  }, [selectedItems, props.onItemsConfirm]);
+  var makeSearch = function makeSearch(value) {
+    if (activeTab !== SEARCH_TAB_ID) {
+      setActiveTab('search');
+    }
+    setSearchText(value);
+  };
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     var _adminUiConfig$univer;
     var addContentTypesInfo = function addContentTypesInfo(contentTypes) {
@@ -3705,6 +4040,8 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
       return;
     }
     (0,_services_universal_discovery_service__WEBPACK_IMPORTED_MODULE_7__.findLocationsById)(_objectSpread(_objectSpread({}, restInfo), {}, {
+      noLanguageCode: true,
+      useAlwaysAvailable: true,
       id: props.selectedLocations.join(','),
       limit: props.selectedLocations.length
     }), function (locations) {
@@ -3731,7 +4068,7 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
       var _response = _slicedToArray(response, 2),
         locationsWithPermissions = _response[0],
         locationsWithVersions = _response[1];
-      if (!locationsWithPermissions.length && !locationsWithVersions.length) {
+      if (!(locationsWithPermissions !== null && locationsWithPermissions !== void 0 && locationsWithPermissions.LocationList.locations.length) && !locationsWithVersions.length) {
         return;
       }
       var clonedSelectedLocation = (0,_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_3__["default"])(selectedLocations);
@@ -3858,12 +4195,18 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
     value: props.onCancel
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(ConfirmContext.Provider, {
     value: onConfirm
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(ConfirmItemsContext.Provider, {
+    value: onItemsConfirm
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SortingContext.Provider, {
     value: [sorting, setSorting]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SortOrderContext.Provider, {
     value: [sortOrder, setSortOrder]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(CurrentViewContext.Provider, {
     value: [currentView, setCurrentView]
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(ViewContext.Provider, {
+    value: {
+      views: VIEWS
+    }
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(MarkedLocationIdContext.Provider, {
     value: [markedLocationId, setMarkedLocationId]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(StartingLocationIdContext.Provider, {
@@ -3874,6 +4217,13 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
     value: [loadedLocationsMap, dispatchLoadedLocationsAction]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(RootLocationIdContext.Provider, {
     value: props.rootLocationId
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SelectionConfigContext.Provider, {
+    value: selectionConfigValue
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SelectedItemsContext.Provider, {
+    value: {
+      selectedItems: selectedItems,
+      dispatchSelectedItemsAction: dispatchSelectedItemsAction
+    }
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SelectedLocationsContext.Provider, {
     value: [selectedLocations, dispatchSelectedLocationsAction]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(CreateContentWidgetContext.Provider, {
@@ -3887,14 +4237,15 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(EditOnTheFlyDataContext.Provider, {
     value: [editOnTheFlyData, setEditOnTheFlyData]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SearchTextContext.Provider, {
-    value: [searchText, setSearchText]
+    value: [searchText, setSearchText, makeSearch]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(DropdownPortalRefContext.Provider, {
     value: dropdownPortalRef
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Tab, null)))))))))))))))))))))))))))))))))));
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Tab, null)))))))))))))))))))))))))))))))))))))));
   /* eslint-enable max-len */
 };
 UniversalDiscoveryModule.propTypes = {
   onConfirm: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func).isRequired,
+  onItemsConfirm: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func),
   onCancel: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func),
   title: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string).isRequired,
   activeTab: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
@@ -3921,6 +4272,9 @@ UniversalDiscoveryModule.propTypes = {
     hidden: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool).isRequired
   })).isRequired,
   selectedLocations: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().array),
+  initSelectedItems: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().array),
+  isInitLocationsDeselectionBlocked: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  deselectAlertTitle: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   allowRedirects: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool).isRequired,
   allowConfirmation: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool).isRequired,
   restInfo: prop_types__WEBPACK_IMPORTED_MODULE_1___default().shape({
@@ -3932,6 +4286,7 @@ UniversalDiscoveryModule.propTypes = {
   snackbarEnabledActions: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().array)
 };
 UniversalDiscoveryModule.defaultProps = {
+  onItemsConfirm: function onItemsConfirm() {},
   onCancel: null,
   activeTab: 'browse',
   rootLocationId: 1,
@@ -3943,6 +4298,9 @@ UniversalDiscoveryModule.defaultProps = {
   activeSortOrder: 'ascending',
   activeView: 'finder',
   selectedLocations: [],
+  initSelectedItems: [],
+  isInitLocationsDeselectionBlocked: false,
+  deselectAlertTitle: null,
   restInfo: defaultRestInfo,
   snackbarEnabledActions: Object.values(SNACKBAR_ACTIONS)
 };

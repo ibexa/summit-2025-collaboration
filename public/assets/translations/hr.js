@@ -1245,15 +1245,15 @@ t.add("ezobjectrelationlist.cta.limit.sub_text", "Relations max. %limit%", "mess
 t.add("ezobjectrelationlist.cta.select", "Select Item", "messages", "hr");
 t.add("ezobjectrelationlist.delete_selected_relations", "Delete", "messages", "hr");
 t.add("ezplatform.forgot_password.reset_your_password.reason.migration", "Your password has expired, change it.", "messages", "hr");
-t.add("ezplatform.forgot_user_password.contact_administrator", "If you do not remember your login, please contact the site administrator.", "messages", "hr");
-t.add("ezplatform.forgot_user_password.login", "This email is connected with several accounts. Please enter your login.", "messages", "hr");
-t.add("ezplatform.forgot_user_password.message", "Hi,\n        <br \/><br \/>\n        We have received a request to reset the password for your account on site. Click \u201creset password\u201d below to choose a new password:\n        <br \/><br \/>\n        <a href=\"%reset_password%\">Reset password<a\/>\n        <br \/><br \/>\n        If you did not request a password reset, please ignore this email, and your password will remain the same.", "messages", "hr");
+t.add("ezplatform.forgot_user_password.contact_administrator", "If you do not remember your login, contact your Administrator.", "messages", "hr");
+t.add("ezplatform.forgot_user_password.login", "This email is connected with several accounts. Enter your login instead.", "messages", "hr");
+t.add("ezplatform.forgot_user_password.message", "Hi,\n        <br \/><br \/>\n        We have received a request to reset the password for your eZ Platform account. Click \u201creset password\u201d below to choose a new password:\n        <br \/><br \/>\n        <a href=\"%reset_password%\">Reset password<\/a>\n        <br \/><br \/>\n        If you did not request a password reset, please ignore this email, and your password will remain the same.", "messages", "hr");
 t.add("ezplatform.forgot_user_password.reset_your_password", "Reset your password", "messages", "hr");
 t.add("ezplatform.registration_confirmation.header", "Your account has been created", "messages", "hr");
 t.add("ezplatform.registration_confirmation.message", "Thank you for creating an account. You can now <a href=\"%login%\">log in<\/a>", "messages", "hr");
 t.add("ezplatform.reset_user_password.change_password", "Change password", "messages", "hr");
 t.add("ezplatform.reset_user_password.link_is_not_valid", "This link is not valid anymore, you can <a href=\"%forgot_user_password%\">generate a new link<\/a> to reset your password.", "messages", "hr");
-t.add("ezplatform.reset_user_password.success", "Congrats, your password has been changed, you can now <a href=\"%login%\">login<\/a> to eZ Platform.", "messages", "hr");
+t.add("ezplatform.reset_user_password.success", "Your password has been changed. You can <a href=\"%login%\">log in<\/a> to eZ Platform.", "messages", "hr");
 t.add("fieldview.toggler.hide", "Hide", "messages", "hr");
 t.add("fieldview.toggler.show", "Show", "messages", "hr");
 t.add("footer.copyright", "Copyright &copy; %year% Ibexa. All right reserved", "messages", "hr");
@@ -2361,7 +2361,6 @@ t.add("site.view.create.global_properties", "Global properties", "messages", "hr
 t.add("site.view.create.public_access", "Public access", "messages", "hr");
 t.add("site.view.delete", "Delete", "messages", "hr");
 t.add("site.view_switcher.view", "View", "messages", "hr");
-t.add("ezplatform.forgot_user_password.success", "<p>If you don\u2019t receive the email, double check that you entered the correct email address and check your spam folder.<\/p>", "messages", "hr");
 t.add("content.review.from", "From:", "messages", "hr");
 t.add("content.review.read_more", "Read more", "messages", "hr");
 t.add("calendar.collapse.sidebar", "Collapse sidebar", "ibexa_calendar_widget", "hr");

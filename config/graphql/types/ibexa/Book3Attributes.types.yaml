@@ -1,0 +1,23 @@
+Book3Attributes:
+    type: object
+    inherits:
+        - ProductAttributesInterface
+    config:
+        interfaces:
+            - ProductAttributesInterface
+        fields:
+            _all:
+                type: '[AttributeInterface]'
+                resolve: '@=query("AttributesByProduct", value)'
+            book_number_of_pages:
+                type: IntegerAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "book_number_of_pages")'
+            book_format:
+                type: SelectionAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "book_format")'
+            book_language:
+                type: SelectionAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "book_language")'
+            book_genre:
+                type: SelectionAttribute
+                resolve: '@=query("AttributeByIdentifier", value, "book_genre")'

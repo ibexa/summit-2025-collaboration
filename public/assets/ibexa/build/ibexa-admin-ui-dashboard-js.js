@@ -70,7 +70,8 @@
     var _event$currentTarget$ = event.currentTarget.dataset,
       contentId = _event$currentTarget$.contentId,
       versionNo = _event$currentTarget$.versionNo,
-      languageCode = _event$currentTarget$.languageCode;
+      languageCode = _event$currentTarget$.languageCode,
+      withConfirm = _event$currentTarget$.withConfirm;
     var contentInfoInput = versionEditForm.querySelector("input[name=\"".concat(versionEditFormName, "[content_info]\"]"));
     var versionInfoContentInfoInput = versionEditForm.querySelector("input[name=\"".concat(versionEditFormName, "[version_info][content_info]\"]"));
     var versionInfoVersionNoInput = versionEditForm.querySelector("input[name=\"".concat(versionEditFormName, "[version_info][version_no]\"]"));
@@ -98,6 +99,7 @@
     var showModal = function showModal(modalHtml) {
       var wrapper = doc.querySelector('.ibexa-modal-wrapper');
       wrapper.innerHTML = modalHtml;
+      var conflictModal = doc.querySelector('#version-draft-conflict-modal');
       var addDraftButton = wrapper.querySelector('.ibexa-btn--add-draft');
       if (addDraftButton) {
         addDraftButton.addEventListener('click', addDraft, false);
@@ -107,7 +109,10 @@
           return wrapperBtnEvent.preventDefault();
         }, false);
       });
-      bootstrap.Modal.getOrCreateInstance(doc.querySelector('#version-draft-conflict-modal')).show();
+      bootstrap.Modal.getOrCreateInstance(conflictModal).show();
+      conflictModal.addEventListener('hide.bs.modal', function () {
+        doc.body.dispatchEvent(new CustomEvent('ibexa:edit-content-reset-language-selector'));
+      });
     };
     var handleCanEditCheck = function handleCanEditCheck(response) {
       if (response.canEdit) {
@@ -126,7 +131,9 @@
       } else if (response.status === 403) {
         response.text().then(showErrorNotification);
       } else if (response.status === 200) {
-        submitVersionEditForm();
+        if (!withConfirm) {
+          submitVersionEditForm();
+        }
       }
     };
     event.preventDefault();
@@ -162,57 +169,85 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       _classCallCheck(this, EditTranslation);
       this.container = config.container;
       this.toggler = config.container.querySelector('.ibexa-btn--translations-list-toggler');
-      this.translationsList = config.container.querySelector('.ibexa-translation-selector__list-wrapper');
+      this.extraActionsContainer = config.container.querySelector('.ibexa-extra-actions');
+      this.closeBtn = config.container.querySelector('.ibexa-extra-actions__close-btn');
+      this.confirmBtn = config.container.querySelector('.ibexa-extra-actions__confirm-btn');
+      this.languagesBtns = config.container.querySelectorAll('.ibexa-btn--select-language');
       this.backdrop = config.backdrop;
       this.tableNode = null;
-      this.hideTranslationsList = this.hideTranslationsList.bind(this);
-      this.showTranslationsList = this.showTranslationsList.bind(this);
+      this.hideExtraActionPanel = this.hideExtraActionPanel.bind(this);
+      this.showExtraActionPanel = this.showExtraActionPanel.bind(this);
+      this.setActiveLanguage = this.setActiveLanguage.bind(this);
+      this.resetLanguageSelector = this.resetLanguageSelector.bind(this);
       this.setPosition = this.setPosition.bind(this);
     }
     return _createClass(EditTranslation, [{
       key: "setPosition",
       value: function setPosition() {
-        var topOffset = parseInt(this.translationsList.dataset.topOffset, 10);
+        var topOffset = parseInt(this.extraActionsContainer.dataset.topOffset, 10);
         var topPosition = window.scrollY > topOffset ? 0 : topOffset - window.scrollY;
         var height = window.scrollY > topOffset ? window.innerHeight : window.innerHeight + window.scrollY - topOffset;
-        this.translationsList.style.top = "".concat(topPosition, "px");
-        this.translationsList.style.height = "".concat(height, "px");
+        this.extraActionsContainer.style.top = "".concat(topPosition, "px");
+        this.extraActionsContainer.style.height = "".concat(height, "px");
       }
     }, {
-      key: "hideTranslationsList",
-      value: function hideTranslationsList(event) {
-        var closestTranslationSelector = event.target.closest('.ibexa-translation-selector');
-        var clickedOnTranslationsList = closestTranslationSelector && closestTranslationSelector.isSameNode(this.container);
-        var clickedOnDraftConflictModal = event.target.closest('.ibexa-modal--version-draft-conflict');
-        if (clickedOnTranslationsList || clickedOnDraftConflictModal) {
-          return;
-        }
+      key: "hideExtraActionPanel",
+      value: function hideExtraActionPanel() {
         if (this.tableNode) {
           this.tableNode.classList.add('ibexa-table--last-column-sticky');
           this.tableNode = null;
         }
         this.backdrop.hide();
-        this.translationsList.classList.add('ibexa-translation-selector__list-wrapper--hidden');
-        doc.removeEventListener('click', this.hideTranslationsList, false);
+        this.extraActionsContainer.classList.add('ibexa-extra-actions--hidden');
+        this.closeBtn.removeEventListener('click', this.hideExtraActionPanel, false);
       }
     }, {
-      key: "showTranslationsList",
-      value: function showTranslationsList(_ref) {
+      key: "showExtraActionPanel",
+      value: function showExtraActionPanel(_ref) {
         var currentTarget = _ref.currentTarget;
-        this.translationsList.classList.remove('ibexa-translation-selector__list-wrapper--hidden');
+        this.extraActionsContainer.classList.remove('ibexa-extra-actions--hidden');
         this.tableNode = currentTarget.closest('.ibexa-table--last-column-sticky');
         if (this.tableNode) {
           this.tableNode.classList.remove('ibexa-table--last-column-sticky');
         }
         this.setPosition();
         this.backdrop.show();
-        doc.addEventListener('click', this.hideTranslationsList, false);
+        this.closeBtn.addEventListener('click', this.hideExtraActionPanel, false);
         ibexa.helpers.tooltips.hideAll();
+      }
+    }, {
+      key: "setActiveLanguage",
+      value: function setActiveLanguage(event) {
+        var _event$currentTarget$ = event.currentTarget.dataset,
+          contentId = _event$currentTarget$.contentId,
+          languageCode = _event$currentTarget$.languageCode;
+        this.confirmBtn.dataset.contentId = contentId;
+        this.confirmBtn.dataset.languageCode = languageCode;
+        this.confirmBtn.disabled = false;
+        this.languagesBtns.forEach(function (btn) {
+          return btn.classList.remove('ibexa-btn--active');
+        });
+        event.currentTarget.classList.add('ibexa-btn--active');
+      }
+    }, {
+      key: "resetLanguageSelector",
+      value: function resetLanguageSelector() {
+        this.confirmBtn.dataset.contentId = null;
+        this.confirmBtn.dataset.languageCode = null;
+        this.confirmBtn.disabled = true;
+        this.languagesBtns.forEach(function (btn) {
+          return btn.classList.remove('ibexa-btn--active');
+        });
       }
     }, {
       key: "init",
       value: function init() {
-        this.toggler.addEventListener('click', this.showTranslationsList, false);
+        var _this = this;
+        this.toggler.addEventListener('click', this.showExtraActionPanel, false);
+        this.languagesBtns.forEach(function (btn) {
+          btn.addEventListener('click', _this.setActiveLanguage, false);
+        });
+        document.body.addEventListener('ibexa:edit-content-reset-language-selector', this.resetLanguageSelector, false);
       }
     }]);
   }();

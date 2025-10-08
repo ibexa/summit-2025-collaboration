@@ -1,0 +1,12 @@
+Laptop3Product:
+    type: object
+    inherits:
+        - BaseProduct
+    config:
+        fields:
+            attributes:
+                type: Laptop3Attributes
+                resolve: '@=value'
+            fields:
+                type: Laptop3ContentFields
+                resolve: '@=value'

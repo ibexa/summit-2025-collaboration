@@ -11,6 +11,12 @@
   var productStockInput = doc.querySelector('.ibexa-pc-edit__product-stock-input');
   productInfiniteCheckbox.addEventListener('change', function () {
     productStockInput.disabled = productInfiniteCheckbox.checked;
+    if (productInfiniteCheckbox.checked && productStockInput.classList.contains('is-invalid')) {
+      var errorWrapper = doc.querySelector('.ibexa-pc-edit__product-stock-row .ibexa-form-error');
+      productStockInput.value = '';
+      productStockInput.classList.remove('is-invalid');
+      errorWrapper.innerText = '';
+    }
   }, false);
 })(window, window.document);
 

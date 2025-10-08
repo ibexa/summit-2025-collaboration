@@ -8,6 +8,7 @@
 
 (function (global, doc) {
   var INPUT_PADDING = 12;
+  var EXTRA_SPACING = 6;
   var togglePasswordVisibility = function togglePasswordVisibility(event) {
     var passwordTogglerBtn = event.currentTarget;
     var passwordShowIcon = passwordTogglerBtn.querySelector('.ibexa-input-text-wrapper__password-show');
@@ -44,14 +45,21 @@
       return passwordTogglerBtn.addEventListener('click', togglePasswordVisibility, false);
     });
     recalculateStyling();
+    attachListenersToMultilineInputs();
   };
   var recalculateInputStyling = function recalculateInputStyling(inputActionsContainer) {
-    var input = inputActionsContainer.closest('.ibexa-input-text-wrapper').querySelector('input');
+    var textWrapper = inputActionsContainer.closest('.ibexa-input-text-wrapper');
+    var inputType = textWrapper.classList.contains('ibexa-input-text-wrapper--multiline') ? 'textarea' : 'input';
+    var input = textWrapper.querySelector(inputType);
+    var _inputActionsContaine = inputActionsContainer.getBoundingClientRect(),
+      actionsWidth = _inputActionsContaine.width;
     if (!input) {
       return;
     }
-    var _inputActionsContaine = inputActionsContainer.getBoundingClientRect(),
-      actionsWidth = _inputActionsContaine.width;
+    if (input.type === 'number') {
+      input.style.paddingRight = input.value ? "".concat(actionsWidth + EXTRA_SPACING, "px") : "".concat(INPUT_PADDING, "px");
+      return;
+    }
     input.style.paddingRight = "".concat(actionsWidth + INPUT_PADDING, "px");
   };
   var recalculateStyling = function recalculateStyling() {
@@ -63,6 +71,30 @@
       inputActionsContainerObserver.observe(inputActionsContainer);
       recalculateInputStyling(inputActionsContainer);
     });
+  };
+  var attachListenersToMultilineInputs = function attachListenersToMultilineInputs() {
+    var multilineInputWrappers = doc.querySelectorAll('.ibexa-input-text-wrapper.ibexa-input-text-wrapper--multiline');
+    multilineInputWrappers.forEach(function (multilineInputWrapper) {
+      var textareaComponent = multilineInputWrapper.querySelector('.ibexa-input--textarea');
+      var textareaComponentObserver = new ResizeObserver(function () {
+        toggleScrollbarStyles(multilineInputWrapper);
+      });
+      textareaComponentObserver.observe(textareaComponent);
+      toggleScrollbarStyles(multilineInputWrapper);
+    });
+  };
+  var toggleScrollbarStyles = function toggleScrollbarStyles(multilineInputWrapper) {
+    var textareaComponent = multilineInputWrapper.querySelector('textarea');
+    var scrollHeight = textareaComponent.scrollHeight,
+      clientHeight = textareaComponent.clientHeight,
+      offsetWidth = textareaComponent.offsetWidth,
+      clientWidth = textareaComponent.clientWidth;
+    var _global$getComputedSt = global.getComputedStyle(textareaComponent),
+      overflowY = _global$getComputedSt.overflowY;
+    var hasScrollbar = overflowY !== 'hidden' && scrollHeight > clientHeight;
+    var scrollbarWidth = offsetWidth - clientWidth;
+    multilineInputWrapper.classList.toggle('ibexa-input-text-wrapper--scrollbar-visible', hasScrollbar);
+    multilineInputWrapper.style.setProperty('--scrollbar-width', "".concat(scrollbarWidth + EXTRA_SPACING, "px"));
   };
   doc.body.addEventListener('ibexa-inputs:added', attachListenersToAllInputs, false);
   doc.body.addEventListener('ibexa-inputs:recalculate-styling', recalculateStyling, false);

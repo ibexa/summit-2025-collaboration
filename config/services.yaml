@@ -1,3 +1,7 @@
+imports:
+  - { resource: packages/test_fixtures/commerce.yaml }
+  - { resource: packages/test_fixtures/experience.yaml }
+  - { resource: packages/test_fixtures/headless.yaml }
 # This file is the entry point to configure your own services.
 # Files in the packages/ subdirectory configure your dependencies.
 

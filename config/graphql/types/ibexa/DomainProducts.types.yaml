@@ -1,0 +1,25 @@
+DomainProducts:
+    type: object
+    config:
+        fields:
+            _types:
+                type: DomainProductTypes
+                resolve: {  }
+            all:
+                type: BaseProductConnection
+                resolve: '@=query("ProductsList", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            byType:
+                type: FilterByTypeGroup
+                resolve: {  }
+            single:
+                type: BaseProduct
+                resolve: '@=query("Product", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    code: { type: String!, description: 'A "code" filter for a single Product' }

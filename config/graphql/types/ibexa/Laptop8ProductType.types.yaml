@@ -1,0 +1,4 @@
+Laptop8ProductType:
+    type: object
+    inherits:
+        - BaseProductType

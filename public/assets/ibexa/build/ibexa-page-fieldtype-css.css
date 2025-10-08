@@ -76,6 +76,7 @@
   border-radius: 0.625rem;
   border: 0.0625rem solid #e0e0e8;
   box-shadow: 0.25rem 1.375rem 1.25rem -0.4375rem rgba(65, 145, 255, 0.05);
+  cursor: pointer;
 }
 .ibexa-page-select-items__item .form-check,
 .ibexa-page-select-items__item .form-check-input {
@@ -133,4 +134,7 @@
 }
 .ibexa-landingpage-settings__editor_mode_label .ibexa-icon {
   margin: 0 0.625rem;
+}
+.ibexa-landingpage-settings__editor_mode_label .form-check {
+  margin: 0.5rem 0;
 }

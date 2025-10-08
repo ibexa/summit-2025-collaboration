@@ -20,13 +20,18 @@ function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" 
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 (function (global, doc, ibexa, React, ReactDOM, Translator) {
   var _this = this;
+  var _ibexa$helpers$text = ibexa.helpers.text,
+    escapeHTML = _ibexa$helpers$text.escapeHTML,
+    escapeHTMLAttribute = _ibexa$helpers$text.escapeHTMLAttribute;
+  var dangerouslySetInnerHTML = ibexa.helpers.dom.dangerouslySetInnerHTML;
+  var getInstance = ibexa.helpers.objectInstances.getInstance;
   var getUsersTimeout;
   var CLASS_SORTED_ASC = 'ibexa-table__sort-column--asc';
   var CLASS_SORTED_DESC = 'ibexa-table__sort-column--desc';
-  var CLASS_VISIBLE_DATE_RANGE = 'ibexa-trash-search-form__range-wrapper--visible';
   var sortedActiveField = doc.querySelector('#trash_search_sort_field').value;
   var sortedActiveDirection = doc.querySelector('#trash_search_sort_direction').value;
-  var dateFields = doc.querySelectorAll('.ibexa-trash-search-form__range-wrapper');
+  var trashedDateTimeRangeNode = doc.querySelector('.ibexa-trash-search-form__trashed-date-time-range');
+  var trashedDateTimeRange = getInstance(trashedDateTimeRangeNode);
   var trashedTypeInput = doc.querySelector('#trash_search_trashed');
   var token = doc.querySelector('meta[name="CSRF-Token"]').content;
   var siteaccess = doc.querySelector('meta[name="SiteAccess"]').content;
@@ -42,15 +47,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   var udwContainer = doc.getElementById('react-udw');
   var autoSendNodes = doc.querySelectorAll('.ibexa-trash-search-form__item--auto-send');
   var errorMessage = Translator.trans(/*@Desc("Cannot fetch user list")*/'trash.user_list.error', {}, 'ibexa_trash_ui');
-  var dateConfig = {
-    mode: 'range',
-    locale: {
-      rangeSeparator: ' - '
-    },
-    formatDate: function formatDate(date) {
-      return ibexa.helpers.timezone.formatShortDateTime(date, null, ibexa.adminUiConfig.dateFormat.shortDate);
-    }
-  };
   var udwRoot = null;
   var closeUDW = function closeUDW() {
     return udwRoot.unmount();
@@ -132,7 +128,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   var getUsersList = function getUsersList(value) {
     var body = JSON.stringify({
       ViewInput: {
-        identifier: "find-user-by-name-".concat(value),
+        identifier: "find-user-by-name-".concat(encodeURIComponent(value)),
         "public": false,
         ContentQuery: {
           FacetBuilders: {},
@@ -163,7 +159,9 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     });
   };
   var createUsersListItem = function createUsersListItem(user) {
-    return "<li data-id=\"".concat(user._id, "\" data-name=\"").concat(user.TranslatedName, "\" class=\"ibexa-trash-search-form__user-item\">").concat(user.TranslatedName, "</li>");
+    var userNameHtmlEscaped = escapeHTML(user.TranslatedName);
+    var userNameHtmlAttributeEscaped = escapeHTMLAttribute(user.TranslatedName);
+    return "<li data-id=\"".concat(user._id, "\" data-name=\"").concat(userNameHtmlAttributeEscaped, "\" class=\"ibexa-trash-search-form__user-item\">").concat(userNameHtmlEscaped, "</li>");
   };
   var showUsersList = function showUsersList(data) {
     var hits = data.View.Result.searchHits.searchHit;
@@ -171,7 +169,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       return total + createUsersListItem(hit.value.Content);
     }, '');
     var methodName = users ? 'addEventListener' : 'removeEventListener';
-    usersList.innerHTML = users;
+    dangerouslySetInnerHTML(usersList, users);
     usersList.classList.remove('ibexa-trash-search-form__user-list--hidden');
     doc.querySelector('body')[methodName]('click', _handleClickOutsideUserList, false);
   };
@@ -206,50 +204,13 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   var toggleDatesSelectVisibility = function toggleDatesSelectVisibility(event) {
     var datesRangeNode = doc.querySelector(event.target.dataset.targetSelector);
     if (event.target.value !== 'custom_range') {
+      trashedDateTimeRange.toggleHidden(true);
+      trashedDateTimeRange.clearDates();
       doc.querySelector(datesRangeNode.dataset.periodSelector).value = event.target.value;
-      doc.querySelector(datesRangeNode.dataset.endSelector).value = '';
-      datesRangeNode.classList.remove(CLASS_VISIBLE_DATE_RANGE);
       formSearch.submit();
       return;
     }
-    datesRangeNode.classList.add(CLASS_VISIBLE_DATE_RANGE);
-  };
-  var setSelectedDateRange = function setSelectedDateRange(timestamps, _ref) {
-    var dates = _ref.dates,
-      inputField = _ref.inputField;
-    var dateRange = inputField.closest('.ibexa-trash-search-form__range-wrapper');
-    if (dates.length === 2) {
-      var startDate = getUnixTimestampUTC(dates[0]);
-      var endDate = getUnixTimestampUTC(dates[1]);
-      var secondsInDay = 86400;
-      var days = (endDate - startDate) / secondsInDay;
-      doc.querySelector(dateRange.dataset.periodSelector).value = "P0Y0M".concat(days, "D");
-      doc.querySelector(dateRange.dataset.endSelector).value = endDate;
-      formSearch.submit();
-    } else if (dates.length === 0) {
-      doc.querySelector(dateRange.dataset.periodSelector).value = '';
-      doc.querySelector(dateRange.dataset.endSelector).value = '';
-      formSearch.submit();
-    }
-  };
-  var getUnixTimestampUTC = function getUnixTimestampUTC(dateObject) {
-    var date = new Date(Date.UTC(dateObject.getFullYear(), dateObject.getMonth(), dateObject.getDate()));
-    date = Math.floor(date.getTime() / 1000);
-    return date;
-  };
-  var initFlatPickr = function initFlatPickr(dateRangeField) {
-    var _dateRangeField$query = dateRangeField.querySelector('.ibexa-trash-search-form__range-select').dataset,
-      start = _dateRangeField$query.start,
-      end = _dateRangeField$query.end;
-    var defaultDate = start && end ? [start, end] : [];
-    var dateTimePickerWidget = new ibexa.core.DateTimePicker({
-      container: dateRangeField,
-      onChange: setSelectedDateRange,
-      flatpickrConfig: _objectSpread(_objectSpread({}, dateConfig), {}, {
-        defaultDate: defaultDate
-      })
-    });
-    dateTimePickerWidget.init();
+    trashedDateTimeRange.toggleHidden(false);
   };
   var handleAutoSubmitNodes = function handleAutoSubmitNodes(event) {
     event.preventDefault();
@@ -274,7 +235,12 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     }
   };
   setSortedClass();
-  dateFields.forEach(initFlatPickr);
+  trashedDateTimeRangeNode.addEventListener('ibexa:date-time-range-single:change', function (event) {
+    var dates = event.detail.dates;
+    if (dates.length === 2 || dates.length === 0) {
+      formSearch.submit();
+    }
+  }, false);
   autoSendNodes.forEach(function (node) {
     return node.addEventListener('change', handleAutoSubmitNodes, false);
   });

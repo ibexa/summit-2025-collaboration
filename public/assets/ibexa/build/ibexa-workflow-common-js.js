@@ -36,6 +36,8 @@
 
 (function (global, doc, ibexa, Routing, Translator) {
   var _this = this;
+  var escapeHTML = ibexa.helpers.text.escapeHTML;
+  var dangerouslySetInnerHTML = ibexa.helpers.dom.dangerouslySetInnerHTML;
   var CLASS_LIST_WRAPPER_HIDDEN = 'ibexa-workflow-apply-transition__user-list-wrapper--hidden';
   var CLASS_LIST_ITEM_DISABLED = 'ibexa-workflow-apply-transition__user-list-item--disabled';
   var SELECTOR_APPLY_TRANSITION = '.ibexa-workflow-apply-transition';
@@ -109,7 +111,8 @@
     });
   };
   var createReviewersListItem = function createReviewersListItem(reviewer) {
-    return "<li data-id=\"".concat(reviewer.id, "\" class=\"ibexa-workflow-apply-transition__user-list-item").concat(!reviewer.canReview ? " ".concat(CLASS_LIST_ITEM_DISABLED) : '', "\">").concat(reviewer.name, "</li>");
+    var reviewerNameHtmlEscaped = escapeHTML(reviewer.name);
+    return "<li data-id=\"".concat(reviewer.id, "\" class=\"ibexa-workflow-apply-transition__user-list-item").concat(!reviewer.canReview ? " ".concat(CLASS_LIST_ITEM_DISABLED) : '', "\">").concat(reviewerNameHtmlEscaped, "</li>");
   };
   var showReviewersList = function showReviewersList(transitionContainer, reviewersList) {
     var listWrapper = transitionContainer.querySelector(SELECTOR_LIST_WRAPPER);
@@ -120,7 +123,7 @@
     var listInfoMethodName = reviewersList.some(function (reviewer) {
       return !reviewer.canReview;
     }) ? 'removeAttribute' : 'setAttribute';
-    listContainer.innerHTML = renderedReviewers;
+    dangerouslySetInnerHTML(listContainer, renderedReviewers);
     listWrapper.classList.remove(CLASS_LIST_WRAPPER_HIDDEN);
     transitionContainer.querySelector('.ibexa-workflow-apply-transition__user-list-info')[listInfoMethodName]('hidden', 'hidden');
   };

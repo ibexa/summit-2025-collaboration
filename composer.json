@@ -7,9 +7,10 @@
         "php": ">=8.3",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "ibexa/collaboration": "~4.6.x-dev",
         "ibexa/commerce": "~4.6.x-dev",
         "ibexa/share": "~4.6.x-dev",
-        "ibexa/fieldtype-richtext-rte": "4.6.x-dev",
+        "ibexa/test-fixtures": "~4.6.x-dev",
         "symfony/console": "5.4.*",
         "symfony/dotenv": "5.4.*",
         "symfony/flex": "^1.17|^2",
@@ -53,8 +54,6 @@
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
-            "yarn install": "script",
-            "vendor/bin/ckeditor-rte-install.sh": "script",
             "ibexa:encore:compile --config-name app": "symfony-cmd",
             "bazinga:js-translation:dump %PUBLIC_DIR%/assets --merge-domains": "symfony-cmd",
             "ibexa:encore:compile": "symfony-cmd"

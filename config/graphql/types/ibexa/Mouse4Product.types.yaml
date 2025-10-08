@@ -1,0 +1,12 @@
+Mouse4Product:
+    type: object
+    inherits:
+        - BaseProduct
+    config:
+        fields:
+            attributes:
+                type: Mouse4Attributes
+                resolve: '@=value'
+            fields:
+                type: Mouse4ContentFields
+                resolve: '@=value'

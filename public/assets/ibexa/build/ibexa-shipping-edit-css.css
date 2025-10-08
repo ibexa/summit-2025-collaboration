@@ -4,6 +4,7 @@
 .ibexa-shipping-edit-form__tax-rate {
   display: inline-block;
   min-width: 20rem;
+  margin-top: 1.5rem;
 }
 
 .ibexa-shipping-edit-cost-widget__value {
@@ -13,7 +14,7 @@
   margin-right: 0.25rem;
 }
 .ibexa-shipping-edit-cost-widget__row--price .ibexa-input-text-wrapper {
-  width: 13.4375rem;
+  width: 20rem;
   max-width: initial;
 }
 .ibexa-shipping-edit-cost-widget__row--currency .ibexa-dropdown {
@@ -22,7 +23,6 @@
 }
 
 .ibexa-shipping-edit-cost-row {
-  display: flex;
   align-items: center;
 }
 .ibexa-shipping-edit-cost-row__prefix {

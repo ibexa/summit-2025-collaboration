@@ -1,0 +1,4 @@
+Mouse8ProductType:
+    type: object
+    inherits:
+        - BaseProductType

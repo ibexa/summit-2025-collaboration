@@ -42,6 +42,35 @@
 
 /***/ }),
 
+/***/ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances.js":
+/*!**************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances.js ***!
+  \**************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   clearInstance: () => (/* binding */ clearInstance),
+/* harmony export */   getInstance: () => (/* binding */ getInstance),
+/* harmony export */   setInstance: () => (/* binding */ setInstance)
+/* harmony export */ });
+var setInstance = function setInstance(domElement, instance) {
+  if (domElement.ibexaInstance) {
+    throw new Error('Instance for this DOM element already exists!');
+  }
+  domElement.ibexaInstance = instance;
+};
+var getInstance = function getInstance(domElement) {
+  return domElement.ibexaInstance;
+};
+var clearInstance = function clearInstance(domElement) {
+  delete domElement.ibexaInstance;
+};
+
+
+/***/ }),
+
 /***/ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/sidebar/btn/content.edit.js":
 /*!**************************************************************************************************!*\
   !*** ./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/sidebar/btn/content.edit.js ***!
@@ -56,7 +85,11 @@
   }
   editButton.addEventListener('click', function () {
     languageRadioOption.checked = true;
-    languageRadioOption.dispatchEvent(new CustomEvent('change'));
+    languageRadioOption.dispatchEvent(new CustomEvent('change', {
+      detail: {
+        sendImmediately: true
+      }
+    }));
   }, false);
 })(window, window.document);
 
@@ -158,6 +191,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     attachModalListeners(wrapper, form, btns);
   };
   var changeHandler = function changeHandler(form, btns, event) {
+    var _event$detail$sendImm, _event$detail, _event$target$closest;
+    var sendImmediately = (_event$detail$sendImm = event === null || event === void 0 || (_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.sendImmediately) !== null && _event$detail$sendImm !== void 0 ? _event$detail$sendImm : false;
     var contentIdInput = form.querySelector('.ibexa-extra-actions__form-field--content-info');
     var locationInput = form.querySelector('.ibexa-extra-actions__form-field--location');
     var contentId = contentIdInput.value;
@@ -169,18 +204,30 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       languageCode: languageCode,
       locationId: locationId
     });
+    var activeLanguageItem = (_event$target$closest = event.target.closest('.ibexa-instant-filter__group-item')) === null || _event$target$closest === void 0 ? void 0 : _event$target$closest.querySelector('.ibexa-label');
+    var allLanguageItems = form.querySelectorAll('.ibexa-instant-filter__group-item .ibexa-label');
+    var submitBtn = form.querySelector('.ibexa-extra-actions__confirm-btn');
+    allLanguageItems.forEach(function (item) {
+      item.classList.remove('ibexa-label--active');
+    });
     fetch(checkVersionDraftLink, {
       credentials: 'same-origin'
     }).then(function (response) {
       if (response.status === 409) {
         response.text().then(showModal.bind(null, form, btns));
+        submitBtn.disabled = true;
+        return;
       } else if (response.status === 200) {
         if (form.querySelector('#user_edit_version_info')) {
           redirectToUserEdit(languageCode, contentId, form);
           return;
         }
-        form.submit();
+        if (sendImmediately) {
+          form.submit();
+        }
       }
+      submitBtn.disabled = false;
+      activeLanguageItem === null || activeLanguageItem === void 0 || activeLanguageItem.classList.add('ibexa-label--active');
     });
   };
   var attachEventsToEditActionsWidget = function attachEventsToEditActionsWidget(container) {
@@ -210,7 +257,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   }
   editButton.addEventListener('click', function () {
     languageRadioOption.checked = true;
-    languageRadioOption.dispatchEvent(new CustomEvent('change'));
+    languageRadioOption.dispatchEvent(new CustomEvent('change', {
+      detail: {
+        sendImmediately: true
+      }
+    }));
   }, false);
 })(window, window.document);
 
@@ -220,14 +271,18 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 /*!***********************************************************************************************!*\
   !*** ./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/sidebar/extra.actions.js ***!
   \***********************************************************************************************/
-/***/ (() => {
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_object_instances__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances.js");
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
 function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
 (function (global, doc, ibexa) {
   var CLASS_HIDDEN = 'ibexa-extra-actions--hidden';
   var CLASS_EXPANDED = 'ibexa-context-menu--expanded';
@@ -236,6 +291,42 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var btns = _toConsumableArray(doc.querySelectorAll('.ibexa-btn--extra-actions'));
   var menu = doc.querySelector('.ibexa-context-menu');
   var backdrop = new ibexa.core.Backdrop();
+  var formsInitialData = new Map();
+  var saveInitialFormData = function saveInitialFormData(extraActionsContainer) {
+    var extraActionsInputs = extraActionsContainer.querySelectorAll('input, select');
+    extraActionsInputs.forEach(function (node) {
+      var value = node.type === 'radio' || node.type === 'checkbox' ? node.checked : node.value;
+      formsInitialData.set(node, value);
+    });
+  };
+  var restoreInitialFormData = function restoreInitialFormData(extraActionsContainer) {
+    if (formsInitialData.size === 0) {
+      return;
+    }
+    var extraActionsInputs = extraActionsContainer.querySelectorAll('input, select');
+    extraActionsInputs.forEach(function (node) {
+      var value = formsInitialData.get(node);
+      var prevValue = node.value;
+      if (node.type === 'radio' || node.type === 'checkbox') {
+        prevValue = node.checked;
+        node.checked = value;
+      } else if (node.tagName === 'SELECT') {
+        var dropdownContainer = node.closest('.ibexa-dropdown');
+        if (dropdownContainer) {
+          var dropdownInstance = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_object_instances__WEBPACK_IMPORTED_MODULE_0__.getInstance)(dropdownContainer);
+          dropdownInstance.selectOption(value);
+        } else {
+          node.value = value;
+        }
+      } else {
+        node.value = value;
+      }
+      if (value !== prevValue) {
+        node.dispatchEvent(new CustomEvent('change'));
+      }
+    });
+    formsInitialData.clear();
+  };
   var haveHiddenPart = function haveHiddenPart(element) {
     return element.classList.contains(CLASS_HIDDEN) && !element.classList.contains(CLASS_PREVENT_SHOW);
   };
@@ -250,6 +341,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     doc.body.dispatchEvent(new CustomEvent('ibexa-extra-actions:after-close'));
     removeBackdrop();
+    restoreInitialFormData(actions);
   };
   var toggleExtraActionsWidget = function toggleExtraActionsWidget(widgetData) {
     var actions = doc.querySelector(".ibexa-extra-actions[data-actions=\"".concat(widgetData.actions, "\"]"));
@@ -272,9 +364,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       backdrop.show();
       doc.body.addEventListener('click', _detectClickOutside, false);
       doc.body.classList.add('ibexa-scroll-disabled');
+      saveInitialFormData(actions);
     } else {
       doc.body.removeEventListener('click', _detectClickOutside);
       removeBackdrop();
+      restoreInitialFormData(actions);
     }
     if (focusElement) {
       focusElement.focus();
@@ -388,6 +482,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 /***/ (() => {
 
 (function (global, doc, ibexa, bootstrap) {
+  var _ibexa$helpers$text = ibexa.helpers.text,
+    escapeHTML = _ibexa$helpers$text.escapeHTML,
+    escapeHTMLAttribute = _ibexa$helpers$text.escapeHTMLAttribute;
+  var dangerouslyInsertAdjacentHTML = ibexa.helpers.dom.dangerouslyInsertAdjacentHTML;
   var openTranslationModal = function openTranslationModal(event) {
     var _event$detail = event.detail,
       item = _event$detail.item,
@@ -417,9 +515,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       if (!enabled || !hasPermissionToLanguage) {
         return;
       }
-      var optionRendered = "<option value=\"".concat(languageCode, "\">").concat(name, "</option>");
+      var nameHtmlEscaped = escapeHTML(name);
+      var languageCodeHtmlAttributeEscaped = escapeHTMLAttribute(languageCode);
+      var optionRendered = "<option value=\"".concat(languageCodeHtmlAttributeEscaped, "\">").concat(nameHtmlEscaped, "</option>");
       var container = doc.createElement('select');
-      container.insertAdjacentHTML('beforeend', optionRendered);
+      dangerouslyInsertAdjacentHTML(container, 'beforeend', optionRendered);
       if (existingLanguages.includes(languageCode)) {
         baseLanguage.append(container.firstElementChild);
       } else {
@@ -576,13 +676,13 @@ function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 (function (global, doc) {
   var openContentEditWidget = function openContentEditWidget(event) {
+    var MIN_ITEMS_WITH_SEARCH = 10;
     var _event$detail = event.detail,
       item = _event$detail.item,
       contentLanguages = _event$detail.contentLanguages,
       permissions = _event$detail.permissions;
     var restrictedLanguageCodes = permissions.restrictedLanguageCodesList.restrictedLanguageCodes;
     var contentFormContainer = doc.querySelector('.ibexa-content-tree-content-form-container--edit');
-    var counterContainer = contentFormContainer.querySelector('.ibexa-extra-actions__counter');
     var contentInput = contentFormContainer.querySelector('[name="content_tree_content_edit[content_info]"]');
     var locationInput = contentFormContainer.querySelector('[name="content_tree_content_edit[location]"]');
     var contentLanguagesCodes = contentLanguages.map(function (_ref) {
@@ -591,6 +691,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }).filter(function (languageCode) {
       return restrictedLanguageCodes.length === 0 || restrictedLanguageCodes.includes(languageCode);
     });
+    var isSearchEnabled = contentLanguages.length >= MIN_ITEMS_WITH_SEARCH;
+    var extraActionsContainer = contentFormContainer.querySelector('.ibexa-extra-actions');
+    var instantFilterInput = extraActionsContainer.querySelector('.ibexa-instant-filter__input-wrapper');
+    extraActionsContainer.classList.toggle('ibexa-extra-actions--has-search', isSearchEnabled);
+    instantFilterInput.classList.toggle('ibexa-instant-filter__input-wrapper--hidden', !isSearchEnabled);
     contentInput.value = item.internalItem.contentId;
     locationInput.value = item.internalItem.locationId;
     if (contentLanguagesCodes.length !== 1) {
@@ -599,7 +704,6 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         var optionWrapper = input.closest('.form-check');
         optionWrapper.hidden = !contentLanguagesCodes.includes(input.value);
       });
-      counterContainer.innerHTML = contentLanguagesCodes.length;
       document.body.dispatchEvent(new CustomEvent('ibexa-extra-actions:toggle-widget', {
         detail: {
           actions: 'content-tree-edit'
@@ -611,7 +715,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         return;
       }
       languageRadioOption.checked = true;
-      languageRadioOption.dispatchEvent(new CustomEvent('change'));
+      languageRadioOption.dispatchEvent(new CustomEvent('change', {
+        detail: {
+          sendImmediately: true
+        }
+      }));
     }
   };
   doc.body.addEventListener('ibexa-content-tree:open-edit-widget', openContentEditWidget, false);

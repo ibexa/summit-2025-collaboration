@@ -5,3 +5,93 @@ RepositoryLanguage:
             eng-GB:
                 value: eng-GB
                 description: 'English (United Kingdom)'
+            afr-AF:
+                value: afr-AF
+                description: Afrikaans
+            alb-SQ:
+                value: alb-SQ
+                description: Albanian
+            ara-AR:
+                value: ara-AR
+                description: Arabic
+            aze-AZ:
+                value: aze-AZ
+                description: Azerbaijani
+            cha-CH:
+                value: cha-CH
+                description: Chamorro
+            chi-ZH:
+                value: chi-ZH
+                description: Chinese
+            cze-CS:
+                value: cze-CS
+                description: Czech
+            dan-DA:
+                value: dan-DA
+                description: Danish
+            dut-NL:
+                value: dut-NL
+                description: 'Dutch (Flemish)'
+            eng-US:
+                value: eng-US
+                description: 'English (United States)'
+            eng-AU:
+                value: eng-AU
+                description: 'English (Australia)'
+            epo-EO:
+                value: epo-EO
+                description: Esperanto
+            esp-ES:
+                value: esp-ES
+                description: Spanish
+            esp-MX:
+                value: esp-MX
+                description: 'Spanish (Mexico)'
+            est-ET:
+                value: est-ET
+                description: Estonian
+            fas-FA:
+                value: fas-FA
+                description: 'Persian (Farsi)'
+            fin-FI:
+                value: fin-FI
+                description: Finnish
+            fre-FR:
+                value: fre-FR
+                description: 'French (France)'
+            fre-BE:
+                value: fre-BE
+                description: 'French (Belgium)'
+            fre-CA:
+                value: fre-CA
+                description: 'French (Canada)'
+            fre-CH:
+                value: fre-CH
+                description: 'French (Switzerland)'
+            fre-LU:
+                value: fre-LU
+                description: 'French (Luxembourg)'
+            geo-KA:
+                value: geo-KA
+                description: Georgian
+            ger-DE:
+                value: ger-DE
+                description: 'German (Germany)'
+            ger-AT:
+                value: ger-AT
+                description: 'German (Austria)'
+            ger-CH:
+                value: ger-CH
+                description: 'German (Switzerland)'
+            ger-LI:
+                value: ger-LI
+                description: 'German (Liechtenstein)'
+            ger-LU:
+                value: ger-LU
+                description: 'German (Luxembourg)'
+            gle-GA:
+                value: gle-GA
+                description: Irish
+            pol-PL:
+                value: pol-PL
+                description: Polish

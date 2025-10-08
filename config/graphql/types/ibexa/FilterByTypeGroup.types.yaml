@@ -1,0 +1,274 @@
+FilterByTypeGroup:
+    type: object
+    config:
+        fields:
+            book0s:
+                type: Book0ProductConnection
+                resolve: '@=query("ProductOfType", "book0", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            book1s:
+                type: Book1ProductConnection
+                resolve: '@=query("ProductOfType", "book1", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            book2s:
+                type: Book2ProductConnection
+                resolve: '@=query("ProductOfType", "book2", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            book3s:
+                type: Book3ProductConnection
+                resolve: '@=query("ProductOfType", "book3", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            book4s:
+                type: Book4ProductConnection
+                resolve: '@=query("ProductOfType", "book4", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            laptop0s:
+                type: Laptop0ProductConnection
+                resolve: '@=query("ProductOfType", "laptop0", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            laptop1s:
+                type: Laptop1ProductConnection
+                resolve: '@=query("ProductOfType", "laptop1", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            laptop2s:
+                type: Laptop2ProductConnection
+                resolve: '@=query("ProductOfType", "laptop2", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            laptop3s:
+                type: Laptop3ProductConnection
+                resolve: '@=query("ProductOfType", "laptop3", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            laptop4s:
+                type: Laptop4ProductConnection
+                resolve: '@=query("ProductOfType", "laptop4", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            laptop5s:
+                type: Laptop5ProductConnection
+                resolve: '@=query("ProductOfType", "laptop5", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            laptop6s:
+                type: Laptop6ProductConnection
+                resolve: '@=query("ProductOfType", "laptop6", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            laptop7s:
+                type: Laptop7ProductConnection
+                resolve: '@=query("ProductOfType", "laptop7", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            laptop8s:
+                type: Laptop8ProductConnection
+                resolve: '@=query("ProductOfType", "laptop8", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            laptop9s:
+                type: Laptop9ProductConnection
+                resolve: '@=query("ProductOfType", "laptop9", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            mouse0s:
+                type: Mouse0ProductConnection
+                resolve: '@=query("ProductOfType", "mouse0", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            mouse1s:
+                type: Mouse1ProductConnection
+                resolve: '@=query("ProductOfType", "mouse1", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            mouse2s:
+                type: Mouse2ProductConnection
+                resolve: '@=query("ProductOfType", "mouse2", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            mouse3s:
+                type: Mouse3ProductConnection
+                resolve: '@=query("ProductOfType", "mouse3", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            mouse4s:
+                type: Mouse4ProductConnection
+                resolve: '@=query("ProductOfType", "mouse4", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            mouse5s:
+                type: Mouse5ProductConnection
+                resolve: '@=query("ProductOfType", "mouse5", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            mouse6s:
+                type: Mouse6ProductConnection
+                resolve: '@=query("ProductOfType", "mouse6", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            mouse7s:
+                type: Mouse7ProductConnection
+                resolve: '@=query("ProductOfType", "mouse7", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            mouse8s:
+                type: Mouse8ProductConnection
+                resolve: '@=query("ProductOfType", "mouse8", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            mouse9s:
+                type: Mouse9ProductConnection
+                resolve: '@=query("ProductOfType", "mouse9", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            virtual0s:
+                type: Virtual0ProductConnection
+                resolve: '@=query("ProductOfType", "virtual0", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            virtual1s:
+                type: Virtual1ProductConnection
+                resolve: '@=query("ProductOfType", "virtual1", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            virtual2s:
+                type: Virtual2ProductConnection
+                resolve: '@=query("ProductOfType", "virtual2", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            virtual3s:
+                type: Virtual3ProductConnection
+                resolve: '@=query("ProductOfType", "virtual3", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }
+            virtual4s:
+                type: Virtual4ProductConnection
+                resolve: '@=query("ProductOfType", "virtual4", args)'
+                argsBuilder: 'Relay::Connection'
+                args:
+                    availability: { type: ProductAvailability, description: 'Filter on product availability' }
+                    code: { type: String, description: 'Filter on product code' }
+                    name: { type: String, description: 'Filter on product name' }
+                    sortBy: { type: '[SortByProductOptions]', description: 'A Sort Clause, or array of Clauses. Add _desc after a Clause to reverse it' }

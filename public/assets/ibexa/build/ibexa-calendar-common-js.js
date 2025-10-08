@@ -96,11 +96,9 @@
       mode: 'same-origin',
       credentials: 'same-origin'
     });
-    fetch(request).then(function (response) {
-      if (response.ok) {
-        doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-reload-data'));
-        doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-clear-selection'));
-      }
+    fetch(request).then(ibexa.helpers.request.getStatusFromResponse).then(function () {
+      doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-reload-data'));
+      doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-clear-selection'));
     })["catch"](function () {
       return window.ibexa.helpers.notification.showErrorNotification(errorMessage);
     });
@@ -186,11 +184,9 @@
       mode: 'same-origin',
       credentials: 'same-origin'
     });
-    fetch(request).then(function (response) {
-      if (response.ok) {
-        doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-reload-data'));
-        doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-clear-selection'));
-      }
+    fetch(request).then(ibexa.helpers.request.getStatusFromResponse).then(function () {
+      doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-reload-data'));
+      doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-clear-selection'));
     })["catch"](function () {
       return window.ibexa.helpers.notification.showErrorNotification(errorMessage);
     });
@@ -250,11 +246,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       mode: 'same-origin',
       credentials: 'same-origin'
     });
-    fetch(request).then(function (response) {
-      if (response.ok) {
-        doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-reload-data'));
-        doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-clear-selection'));
-      }
+    fetch(request).then(ibexa.helpers.request.getStatusFromResponse).then(function () {
+      doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-reload-data'));
+      doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-clear-selection'));
     })["catch"](function () {
       return ibexa.helpers.notification.showErrorNotification(errorMessage);
     });
@@ -330,11 +324,9 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
       mode: 'same-origin',
       credentials: 'same-origin'
     });
-    fetch(request).then(function (response) {
-      if (response.ok) {
-        doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-reload-data'));
-        doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-clear-selection'));
-      }
+    fetch(request).then(ibexa.helpers.request.getStatusFromResponse).then(function () {
+      doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-reload-data'));
+      doc.body.dispatchEvent(new CustomEvent('ibexa-calendar-clear-selection'));
     })["catch"](function () {
       return ibexa.helpers.notification.showErrorNotification(errorMessage);
     });

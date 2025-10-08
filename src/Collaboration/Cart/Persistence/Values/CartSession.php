@@ -20,10 +20,12 @@ final class CartSession extends AbstractSession
         string $cartIdentifier,
         string $token,
         int $userId,
+        bool $isActive,
+        bool $hasPublicLink,
         DateTimeImmutable $createdAt,
         DateTimeImmutable $updatedAt
     ) {
-        parent::__construct($id, $token, $userId, $createdAt, $updatedAt);
+        parent::__construct($id, $token, $userId, $isActive, $hasPublicLink, $createdAt, $updatedAt);
 
         $this->cartIdentifier = $cartIdentifier;
     }

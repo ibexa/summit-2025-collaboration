@@ -1,0 +1,117 @@
+### Shareable
+-
+    mode: create
+    type: content
+    metadata:
+        contentType: user_group
+        mainTranslation: eng-GB
+        parentGroupId: 4
+        section: 2
+    location:
+        parentLocationId: 5
+    fields:
+        -
+            fieldDefIdentifier: name
+            languageCode: eng-GB
+            value: Technical
+    references:
+        -
+            name: ref__content__user_group__technical_users
+            type: content_id
+        -
+            name: ref__location__user_group__technical_users
+            type: location_id
+
+-
+    mode: create
+    type: content
+    metadata:
+        contentType: user_group
+        mainTranslation: eng-GB
+        parentGroupId: reference:ref__content__user_group__technical_users
+        section: 2
+    location:
+        parentLocationId: reference:ref__location__user_group__technical_users
+    fields:
+        -
+            fieldDefIdentifier: name
+            languageCode: eng-GB
+            value: Shareable
+    references:
+        -
+            name: ref__content__user_group__shareable_users
+            type: content_id
+        -
+            name: ref__path__user_group__shareable_users
+            type: path
+
+-
+    mode: create
+    type: role
+    metadata:
+        identifier: Shareable
+    policies:
+        -
+            module: user
+            function: login
+        -
+            module: content
+            function: read
+        -
+            module: content
+            function: versionread
+    actions:
+        -   action: assign_role_to_user_group
+            id: reference:ref__content__user_group__shareable_users
+    references:
+        -
+            name: ref__role__shareable
+            type: role_id
+
+-
+    mode: create
+    type: user
+    metadata:
+        login: !php/const \Ibexa\Collaboration\Security\User\ShareableLinkUser::SHAREABLE_LINK_USER_IDENTIFIER
+        email: shareable@link.invalid
+        password: ''
+        enabled: true
+        mainLanguage: eng-GB
+        contentType: user
+    groups:
+        - reference:ref__content__user_group__shareable_users
+    fields:
+        -
+            fieldDefIdentifier: first_name
+            languageCode: eng-GB
+            value: Shareable
+        -
+            fieldDefIdentifier: last_name
+            languageCode: eng-GB
+            value: Link
+        -
+            fieldDefIdentifier: user_account
+            languageCode: eng-GB
+            value:
+                hasStoredLogin: true
+                login: !php/const \Ibexa\Collaboration\Security\User\ShareableLinkUser::SHAREABLE_LINK_USER_IDENTIFIER
+                email: shareable@link.invalid
+                passwordHash: ''
+                passwordHashType: !php/const \Ibexa\Contracts\Core\Repository\Values\User\User::PASSWORD_HASH_PHP_DEFAULT
+                passwordUpdatedAt: null
+                enabled: true
+                maxLogin: 0
+                plainPassword: null
+    references:
+        -
+            name: ref__user__shareable
+            type: user_id
+
+-
+    mode: update
+    type: content
+    match:
+        field: content_id
+        value: reference:ref__user__shareable
+    metadata:
+        ownerId: reference:ref__user__shareable

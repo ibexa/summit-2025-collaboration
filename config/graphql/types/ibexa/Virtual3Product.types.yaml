@@ -1,0 +1,12 @@
+Virtual3Product:
+    type: object
+    inherits:
+        - BaseProduct
+    config:
+        fields:
+            attributes:
+                type: Virtual3Attributes
+                resolve: '@=value'
+            fields:
+                type: Virtual3ContentFields
+                resolve: '@=value'

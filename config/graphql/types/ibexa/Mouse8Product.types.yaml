@@ -1,0 +1,12 @@
+Mouse8Product:
+    type: object
+    inherits:
+        - BaseProduct
+    config:
+        fields:
+            attributes:
+                type: Mouse8Attributes
+                resolve: '@=value'
+            fields:
+                type: Mouse8ContentFields
+                resolve: '@=value'

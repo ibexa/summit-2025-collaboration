@@ -42,6 +42,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   createContentTypeDataMapByHref: () => (/* binding */ createContentTypeDataMapByHref),
 /* harmony export */   getContentTypeData: () => (/* binding */ getContentTypeData),
 /* harmony export */   getContentTypeDataByHref: () => (/* binding */ getContentTypeDataByHref),
+/* harmony export */   getContentTypeDataMapByHref: () => (/* binding */ getContentTypeDataMapByHref),
 /* harmony export */   getContentTypeIconUrl: () => (/* binding */ getContentTypeIconUrl),
 /* harmony export */   getContentTypeIconUrlByHref: () => (/* binding */ getContentTypeIconUrlByHref),
 /* harmony export */   getContentTypeIdentifierByHref: () => (/* binding */ getContentTypeIdentifierByHref),
@@ -95,6 +96,12 @@ var createContentTypeDataMapByHref = function createContentTypeDataMapByHref() {
     }
     return contentTypeDataMapByHref;
   }, {});
+};
+var getContentTypeDataMapByHref = function getContentTypeDataMapByHref() {
+  if (!contentTypesDataMapByHref) {
+    contentTypesDataMapByHref = createContentTypeDataMapByHref();
+  }
+  return contentTypesDataMapByHref;
 };
 
 /**
@@ -513,34 +520,44 @@ function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyri
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 
-var getErrorMessage = function getErrorMessage(response) {
+var defaultGetErrorMessage = function defaultGetErrorMessage() {
+  var error = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return error.errorMessage;
+};
+var getErrorMessageObject = function getErrorMessageObject(response) {
   var responseErrorMessage = response.json().then(function (jsonResponse) {
     var _jsonResponse$ErrorMe;
-    return (_jsonResponse$ErrorMe = jsonResponse.ErrorMessage) === null || _jsonResponse$ErrorMe === void 0 ? void 0 : _jsonResponse$ErrorMe.errorMessage;
+    return (_jsonResponse$ErrorMe = jsonResponse.ErrorMessage) !== null && _jsonResponse$ErrorMe !== void 0 ? _jsonResponse$ErrorMe : jsonResponse;
   });
   return responseErrorMessage;
 };
 var handleRequest = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(response) {
-    var Translator, responseErrorMessage, errorMessage, defaultErrorMsg;
+    var getErrorMessage,
+      Translator,
+      responseErrorMessageObject,
+      errorMessage,
+      defaultErrorMsg,
+      _args = arguments;
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
+          getErrorMessage = _args.length > 1 && _args[1] !== undefined ? _args[1] : defaultGetErrorMessage;
           if (response.ok) {
-            _context.next = 8;
+            _context.next = 9;
             break;
           }
           Translator = (0,_context_helper__WEBPACK_IMPORTED_MODULE_0__.getTranslator)();
-          _context.next = 4;
-          return getErrorMessage(response);
-        case 4:
-          responseErrorMessage = _context.sent;
-          errorMessage = responseErrorMessage || response.statusText;
+          _context.next = 5;
+          return getErrorMessageObject(response);
+        case 5:
+          responseErrorMessageObject = _context.sent;
+          errorMessage = getErrorMessage(responseErrorMessageObject) || response.statusText;
           defaultErrorMsg = Translator.trans(/*@Desc("Something went wrong. Try to refresh the page or contact your administrator.")*/'error.request.default_msg');
           throw Error(errorMessage || defaultErrorMsg);
-        case 8:
-          return _context.abrupt("return", response);
         case 9:
+          return _context.abrupt("return", response);
+        case 10:
         case "end":
           return _context.stop();
       }
@@ -551,13 +568,13 @@ var handleRequest = /*#__PURE__*/function () {
   };
 }();
 var getJsonFromResponse = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(response) {
+  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(response, getErrorMessage) {
     var parsedRequest;
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
           _context2.next = 2;
-          return handleRequest(response);
+          return handleRequest(response, getErrorMessage);
         case 2:
           parsedRequest = _context2.sent;
           return _context2.abrupt("return", parsedRequest.json());
@@ -567,7 +584,7 @@ var getJsonFromResponse = /*#__PURE__*/function () {
       }
     }, _callee2);
   }));
-  return function getJsonFromResponse(_x2) {
+  return function getJsonFromResponse(_x2, _x3) {
     return _ref2.apply(this, arguments);
   };
 }();
@@ -588,7 +605,7 @@ var getTextFromResponse = /*#__PURE__*/function () {
       }
     }, _callee3);
   }));
-  return function getTextFromResponse(_x3) {
+  return function getTextFromResponse(_x4) {
     return _ref3.apply(this, arguments);
   };
 }();
@@ -609,7 +626,7 @@ var getStatusFromResponse = /*#__PURE__*/function () {
       }
     }, _callee4);
   }));
-  return function getStatusFromResponse(_x4) {
+  return function getStatusFromResponse(_x5) {
     return _ref4.apply(this, arguments);
   };
 }();
@@ -668,41 +685,47 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 var _window = window,
   doc = _window.document;
-var lastInsertTooltipTarget = null;
 var TOOLTIPS_SELECTOR = '[title], [data-tooltip-title]';
 var observerConfig = {
   childList: true,
-  subtree: true
+  subtree: true,
+  attributes: true,
+  attributeFilter: ['title', 'data-tooltip-title', 'data-tooltip-extra-class', 'data-tooltip-manual-reparsing']
 };
+var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
 var resizeEllipsisObserver = new ResizeObserver(function (entries) {
   entries.forEach(function (entry) {
     parse(entry.target);
   });
 });
 var observer = new MutationObserver(function (mutationsList) {
-  if (lastInsertTooltipTarget) {
-    mutationsList.forEach(function (mutation) {
-      var addedNodes = mutation.addedNodes,
-        removedNodes = mutation.removedNodes;
-      if (addedNodes.length) {
-        addedNodes.forEach(function (addedNode) {
-          if (addedNode instanceof Element) {
-            parse(addedNode);
-          }
-        });
+  mutationsList.forEach(function (mutation) {
+    var type = mutation.type,
+      target = mutation.target,
+      addedNodes = mutation.addedNodes,
+      removedNodes = mutation.removedNodes;
+    if (type === 'attributes') {
+      var tooltipManualReparsing = target.dataset.tooltipManualReparsing;
+      if (!tooltipManualReparsing) {
+        parse(target.parentElement);
       }
-      if (removedNodes.length) {
-        removedNodes.forEach(function (removedNode) {
-          if (removedNode.classList && !removedNode.classList.contains('ibexa-tooltip')) {
-            lastInsertTooltipTarget = null;
-            doc.querySelectorAll('.ibexa-tooltip.show').forEach(function (tooltipNode) {
-              tooltipNode.remove();
-            });
-          }
+    }
+    addedNodes.forEach(function (addedNode) {
+      if (addedNode instanceof Element && !(addedNode !== null && addedNode !== void 0 && addedNode.classList.contains('ibexa-tooltip'))) {
+        parse(addedNode);
+      }
+    });
+    removedNodes.forEach(function (removedNode) {
+      if (removedNode.classList && !removedNode.classList.contains('ibexa-tooltip')) {
+        var triggeredNodes = removedNode.querySelectorAll("[data-bs-original-title]");
+        triggeredNodes.forEach(function (triggerBtn) {
+          var _tooltipInstance$tip;
+          var tooltipInstance = bootstrap.Tooltip.getOrCreateInstance(triggerBtn);
+          tooltipInstance === null || tooltipInstance === void 0 || (_tooltipInstance$tip = tooltipInstance.tip) === null || _tooltipInstance$tip === void 0 || _tooltipInstance$tip.remove();
         });
       }
     });
-  }
+  });
 });
 var modifyPopperConfig = function modifyPopperConfig(iframe, defaultBsPopperConfig) {
   if (!iframe) {
@@ -776,9 +799,13 @@ var isTitleEllipsized = function isTitleEllipsized(node) {
   var textHeight = getTextHeight(title, styles);
   return textHeight > nodeHeight;
 };
+var getContainer = function getContainer(tooltipNode) {
+  var tooltipContainerSelector = tooltipNode.dataset.tooltipContainerSelector;
+  var container = tooltipNode.closest(tooltipContainerSelector);
+  return container !== null && container !== void 0 ? container : doc.body;
+};
 var initializeTooltip = function initializeTooltip(tooltipNode, hasEllipsisStyle) {
   var _tooltipNode$dataset$, _tooltipNode$dataset$2, _tooltipNode$dataset$3;
-  var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
   var _tooltipNode$dataset = tooltipNode.dataset,
     delayShow = _tooltipNode$dataset.delayShow,
     delayHide = _tooltipNode$dataset.delayHide;
@@ -791,7 +818,7 @@ var initializeTooltip = function initializeTooltip(tooltipNode, hasEllipsisStyle
   var placement = (_tooltipNode$dataset$2 = tooltipNode.dataset.tooltipPlacement) !== null && _tooltipNode$dataset$2 !== void 0 ? _tooltipNode$dataset$2 : 'bottom';
   var trigger = (_tooltipNode$dataset$3 = tooltipNode.dataset.tooltipTrigger) !== null && _tooltipNode$dataset$3 !== void 0 ? _tooltipNode$dataset$3 : 'hover';
   var useHtml = tooltipNode.dataset.tooltipUseHtml !== undefined;
-  var container = tooltipNode.dataset.tooltipContainerSelector ? tooltipNode.closest(tooltipNode.dataset.tooltipContainerSelector) : 'body';
+  var container = getContainer(tooltipNode);
   var iframe = document.querySelector(tooltipNode.dataset.tooltipIframeSelector);
   new bootstrap.Tooltip(tooltipNode, {
     delay: delay,
@@ -801,9 +828,6 @@ var initializeTooltip = function initializeTooltip(tooltipNode, hasEllipsisStyle
     popperConfig: modifyPopperConfig.bind(null, iframe),
     html: useHtml,
     template: "<div class=\"tooltip ibexa-tooltip ".concat(extraClass, "\">\n                        <div class=\"tooltip-arrow ibexa-tooltip__arrow\"></div>\n                        <div class=\"tooltip-inner ibexa-tooltip__inner\"></div>\n                   </div>")
-  });
-  tooltipNode.addEventListener('inserted.bs.tooltip', function (event) {
-    lastInsertTooltipTarget = event.currentTarget;
   });
   if ((0,_browser_helper__WEBPACK_IMPORTED_MODULE_0__.isSafari)()) {
     if (tooltipNode.children) {
@@ -826,7 +850,6 @@ var parse = function parse() {
   if (!baseElement) {
     return;
   }
-  var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
   var tooltipNodes = _toConsumableArray(baseElement.querySelectorAll(TOOLTIPS_SELECTOR));
   if (baseElement instanceof Element) {
     tooltipNodes.push(baseElement);
@@ -882,7 +905,6 @@ var hideAll = function hideAll() {
   if (!baseElement) {
     return;
   }
-  var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
   var tooltipsNode = baseElement.querySelectorAll(TOOLTIPS_SELECTOR);
   var _iterator2 = _createForOfIteratorHelper(tooltipsNode),
     _step2;
@@ -1071,7 +1093,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
 /* harmony import */ var _helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
 /* harmony import */ var _urlIcon__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./urlIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/urlIcon.js");
-/* harmony import */ var _inculdedIcon__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./inculdedIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js");
+/* harmony import */ var _includedIcon__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./includedIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
@@ -1087,7 +1109,7 @@ var Icon = function Icon(props) {
     'ibexa-icon': true
   }, props.extraClasses, true));
   var isIconIncluded = props.useIncludedIcon || (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.isExternalInstance)();
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, isIconIncluded ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_inculdedIcon__WEBPACK_IMPORTED_MODULE_5__["default"], {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, isIconIncluded ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_includedIcon__WEBPACK_IMPORTED_MODULE_5__["default"], {
     cssClass: cssClass,
     name: props.name,
     defaultIconName: props.defaultIconName
@@ -1115,9 +1137,9 @@ Icon.defaultProps = {
 
 /***/ }),
 
-/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js":
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js":
 /*!*****************************************************************************************!*\
-  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js ***!
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js ***!
   \*****************************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -1271,7 +1293,7 @@ var iconsMap = {
   'upload-image': _ibexa_admin_ui_src_bundle_Resources_public_img_icons_upload_image_svg__WEBPACK_IMPORTED_MODULE_46__,
   warning: _ibexa_admin_ui_src_bundle_Resources_public_img_icons_warning_svg__WEBPACK_IMPORTED_MODULE_47__
 };
-var InculdedIcon = function InculdedIcon(props) {
+var IncludedIcon = function IncludedIcon(props) {
   var _iconsMap$name;
   var name = props.name,
     cssClass = props.cssClass,
@@ -1281,17 +1303,17 @@ var InculdedIcon = function InculdedIcon(props) {
     className: cssClass
   });
 };
-InculdedIcon.propTypes = {
+IncludedIcon.propTypes = {
   cssClass: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   name: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   defaultIconName: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string)
 };
-InculdedIcon.defaultProps = {
+IncludedIcon.defaultProps = {
   cssClass: '',
   name: 'about-info',
   defaultIconName: 'about-info'
 };
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (InculdedIcon);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (IncludedIcon);
 
 /***/ }),
 
@@ -1390,11 +1412,14 @@ var Popup = function Popup(_ref) {
     actionBtnsConfig = _ref.actionBtnsConfig,
     size = _ref.size,
     noHeader = _ref.noHeader,
+    noFooter = _ref.noFooter,
     noCloseBtn = _ref.noCloseBtn,
     extraClasses = _ref.extraClasses,
-    showTooltip = _ref.showTooltip;
+    showTooltip = _ref.showTooltip,
+    subheader = _ref.subheader;
   var rootDOMElement = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__.getRootDOMElement)();
   var modalRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var latestBootstrapModal = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
   var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__.getTranslator)();
   var bootstrap = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__.getBootstrap)();
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
@@ -1403,34 +1428,40 @@ var Popup = function Popup(_ref) {
     if (isVisible) {
       showPopup();
       modalRef.current.addEventListener('hidden.bs.modal', onClose);
+    } else {
+      if (latestBootstrapModal.current) {
+        latestBootstrapModal.current.hide();
+      }
     }
   }, [isVisible]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    return function () {
+      if (latestBootstrapModal.current) {
+        latestBootstrapModal.current.hide();
+      }
+    };
+  }, []);
   if (!isVisible) {
     return null;
   }
   var modalClasses = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__.createCssClassNames)(_defineProperty({
     'c-popup modal fade': true,
-    'c-popup--no-header': noHeader
+    'c-popup--no-header': noHeader,
+    'c-popup--has-subheader': !noHeader && subheader
   }, extraClasses, extraClasses));
   var closeBtnLabel = Translator.trans(/*@Desc("Close")*/'popup.close.label', {}, 'ibexa_universal_discovery_widget');
   var hidePopup = function hidePopup() {
-    modalRef.current.removeEventListener('hidden.bs.modal', onClose);
-    bootstrap.Modal.getOrCreateInstance(modalRef.current).hide();
+    latestBootstrapModal.current.hide();
     rootDOMElement.classList.remove(CLASS_MODAL_OPEN, CLASS_NON_SCROLLABLE);
   };
   var showPopup = function showPopup() {
-    var bootstrapModal = bootstrap.Modal.getOrCreateInstance(modalRef.current, _objectSpread(_objectSpread({}, MODAL_CONFIG), {}, {
-      keyboard: !noKeyboard,
-      focus: hasFocus
-    }));
-    var initializedBackdropRootElement = bootstrapModal._backdrop._config.rootElement;
+    var initializedBackdropRootElement = latestBootstrapModal.current._backdrop._config.rootElement;
     if (initializedBackdropRootElement !== rootDOMElement) {
-      bootstrapModal._backdrop._config.rootElement = rootDOMElement;
+      latestBootstrapModal.current._backdrop._config.rootElement = rootDOMElement;
     }
-    bootstrapModal.show();
+    latestBootstrapModal.current.show();
   };
   var handleOnClick = function handleOnClick(event, onClick, preventClose) {
-    modalRef.current.removeEventListener('hidden.bs.modal', onClose);
     if (!preventClose) {
       hidePopup();
     }
@@ -1452,7 +1483,15 @@ var Popup = function Popup(_ref) {
     }));
   };
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    ref: modalRef,
+    ref: function ref(_ref3) {
+      modalRef.current = _ref3;
+      if (_ref3) {
+        latestBootstrapModal.current = bootstrap.Modal.getOrCreateInstance(modalRef.current, _objectSpread(_objectSpread({}, MODAL_CONFIG), {}, {
+          keyboard: !noKeyboard,
+          focus: hasFocus
+        }));
+      }
+    },
     className: modalClasses,
     tabIndex: hasFocus ? -1 : undefined
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
@@ -1460,7 +1499,7 @@ var Popup = function Popup(_ref) {
     role: "dialog"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "modal-content c-popup__content"
-  }, noHeader ? renderCloseBtn() : title && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+  }, noHeader ? renderCloseBtn() : title && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "modal-header c-popup__header"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", {
     className: "modal-title c-popup__headline",
@@ -1469,9 +1508,11 @@ var Popup = function Popup(_ref) {
     className: "c-popup__title"
   }, title), subtitle && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
     className: "c-popup__subtitle"
-  }, subtitle)), renderCloseBtn()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+  }, subtitle)), renderCloseBtn()), subheader && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-popup__subheader"
+  }, subheader)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "modal-body c-popup__body"
-  }, children), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+  }, children), !noFooter && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "modal-footer c-popup__footer"
   }, actionBtnsConfig.map(function (_ref2) {
     var className = _ref2.className,
@@ -1509,10 +1550,12 @@ Popup.propTypes = {
   hasFocus: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
   size: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   noHeader: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  noFooter: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
   noCloseBtn: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
   noKeyboard: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
   extraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
-  showTooltip: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool)
+  showTooltip: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  subheader: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().node)
 };
 Popup.defaultProps = {
   hasFocus: true,
@@ -1520,11 +1563,13 @@ Popup.defaultProps = {
   onClose: null,
   size: 'large',
   noHeader: false,
+  noFooter: false,
   noCloseBtn: false,
   extraClasses: '',
   title: null,
   subtitle: null,
-  showTooltip: true
+  showTooltip: true,
+  subheader: null
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Popup);
 
@@ -1630,6 +1675,7 @@ var showErrorNotification = function showErrorNotification(error) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   COLOR_VARIANTS: () => (/* binding */ COLOR_VARIANTS),
 /* harmony export */   SIZES: () => (/* binding */ SIZES),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
@@ -1650,20 +1696,27 @@ var SIZES = {
   MEDIUM: 'medium',
   LARGE: 'large'
 };
+var COLOR_VARIANTS = {
+  PRIMARY: 'primary',
+  LIGHT: 'light'
+};
 var Spinner = function Spinner(_ref) {
-  var size = _ref.size;
-  var className = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty({
+  var size = _ref.size,
+    colorVariant = _ref.colorVariant;
+  var className = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty(_defineProperty({
     'c-spinner': true
-  }, "c-spinner--".concat(size), true));
+  }, "c-spinner--".concat(size), true), "c-spinner--".concat(colorVariant), true));
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: className
   });
 };
 Spinner.propTypes = {
-  size: prop_types__WEBPACK_IMPORTED_MODULE_1___default().oneOf(Object.values(SIZES))
+  size: prop_types__WEBPACK_IMPORTED_MODULE_1___default().oneOf(Object.values(SIZES)),
+  colorVariant: prop_types__WEBPACK_IMPORTED_MODULE_1___default().oneOf(Object.values(COLOR_VARIANTS))
 };
 Spinner.defaultProps = {
-  size: SIZES.MEDIUM
+  size: SIZES.MEDIUM,
+  colorVariant: COLOR_VARIANTS.PRIMARY
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Spinner);
 
@@ -1948,7 +2001,7 @@ var ContentTree = /*#__PURE__*/function (_Component) {
           width: "".concat(width, "px")
         };
       }
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", containerAttrs, this.renderHeader(), this.renderList(), this.renderLoadingSpinner(), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", containerAttrs, this.renderHeader(), this.renderList(), this.renderLoadingSpinner(), resizable && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
         className: "m-tree__resize-handler",
         onMouseDown: this.addWidthChangeListener
       })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
@@ -2294,7 +2347,8 @@ var ListItem = /*#__PURE__*/function (_Component) {
         name = _this$props8.name,
         locationId = _this$props8.locationId,
         indent = _this$props8.indent,
-        onClick = _this$props8.onClick;
+        onClick = _this$props8.onClick,
+        isInvisible = _this$props8.isInvisible;
       if (locationId === _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_5__.SYSTEM_ROOT_LOCATION_ID) {
         return null;
       }
@@ -2324,7 +2378,10 @@ var ListItem = /*#__PURE__*/function (_Component) {
       }, this.renderIcon(), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
         className: "c-list-item__label-content",
         title: name
-      }, name)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      }, name, isInvisible && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+        name: "view-hide",
+        extraClasses: "ibexa-icon--small c-list-item__hidden-icon"
+      }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
         className: "c-list-item__actions"
       }, this.sortedActions.map(function (action) {
         var ActionComponent = action.component;
@@ -3203,6 +3260,22 @@ var mapChildrenToSubitems = function mapChildrenToSubitems(location) {
   delete location.children;
   delete location.displayLimit;
   return location;
+};
+
+/***/ }),
+
+/***/ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/common/helpers/content.type.js":
+/*!************************************************************************************************!*\
+  !*** ./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/common/helpers/content.type.js ***!
+  \************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   checkIsContainer: () => (/* binding */ checkIsContainer)
+/* harmony export */ });
+var checkIsContainer = function checkIsContainer(item) {
+  return item.internalItem && item.internalItem.isContainer;
 };
 
 /***/ }),
@@ -4765,10 +4838,11 @@ var _window = window,
   Translator = _window.Translator,
   document = _window.document;
 var HideContent = function HideContent(_ref) {
-  var _fetchedData$, _permissions$hasAcces, _item$internalItem$is, _item$internalItem;
+  var _fetchedData$, _permissions$hasAcces, _item$internalItem$is, _item$internalItem, _hideContentCallback$;
   var item = _ref.item,
     isLoading = _ref.isLoading,
-    fetchedData = _ref.fetchedData;
+    fetchedData = _ref.fetchedData,
+    hideContentCallback = _ref.hideContentCallback;
   var itemHideLabel = Translator.trans(/*@Desc("Hide")*/'actions.hide_content', {}, 'ibexa_content_tree_ui');
   var itemRevealLabel = Translator.trans(/*@Desc("Reveal")*/'actions.reveal_content', {}, 'ibexa_content_tree_ui');
   var permissions = (0,_common_helpers_getters__WEBPACK_IMPORTED_MODULE_3__.getPermissions)((_fetchedData$ = fetchedData[0]) === null || _fetchedData$ === void 0 ? void 0 : _fetchedData$.permissions, 'hide');
@@ -4776,7 +4850,7 @@ var HideContent = function HideContent(_ref) {
   var isDisabled = isLoading || !hasAccess;
   var isInvisible = (_item$internalItem$is = (_item$internalItem = item.internalItem) === null || _item$internalItem === void 0 ? void 0 : _item$internalItem.isInvisible) !== null && _item$internalItem$is !== void 0 ? _item$internalItem$is : false;
   var itemLabel = isInvisible ? itemRevealLabel : itemHideLabel;
-  var hideContent = function hideContent() {
+  var defaultHideContent = function defaultHideContent() {
     if (isInvisible) {
       document.body.dispatchEvent(new CustomEvent('ibexa-content-tree:reveal', {
         detail: {
@@ -4791,6 +4865,10 @@ var HideContent = function HideContent(_ref) {
       }));
     }
   };
+  var hideContent = (_hideContentCallback$ = hideContentCallback === null || hideContentCallback === void 0 ? void 0 : hideContentCallback.bind(null, {
+    isInvisible: isInvisible,
+    item: item
+  })) !== null && _hideContentCallback$ !== void 0 ? _hideContentCallback$ : defaultHideContent;
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_components_action_list_item_action_list_item__WEBPACK_IMPORTED_MODULE_2__["default"], {
     label: itemLabel,
     isLoading: isLoading,
@@ -4801,12 +4879,14 @@ var HideContent = function HideContent(_ref) {
 HideContent.propTypes = {
   item: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object),
   isLoading: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
-  fetchedData: prop_types__WEBPACK_IMPORTED_MODULE_1___default().arrayOf((prop_types__WEBPACK_IMPORTED_MODULE_1___default().object))
+  fetchedData: prop_types__WEBPACK_IMPORTED_MODULE_1___default().arrayOf((prop_types__WEBPACK_IMPORTED_MODULE_1___default().object)),
+  hideContentCallback: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func)
 };
 HideContent.defaultProps = {
   item: {},
   isLoading: false,
-  fetchedData: []
+  fetchedData: [],
+  hideContentCallback: null
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (HideContent);
 
@@ -5029,6 +5109,7 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ContentTypesInfoMapContext: () => (/* binding */ ContentTypesInfoMapContext),
+/* harmony export */   MODULE_ID: () => (/* binding */ MODULE_ID),
 /* harmony export */   RestInfoContext: () => (/* binding */ RestInfoContext),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
 /* harmony export */   treeBuilderConfig: () => (/* binding */ treeBuilderConfig)
@@ -5036,27 +5117,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
-/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper.js */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper.js");
-/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
-/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
-/* harmony import */ var _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_helpers_localStorage__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-tree-builder/src/bundle/ui-dev/src/modules/tree-builder/helpers/localStorage */ "./vendor/ibexa/tree-builder/src/bundle/ui-dev/src/modules/tree-builder/helpers/localStorage.js");
-/* harmony import */ var _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ibexa-tree-builder/src/bundle/ui-dev/src/modules/tree-builder/tree.builder.module */ "./vendor/ibexa/tree-builder/src/bundle/ui-dev/src/modules/tree-builder/tree.builder.module.js");
-/* harmony import */ var _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_actions_select_all_select_all__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ibexa-tree-builder/src/bundle/ui-dev/src/modules/tree-builder/actions/select-all/select.all */ "./vendor/ibexa/tree-builder/src/bundle/ui-dev/src/modules/tree-builder/actions/select-all/select.all.js");
-/* harmony import */ var _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_actions_unselect_all_unselect_all__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @ibexa-tree-builder/src/bundle/ui-dev/src/modules/tree-builder/actions/unselect-all/unselect.all */ "./vendor/ibexa/tree-builder/src/bundle/ui-dev/src/modules/tree-builder/actions/unselect-all/unselect.all.js");
-/* harmony import */ var _components_collapse_all_collapse_all_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./components/collapse-all/collapse.all.js */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/collapse-all/collapse.all.js");
-/* harmony import */ var _components_add_remove_bookmarks_add_remove_bookmarks__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./components/add-remove-bookmarks/add.remove.bookmarks */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/add-remove-bookmarks/add.remove.bookmarks.js");
-/* harmony import */ var _components_add_translation_add_translation__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./components/add-translation/add.translation */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/add-translation/add.translation.js");
-/* harmony import */ var _components_create_content_create_content__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./components/create-content/create.content */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/create-content/create.content.js");
-/* harmony import */ var _components_edit_content_edit_content__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./components/edit-content/edit.content */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/edit-content/edit.content.js");
-/* harmony import */ var _components_hide_content_hide_content__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./components/hide-content/hide.content */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/hide-content/hide.content.js");
-/* harmony import */ var _components_delete_content_delete_content__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./components/delete-content/delete.content */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/delete-content/delete.content.js");
-/* harmony import */ var _common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../common/services/content.tree.service */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/common/services/content.tree.service.js");
-/* harmony import */ var _common_helpers_getters__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ../common/helpers/getters */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/common/helpers/getters.js");
-/* harmony import */ var _common_helpers_tree__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ../common/helpers/tree */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/common/helpers/tree.js");
-/* harmony import */ var _common_helpers_notifications__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ../common/helpers/notifications */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/common/helpers/notifications.js");
-/* harmony import */ var _components_preview_content_preview_content_js__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./components/preview-content/preview.content.js */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/preview-content/preview.content.js");
-/* harmony import */ var _components_remove_from_bookmarks_remove_from_bookmarks_js__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./components/remove-from-bookmarks/remove.from.bookmarks.js */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/remove-from-bookmarks/remove.from.bookmarks.js");
-/* harmony import */ var _components_add_to_bookmarks_add_to_bookmarks_js__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./components/add-to-bookmarks/add.to.bookmarks.js */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/add-to-bookmarks/add.to.bookmarks.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_content_type_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/content.type.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/content.type.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper.js */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+/* harmony import */ var _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_helpers_localStorage__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ibexa-tree-builder/src/bundle/ui-dev/src/modules/tree-builder/helpers/localStorage */ "./vendor/ibexa/tree-builder/src/bundle/ui-dev/src/modules/tree-builder/helpers/localStorage.js");
+/* harmony import */ var _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ibexa-tree-builder/src/bundle/ui-dev/src/modules/tree-builder/tree.builder.module */ "./vendor/ibexa/tree-builder/src/bundle/ui-dev/src/modules/tree-builder/tree.builder.module.js");
+/* harmony import */ var _common_helpers_content_type__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../common/helpers/content.type */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/common/helpers/content.type.js");
+/* harmony import */ var _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_actions_select_all_select_all__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @ibexa-tree-builder/src/bundle/ui-dev/src/modules/tree-builder/actions/select-all/select.all */ "./vendor/ibexa/tree-builder/src/bundle/ui-dev/src/modules/tree-builder/actions/select-all/select.all.js");
+/* harmony import */ var _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_actions_unselect_all_unselect_all__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @ibexa-tree-builder/src/bundle/ui-dev/src/modules/tree-builder/actions/unselect-all/unselect.all */ "./vendor/ibexa/tree-builder/src/bundle/ui-dev/src/modules/tree-builder/actions/unselect-all/unselect.all.js");
+/* harmony import */ var _components_collapse_all_collapse_all_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./components/collapse-all/collapse.all.js */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/collapse-all/collapse.all.js");
+/* harmony import */ var _components_add_remove_bookmarks_add_remove_bookmarks__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./components/add-remove-bookmarks/add.remove.bookmarks */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/add-remove-bookmarks/add.remove.bookmarks.js");
+/* harmony import */ var _components_add_translation_add_translation__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./components/add-translation/add.translation */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/add-translation/add.translation.js");
+/* harmony import */ var _components_create_content_create_content__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./components/create-content/create.content */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/create-content/create.content.js");
+/* harmony import */ var _components_edit_content_edit_content__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./components/edit-content/edit.content */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/edit-content/edit.content.js");
+/* harmony import */ var _components_hide_content_hide_content__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./components/hide-content/hide.content */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/hide-content/hide.content.js");
+/* harmony import */ var _components_delete_content_delete_content__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./components/delete-content/delete.content */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/delete-content/delete.content.js");
+/* harmony import */ var _common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ../common/services/content.tree.service */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/common/services/content.tree.service.js");
+/* harmony import */ var _common_helpers_getters__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ../common/helpers/getters */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/common/helpers/getters.js");
+/* harmony import */ var _common_helpers_tree__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ../common/helpers/tree */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/common/helpers/tree.js");
+/* harmony import */ var _common_helpers_notifications__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ../common/helpers/notifications */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/common/helpers/notifications.js");
+/* harmony import */ var _components_preview_content_preview_content_js__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./components/preview-content/preview.content.js */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/preview-content/preview.content.js");
+/* harmony import */ var _components_remove_from_bookmarks_remove_from_bookmarks_js__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./components/remove-from-bookmarks/remove.from.bookmarks.js */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/remove-from-bookmarks/remove.from.bookmarks.js");
+/* harmony import */ var _components_add_to_bookmarks_add_to_bookmarks_js__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./components/add-to-bookmarks/add.to.bookmarks.js */ "./vendor/ibexa/content-tree/src/bundle/ui-dev/src/modules/content-tree/components/add-to-bookmarks/add.to.bookmarks.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -5073,6 +5156,8 @@ function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) 
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
 
 
 
@@ -5118,7 +5203,7 @@ var ContentTreeModule = function ContentTreeModule(props) {
     if (typeof customReadSubtree === 'function') {
       return customReadSubtree();
     }
-    return (0,_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_helpers_localStorage__WEBPACK_IMPORTED_MODULE_5__.getData)({
+    return (0,_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_helpers_localStorage__WEBPACK_IMPORTED_MODULE_6__.getData)({
       moduleId: MODULE_ID,
       userId: userId,
       subId: rootLocationId,
@@ -5131,7 +5216,7 @@ var ContentTreeModule = function ContentTreeModule(props) {
       customSaveSubtree();
       return;
     }
-    (0,_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_helpers_localStorage__WEBPACK_IMPORTED_MODULE_5__.saveData)({
+    (0,_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_helpers_localStorage__WEBPACK_IMPORTED_MODULE_6__.saveData)({
       moduleId: MODULE_ID,
       userId: userId,
       subId: rootLocationId,
@@ -5143,18 +5228,15 @@ var ContentTreeModule = function ContentTreeModule(props) {
     _useState2 = _slicedToArray(_useState, 2),
     isLoaded = _useState2[0],
     setIsLoaded = _useState2[1];
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({}),
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(props.preloadedLocations),
     _useState4 = _slicedToArray(_useState3, 2),
-    contentTypesInfoMap = _useState4[0],
-    setContentTypesInfoMap = _useState4[1];
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(props.preloadedLocations),
-    _useState6 = _slicedToArray(_useState5, 2),
-    tree = _useState6[0],
-    setTree = _useState6[1];
-  var subtree = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)((0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_18__.generateInitialSubtree)({
+    tree = _useState4[0],
+    setTree = _useState4[1];
+  var subtree = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)((0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_20__.generateInitialSubtree)({
     rootLocationId: rootLocationId,
     subitemsLoadLimit: subitemsLoadLimit
   })); // subtree is actually tree request data
+  var contentTypesInfoMap = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_content_type_helper__WEBPACK_IMPORTED_MODULE_2__.getContentTypeDataMapByHref)();
   var getCurrentLocationId = function getCurrentLocationId() {
     var currentLocationIdString = props.currentLocationPath.split('/').filter(function (id) {
       return !!id;
@@ -5162,7 +5244,7 @@ var ContentTreeModule = function ContentTreeModule(props) {
     return parseInt(currentLocationIdString, 10);
   };
   var setInitialItemsState = function setInitialItemsState(location) {
-    subtree.current = (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_18__.generateSubtree)({
+    subtree.current = (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_20__.generateSubtree)({
       items: [location],
       isRoot: true,
       subitemsLoadLimit: subitemsLoadLimit,
@@ -5176,7 +5258,7 @@ var ContentTreeModule = function ContentTreeModule(props) {
     var restInfo = props.restInfo,
       sort = props.sort;
     setIsLoaded(false);
-    (0,_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_16__.loadSubtree)((0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_18__.getLoadSubtreeParams)({
+    (0,_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_18__.loadSubtree)((0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_20__.getLoadSubtreeParams)({
       subtree: subtree,
       restInfo: restInfo,
       sort: sort
@@ -5201,7 +5283,7 @@ var ContentTreeModule = function ContentTreeModule(props) {
     })["catch"](window.ibexa.helpers.notification.showErrorNotification);
   };
   var findLocationsByIdWrapper = function findLocationsByIdWrapper(args) {
-    return (0,_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_16__.findLocationsById)(_objectSpread(_objectSpread({}, props.restInfo), {}, {
+    return (0,_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_18__.findLocationsById)(_objectSpread(_objectSpread({}, props.restInfo), {}, {
       limit: props.subitemsLoadLimit
     }, args));
   };
@@ -5225,7 +5307,7 @@ var ContentTreeModule = function ContentTreeModule(props) {
     }
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
       className: "c-ct-list-item__icon"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_3__["default"], iconAttrs));
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_4__["default"], iconAttrs));
   };
   var renderLabel = function renderLabel(item, otherProps) {
     var name = item.internalItem.name;
@@ -5240,12 +5322,12 @@ var ContentTreeModule = function ContentTreeModule(props) {
     var isExpanded = _ref.isExpanded,
       loadMore = _ref.loadMore;
     if (isExpanded) {
-      (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_18__.addItemToSubtree)(subtree.current[0], item.internalItem, item.internalItem.path.split('/'), {
+      (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_20__.addItemToSubtree)(subtree.current[0], item.internalItem, item.internalItem.path.split('/'), {
         subitemsLoadLimit: subitemsLoadLimit,
         subitemsLimit: subitemsLimit
       });
     } else {
-      (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_18__.removeItemFromSubtree)(subtree.current[0], item.internalItem, item.internalItem.path.split('/'));
+      (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_20__.removeItemFromSubtree)(subtree.current[0], item.internalItem, item.internalItem.path.split('/'));
     }
     saveSubtree();
     var subitems = item.subitems;
@@ -5263,7 +5345,7 @@ var ContentTreeModule = function ContentTreeModule(props) {
       id: sourceIds
     }).then(function (response) {
       var destination = "/".concat(item.nextParent.path);
-      return (0,_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_16__.moveElements)(response, destination, _objectSpread({}, props.restInfo));
+      return (0,_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_18__.moveElements)(response, destination, _objectSpread({}, props.restInfo));
     }).then(function (response) {
       var movedItems = response.success,
         notMovedItems = response.fail;
@@ -5305,7 +5387,7 @@ var ContentTreeModule = function ContentTreeModule(props) {
       id: sourceIds
     }).then(function (response) {
       var destination = "/".concat(item.path);
-      return (0,_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_16__.copyElements)(response, destination, _objectSpread({}, props.restInfo));
+      return (0,_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_18__.copyElements)(response, destination, _objectSpread({}, props.restInfo));
     }).then(function (response) {
       var copiedItems = response.success,
         notCopiedItems = response.fail;
@@ -5361,20 +5443,20 @@ var ContentTreeModule = function ContentTreeModule(props) {
     return findLocationsByIdWrapper({
       id: sourceIds
     }).then(function (response) {
-      return (0,_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_16__.deleteElements)(response, _objectSpread(_objectSpread({}, props.restInfo), {}, {
+      return (0,_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_18__.deleteElements)(response, _objectSpread(_objectSpread({}, props.restInfo), {}, {
         contentTypes: contentTypesInfoMap
       }));
     }).then(function (response) {
       var deletedItems = response.success,
         notDeletedItems = response.fail;
       if (notDeletedItems.length) {
-        var _getNotDeletedItemsDa = (0,_common_helpers_notifications__WEBPACK_IMPORTED_MODULE_19__.getNotDeletedItemsData)(notDeletedItems, deletedItems, _common_helpers_getters__WEBPACK_IMPORTED_MODULE_17__.isUser.bind(null, contentTypesInfoMap)),
+        var _getNotDeletedItemsDa = (0,_common_helpers_notifications__WEBPACK_IMPORTED_MODULE_21__.getNotDeletedItemsData)(notDeletedItems, deletedItems, _common_helpers_getters__WEBPACK_IMPORTED_MODULE_19__.isUser.bind(null, contentTypesInfoMap)),
           message = _getNotDeletedItemsDa.message;
         window.ibexa.helpers.notification.showWarningNotification(message);
       } else {
-        var anyUserContentItemDeleted = deletedItems.some(_common_helpers_getters__WEBPACK_IMPORTED_MODULE_17__.isUser.bind(null, contentTypesInfoMap));
+        var anyUserContentItemDeleted = deletedItems.some(_common_helpers_getters__WEBPACK_IMPORTED_MODULE_19__.isUser.bind(null, contentTypesInfoMap));
         var anyNonUserContentItemDeleted = deletedItems.some(function (location) {
-          return !(0,_common_helpers_getters__WEBPACK_IMPORTED_MODULE_17__.isUser)(contentTypesInfoMap, location);
+          return !(0,_common_helpers_getters__WEBPACK_IMPORTED_MODULE_19__.isUser)(contentTypesInfoMap, location);
         });
         var _message3 = null;
         if (anyUserContentItemDeleted && anyNonUserContentItemDeleted) {
@@ -5397,7 +5479,7 @@ var ContentTreeModule = function ContentTreeModule(props) {
         }).then(function (_ref5) {
           var _ref6 = _slicedToArray(_ref5, 1),
             nodeResponse = _ref6[0];
-          window.location.href = (0,_common_helpers_getters__WEBPACK_IMPORTED_MODULE_17__.getContentLink)({
+          window.location.href = (0,_common_helpers_getters__WEBPACK_IMPORTED_MODULE_19__.getContentLink)({
             contentId: nodeResponse.ContentInfo.Content._id,
             locationId: nodeResponse.id
           });
@@ -5411,22 +5493,22 @@ var ContentTreeModule = function ContentTreeModule(props) {
     return item.internalItem.locationId === getCurrentLocationId();
   };
   var loadMoreSubitems = function loadMoreSubitems(item) {
-    return (0,_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_16__.loadLocationItems)(_objectSpread(_objectSpread({}, props.restInfo), {}, {
+    return (0,_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_18__.loadLocationItems)(_objectSpread(_objectSpread({}, props.restInfo), {}, {
       parentLocationId: item.internalItem.locationId,
       limit: props.subitemsLoadLimit,
       offset: item.internalItem.subitems.length
     })).then(function (location) {
       setTree(function (prevTree) {
-        var prevTreeParentItem = (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_18__.findItem)([prevTree], item.internalItem.path.split('/'));
+        var prevTreeParentItem = (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_20__.findItem)([prevTree], item.internalItem.path.split('/'));
         if (prevTreeParentItem) {
-          var nextTree = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(prevTree);
-          var nextTreeParentItem = (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_18__.findItem)([nextTree], item.internalItem.path.split('/'));
+          var nextTree = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper_js__WEBPACK_IMPORTED_MODULE_3__["default"])(prevTree);
+          var nextTreeParentItem = (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_20__.findItem)([nextTree], item.internalItem.path.split('/'));
           nextTreeParentItem.subitems = [].concat(_toConsumableArray(nextTreeParentItem.subitems), _toConsumableArray(location.subitems)).map(function (subitem) {
             return _objectSpread(_objectSpread({}, subitem), {}, {
               path: "".concat(nextTreeParentItem.path, "/").concat(subitem.locationId)
             });
           });
-          (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_18__.updateItemInSubtree)(subtree.current[0], nextTreeParentItem, item.internalItem.path.split('/'));
+          (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_20__.updateItemInSubtree)(subtree.current[0], nextTreeParentItem, item.internalItem.path.split('/'));
           saveSubtree();
           return nextTree;
         }
@@ -5438,7 +5520,7 @@ var ContentTreeModule = function ContentTreeModule(props) {
     var children = item.children,
       total = item.total,
       isRootItem = item.isRootItem;
-    var className = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_4__.createCssClassNames)({
+    var className = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_5__.createCssClassNames)({
       'c-ct-list-item': true,
       'c-ct-list-item--can-load-more': children && children.length < total,
       'c-ct-list-item--is-root-item': isRootItem
@@ -5468,7 +5550,7 @@ var ContentTreeModule = function ContentTreeModule(props) {
       internalItem: item,
       name: item.name,
       id: item.locationId,
-      href: (0,_common_helpers_getters__WEBPACK_IMPORTED_MODULE_17__.getContentLink)(item),
+      href: (0,_common_helpers_getters__WEBPACK_IMPORTED_MODULE_19__.getContentLink)(item),
       path: item.path,
       subitems: item.subitems,
       total: item.totalSubitemsCount,
@@ -5480,34 +5562,22 @@ var ContentTreeModule = function ContentTreeModule(props) {
   };
   var moduleName = Translator.trans(/*@Desc("Content tree")*/'content.tree_name', {}, 'ibexa_content_tree_ui');
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    (0,_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_16__.loadContentTypes)(props.restInfo.siteaccess).then(function (response) {
-      var contentTypesMap = response.ContentTypeInfoList.ContentType.reduce(function (contentTypesList, item) {
-        contentTypesList[item._href] = item;
-        return contentTypesList;
-      }, {});
-      setContentTypesInfoMap(contentTypesMap);
-    })["catch"](function () {
-      var errorMessage = Translator.trans(/*@Desc("Cannot load content types")*/'load_content_types.error', {}, 'ibexa_content_tree_ui');
-      ibexa.helpers.notification.showErrorNotification(errorMessage);
-    });
-  }, []);
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     var subtreeData = readSubtree();
     if (subtreeData) {
       subtree.current = subtreeData;
     }
-    (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_18__.expandCurrentLocationInSubtree)({
+    (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_20__.expandCurrentLocationInSubtree)({
       subtree: subtree.current,
       rootLocationId: rootLocationId,
       currentLocationPath: currentLocationPath,
       subitemsLimit: subitemsLimit
     });
-    (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_18__.clipTooDeepSubtreeBranches)({
+    (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_20__.clipTooDeepSubtreeBranches)({
       subtree: subtree.current[0],
       maxDepth: treeMaxDepth - 1
     });
     subtree.current[0].children.forEach(function (subtreeChild) {
-      return (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_18__.limitSubitemsInSubtree)({
+      return (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_20__.limitSubitemsInSubtree)({
         subtree: subtreeChild,
         subitemsLimit: subitemsLimit
       });
@@ -5543,7 +5613,7 @@ var ContentTreeModule = function ContentTreeModule(props) {
     callbackDeleteElements: callbackDeleteElements,
     subitemsLimit: subitemsLimit,
     treeDepthLimit: treeMaxDepth,
-    actionsType: _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_TYPE.CONTEXTUAL_MENU,
+    actionsType: _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_TYPE.CONTEXTUAL_MENU,
     dragDisabled: true,
     isLoading: !isLoaded,
     useTheme: true
@@ -5585,39 +5655,39 @@ var treeBuilderConfig = _defineProperty({}, MODULE_ID, {
     subitems: [{
       priority: 10,
       id: 'create',
-      component: _components_create_content_create_content__WEBPACK_IMPORTED_MODULE_12__["default"],
-      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_PARENT.SINGLE_ITEM],
-      fetchMethods: [_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_16__.loadLocationItemExtendedInfo]
+      component: _components_create_content_create_content__WEBPACK_IMPORTED_MODULE_14__["default"],
+      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_PARENT.SINGLE_ITEM],
+      fetchMethods: [_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_18__.loadLocationItemExtendedInfo]
     }, {
       priority: 20,
       id: 'edit',
-      component: _components_edit_content_edit_content__WEBPACK_IMPORTED_MODULE_13__["default"],
-      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_PARENT.SINGLE_ITEM],
-      fetchMethods: [_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_16__.loadLocationItemExtendedInfo]
+      component: _components_edit_content_edit_content__WEBPACK_IMPORTED_MODULE_15__["default"],
+      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_PARENT.SINGLE_ITEM],
+      fetchMethods: [_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_18__.loadLocationItemExtendedInfo]
     }, {
       priority: 20,
       id: 'preview',
-      component: _components_preview_content_preview_content_js__WEBPACK_IMPORTED_MODULE_20__["default"],
-      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_PARENT.SINGLE_ITEM],
-      fetchMethods: [_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_16__.loadLocationItemExtendedInfo]
+      component: _components_preview_content_preview_content_js__WEBPACK_IMPORTED_MODULE_22__["default"],
+      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_PARENT.SINGLE_ITEM],
+      fetchMethods: [_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_18__.loadLocationItemExtendedInfo]
     }, {
       priority: 30,
       id: 'delete',
-      component: _components_delete_content_delete_content__WEBPACK_IMPORTED_MODULE_15__["default"],
-      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_PARENT.SINGLE_ITEM],
-      fetchMethods: [_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_16__.loadLocationItemExtendedInfo]
+      component: _components_delete_content_delete_content__WEBPACK_IMPORTED_MODULE_17__["default"],
+      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_PARENT.SINGLE_ITEM],
+      fetchMethods: [_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_18__.loadLocationItemExtendedInfo]
     }, {
       priority: 40,
       id: 'addTranslation',
-      component: _components_add_translation_add_translation__WEBPACK_IMPORTED_MODULE_11__["default"],
-      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_PARENT.SINGLE_ITEM],
-      fetchMethods: [_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_16__.loadLocationItemExtendedInfo]
+      component: _components_add_translation_add_translation__WEBPACK_IMPORTED_MODULE_13__["default"],
+      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_PARENT.SINGLE_ITEM],
+      fetchMethods: [_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_18__.loadLocationItemExtendedInfo]
     }, {
       priority: 50,
       id: 'hide',
-      component: _components_hide_content_hide_content__WEBPACK_IMPORTED_MODULE_14__["default"],
-      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_PARENT.SINGLE_ITEM],
-      fetchMethods: [_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_16__.loadLocationItemExtendedInfo]
+      component: _components_hide_content_hide_content__WEBPACK_IMPORTED_MODULE_16__["default"],
+      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_PARENT.SINGLE_ITEM],
+      fetchMethods: [_common_services_content_tree_service__WEBPACK_IMPORTED_MODULE_18__.loadLocationItemExtendedInfo]
     }]
   }, {
     priority: 25,
@@ -5625,18 +5695,18 @@ var treeBuilderConfig = _defineProperty({}, MODULE_ID, {
     subitems: [{
       priority: 10,
       id: 'addRemoveBookmarks',
-      component: _components_add_remove_bookmarks_add_remove_bookmarks__WEBPACK_IMPORTED_MODULE_10__["default"],
-      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_PARENT.SINGLE_ITEM]
+      component: _components_add_remove_bookmarks_add_remove_bookmarks__WEBPACK_IMPORTED_MODULE_12__["default"],
+      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_PARENT.SINGLE_ITEM]
     }, {
       priority: 100,
       id: 'addBookmarks',
-      component: _components_add_to_bookmarks_add_to_bookmarks_js__WEBPACK_IMPORTED_MODULE_22__["default"],
-      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_PARENT.TOP_MENU]
+      component: _components_add_to_bookmarks_add_to_bookmarks_js__WEBPACK_IMPORTED_MODULE_24__["default"],
+      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_PARENT.TOP_MENU]
     }, {
       priority: 200,
       id: 'removeBookmarks',
-      component: _components_remove_from_bookmarks_remove_from_bookmarks_js__WEBPACK_IMPORTED_MODULE_21__["default"],
-      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_PARENT.TOP_MENU]
+      component: _components_remove_from_bookmarks_remove_from_bookmarks_js__WEBPACK_IMPORTED_MODULE_23__["default"],
+      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_PARENT.TOP_MENU]
     }]
   }, {
     priority: 30,
@@ -5644,8 +5714,9 @@ var treeBuilderConfig = _defineProperty({}, MODULE_ID, {
     subitems: [{
       priority: 20,
       id: 'collapse',
-      component: _components_collapse_all_collapse_all_js__WEBPACK_IMPORTED_MODULE_9__["default"],
-      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_PARENT.TOP_MENU, _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_PARENT.SINGLE_ITEM]
+      component: _components_collapse_all_collapse_all_js__WEBPACK_IMPORTED_MODULE_11__["default"],
+      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_PARENT.TOP_MENU, _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_PARENT.SINGLE_ITEM],
+      checkIsContainer: _common_helpers_content_type__WEBPACK_IMPORTED_MODULE_8__.checkIsContainer
     }]
   }, {
     priority: 40,
@@ -5653,13 +5724,15 @@ var treeBuilderConfig = _defineProperty({}, MODULE_ID, {
     subitems: [{
       priority: 10,
       id: 'select',
-      component: _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_actions_select_all_select_all__WEBPACK_IMPORTED_MODULE_7__["default"],
-      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_PARENT.TOP_MENU, _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_PARENT.SINGLE_ITEM]
+      component: _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_actions_select_all_select_all__WEBPACK_IMPORTED_MODULE_9__["default"],
+      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_PARENT.TOP_MENU, _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_PARENT.SINGLE_ITEM],
+      checkIsContainer: _common_helpers_content_type__WEBPACK_IMPORTED_MODULE_8__.checkIsContainer
     }, {
       priority: 20,
       id: 'unselect',
-      component: _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_actions_unselect_all_unselect_all__WEBPACK_IMPORTED_MODULE_8__["default"],
-      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_PARENT.TOP_MENU, _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_6__.ACTION_PARENT.SINGLE_ITEM]
+      component: _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_actions_unselect_all_unselect_all__WEBPACK_IMPORTED_MODULE_10__["default"],
+      visibleIn: [_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_PARENT.TOP_MENU, _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_tree_builder_module__WEBPACK_IMPORTED_MODULE_7__.ACTION_PARENT.SINGLE_ITEM],
+      checkIsContainer: _common_helpers_content_type__WEBPACK_IMPORTED_MODULE_8__.checkIsContainer
     }]
   }]
 });
@@ -5701,14 +5774,21 @@ var CollapseAll = function CollapseAll(_ref) {
   var item = _ref.item,
     label = _ref.label,
     useIconAsLabel = _ref.useIconAsLabel,
-    afterCollapseCallback = _ref.afterCollapseCallback;
+    afterCollapseCallback = _ref.afterCollapseCallback,
+    checkIsContainer = _ref.checkIsContainer;
   var buildItem = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_tree_builder_module__WEBPACK_IMPORTED_MODULE_4__.BuildItemContext);
   var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_components_local_storage_expand_connector_local_storage_expand_connector__WEBPACK_IMPORTED_MODULE_3__.ExpandContext),
     dispatchExpandedData = _useContext.dispatchExpandedData;
   var tree = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_tree_builder_module__WEBPACK_IMPORTED_MODULE_4__.TreeContext);
+  var isMultipleItemsAction = (0,_helpers_item__WEBPACK_IMPORTED_MODULE_7__.isItemEmpty)(item);
+  var isHidden = !isMultipleItemsAction && !checkIsContainer(item);
+  if (isHidden) {
+    return null;
+  }
+  var isDisabled = !isMultipleItemsAction ? item.internalItem.totalSubitemsCount === 0 : false;
   var itemLabel = label || Translator.trans(/*@Desc("Collapse all")*/
   'actions.collapse_all', {}, 'ibexa_tree_builder_ui');
-  var data = (0,_helpers_item__WEBPACK_IMPORTED_MODULE_7__.isItemEmpty)(item) ? tree : item;
+  var data = isMultipleItemsAction ? tree : item;
   var canItemBeExpanded = function canItemBeExpanded(itemToCollapse) {
     return !!itemToCollapse.subitems && itemToCollapse.subitems.length;
   };
@@ -5728,20 +5808,25 @@ var CollapseAll = function CollapseAll(_ref) {
     label: itemLabel,
     labelIcon: "caret-up",
     useIconAsLabel: useIconAsLabel,
-    onClick: collapseAllNodes
+    onClick: collapseAllNodes,
+    isDisabled: isDisabled
   });
 };
 CollapseAll.propTypes = {
   item: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object),
   label: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().node),
   useIconAsLabel: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
-  afterCollapseCallback: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func)
+  afterCollapseCallback: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func),
+  checkIsContainer: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func)
 };
 CollapseAll.defaultProps = {
   item: {},
   label: null,
   useIconAsLabel: false,
-  afterCollapseCallback: function afterCollapseCallback() {}
+  afterCollapseCallback: function afterCollapseCallback() {},
+  checkIsContainer: function checkIsContainer() {
+    return false;
+  }
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (CollapseAll);
 
@@ -5962,7 +6047,8 @@ var _window = window,
 var SelectAll = function SelectAll(_ref) {
   var item = _ref.item,
     label = _ref.label,
-    useIconAsLabel = _ref.useIconAsLabel;
+    useIconAsLabel = _ref.useIconAsLabel,
+    checkIsContainer = _ref.checkIsContainer;
   var buildItem = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_tree_builder_module__WEBPACK_IMPORTED_MODULE_3__.BuildItemContext);
   var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_components_selected_provider_selected_provider__WEBPACK_IMPORTED_MODULE_4__.SelectedContext),
     dispatchSelectedData = _useContext.dispatchSelectedData;
@@ -5972,6 +6058,11 @@ var SelectAll = function SelectAll(_ref) {
   var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_tree_builder_module__WEBPACK_IMPORTED_MODULE_3__.DelayedChildrenSelectContext),
     dispatchDelayedChildrenSelectAction = _useContext3.dispatchDelayedChildrenSelectAction;
   var isMultipleItemsAction = (0,_helpers_item__WEBPACK_IMPORTED_MODULE_6__.isItemEmpty)(item);
+  var isHidden = !isMultipleItemsAction && !checkIsContainer(item);
+  if (isHidden) {
+    return null;
+  }
+  var isDisabled = !isMultipleItemsAction ? item.internalItem.totalSubitemsCount === 0 : tree === null;
   var getDefaultLabel = function getDefaultLabel() {
     if (isMultipleItemsAction) {
       return Translator.trans(/*@Desc("Select all elements")*/
@@ -5981,7 +6072,7 @@ var SelectAll = function SelectAll(_ref) {
     'actions.select.all', {}, 'ibexa_tree_builder_ui');
   };
   var itemLabel = label || getDefaultLabel();
-  if (isMultipleItemsAction && tree === null) {
+  if (isDisabled) {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_action_list_item_action_list_item__WEBPACK_IMPORTED_MODULE_2__["default"], {
       label: itemLabel,
       labelIcon: "checkmark",
@@ -6024,12 +6115,16 @@ var SelectAll = function SelectAll(_ref) {
 SelectAll.propTypes = {
   item: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object),
   label: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().node),
-  useIconAsLabel: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool)
+  useIconAsLabel: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  checkIsContainer: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func)
 };
 SelectAll.defaultProps = {
   item: {},
   label: null,
-  useIconAsLabel: false
+  useIconAsLabel: false,
+  checkIsContainer: function checkIsContainer() {
+    return false;
+  }
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SelectAll);
 
@@ -6068,12 +6163,18 @@ var _window = window,
 var UnselectAll = function UnselectAll(_ref) {
   var item = _ref.item,
     label = _ref.label,
-    useIconAsLabel = _ref.useIconAsLabel;
+    useIconAsLabel = _ref.useIconAsLabel,
+    checkIsContainer = _ref.checkIsContainer;
   var buildItem = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_tree_builder_module__WEBPACK_IMPORTED_MODULE_3__.BuildItemContext);
   var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_components_selected_provider_selected_provider__WEBPACK_IMPORTED_MODULE_4__.SelectedContext),
     dispatchSelectedData = _useContext.dispatchSelectedData;
   var tree = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_tree_builder_module__WEBPACK_IMPORTED_MODULE_3__.TreeContext);
   var isMultipleItemsAction = (0,_helpers_item__WEBPACK_IMPORTED_MODULE_7__.isItemEmpty)(item);
+  var isHidden = !isMultipleItemsAction && !checkIsContainer(item);
+  if (isHidden) {
+    return null;
+  }
+  var isDisabled = !isMultipleItemsAction ? item.internalItem.totalSubitemsCount === 0 : tree === null;
   var getDefaultLabel = function getDefaultLabel() {
     if ((0,_helpers_item__WEBPACK_IMPORTED_MODULE_7__.isItemEmpty)(item)) {
       return Translator.trans(/*@Desc("Unselect all elements")*/
@@ -6083,7 +6184,7 @@ var UnselectAll = function UnselectAll(_ref) {
     'actions.unselect.all', {}, 'ibexa_tree_builder_ui');
   };
   var itemLabel = label || getDefaultLabel();
-  if (isMultipleItemsAction && tree === null) {
+  if (isDisabled) {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_action_list_item_action_list_item__WEBPACK_IMPORTED_MODULE_2__["default"], {
       label: itemLabel,
       labelIcon: "checkmark",
@@ -6112,12 +6213,16 @@ var UnselectAll = function UnselectAll(_ref) {
 UnselectAll.propTypes = {
   item: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object),
   label: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().node),
-  useIconAsLabel: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool)
+  useIconAsLabel: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  checkIsContainer: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func)
 };
 UnselectAll.defaultProps = {
   item: {},
   label: null,
-  useIconAsLabel: false
+  useIconAsLabel: false,
+  checkIsContainer: function checkIsContainer() {
+    return false;
+  }
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (UnselectAll);
 
@@ -6375,10 +6480,14 @@ var ActionList = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.forwardRef)(
         forcedProps = menuItem.forcedProps,
         fetchMethods = menuItem.fetchMethods;
       if (subitems) {
-        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("ul", {
-          className: "c-tb-action-list__list",
-          key: id
-        }, _renderSubmenu(subitems));
+        var hasAnyChildren = subitems.length;
+        if (hasAnyChildren) {
+          return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("ul", {
+            className: "c-tb-action-list__list",
+            key: id
+          }, _renderSubmenu(subitems));
+        }
+        return null;
       }
       var Component = component;
       var fetchedDataMap = allFetchedData.filter(function (_ref2) {
@@ -6607,7 +6716,7 @@ var ContextualMenu = function ContextualMenu(_ref) {
         menuPortalHeight = _menuPortalRef$curren.height;
       var _itemElement$getBound2 = itemElement.getBoundingClientRect(),
         itemYPosition = _itemElement$getBound2.y;
-      if (itemYPosition + menuPortalHeight > window.innerHeight) {
+      if (itemYPosition + menuPortalHeight > window.innerHeight && itemYPosition >= menuPortalHeight) {
         setMenuDirection(function (prevPosition) {
           return _objectSpread(_objectSpread({}, prevPosition), {}, {
             vertical: MENU_DIRECTION.VERTICAL.TOP
@@ -6979,6 +7088,9 @@ var Header = function Header(_ref) {
   var containerWidth = (_widthContainer$resiz = widthContainer.resizedContainerWidth) !== null && _widthContainer$resiz !== void 0 ? _widthContainer$resiz : widthContainer.containerWidth;
   var isCollapsed = (0,_width_container_width_container__WEBPACK_IMPORTED_MODULE_5__.checkIsTreeCollapsed)(containerWidth);
   var toggleWidthContainer = function toggleWidthContainer() {
+    if (!isCollapsed) {
+      setIsExpanded(false);
+    }
     setWidthContainer(function (prevState) {
       return _objectSpread(_objectSpread({}, prevState), {}, {
         containerWidth: isCollapsed ? EXPANDED_WIDTH : COLLAPSED_WIDTH
@@ -7707,7 +7819,7 @@ var ListItemSingle = function ListItemSingle(_ref) {
       onClick: onLabelClick
     };
     var label = getLabel();
-    if (!item.href) {
+    if (!item.href || isDisabled) {
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", labelProps, getIconChoice(), label, getHiddenInfo());
     }
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", labelProps, getIconChoice(), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", {
@@ -7844,7 +7956,7 @@ var ListItemSingle = function ListItemSingle(_ref) {
     'c-tb-list-item-single--has-sub-items': item.total,
     'c-tb-list-item-single--hovered': isHovered && !isDragging && !isQuickEditModeEnabled && !isQuickCreateModeEnabled && !(dragItemDisabled && actionsDisabled),
     'c-tb-list-item-single--highlighted': showHighlight,
-    'c-tb-list-item-single--clickable': item.href || item.onItemClick,
+    'c-tb-list-item-single--clickable': (item.href || item.onItemClick) && !isDisabled,
     'c-tb-list-item-single--disabled': isDisabled,
     'c-tb-list-item-single--expanded': isExpanded,
     'c-tb-list-item-single--active': isItemActive,
@@ -8883,6 +8995,8 @@ var Search = function Search(_ref) {
     className: "c-tb-search"
   }, !isCollapsed && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "ibexa-input-text-wrapper ibexa-input-text-wrapper--search"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-input-text-wrapper__input-wrapper"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
     type: "text",
     className: "form-control ibexa-input ibexa-input--text ibexa-input--small",
@@ -8910,7 +9024,7 @@ var Search = function Search(_ref) {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
     name: "search",
     extraClasses: "ibexa-icon ibexa-icon--small"
-  })))));
+  }))))));
 };
 Search.propTypes = {
   onSearchInputChange: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func).isRequired,
@@ -8953,16 +9067,21 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 var SelectedContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
-var getStateHash = function getStateHash(state) {
-  return state.map(function (item) {
-    return item.id;
-  }).join('_');
+var generateObjectHash = function generateObjectHash(obj) {
+  var str = JSON.stringify(obj);
+  var hash = 0;
+  for (var i = 0, len = str.length; i < len; i++) {
+    var chr = str.charCodeAt(i);
+    hash = (hash << 5) - hash + chr;
+    hash |= 0;
+  }
+  return hash;
 };
 var SelectedProvider = function SelectedProvider(_ref) {
   var children = _ref.children,
     initiallySelectedItemsIds = _ref.initiallySelectedItemsIds;
   var rootDOMElement = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getRootDOMElement)();
-  var prevSelectedDataHashRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(getStateHash([]));
+  var prevSelectedDataHashRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(generateObjectHash([]));
   var prevInitialItemsIds = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)('');
   var moduleId = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_tree_builder_module__WEBPACK_IMPORTED_MODULE_3__.ModuleIdContext);
   var _useStoredItemsReduce = (0,_hooks_useStoredItemsReducer__WEBPACK_IMPORTED_MODULE_4__["default"])(),
@@ -8989,7 +9108,7 @@ var SelectedProvider = function SelectedProvider(_ref) {
     }
   }, [initiallySelectedItemsIds]);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    var currentSelectedDataHash = getStateHash(selectedData);
+    var currentSelectedDataHash = generateObjectHash(selectedData);
     var areSetsEqual = prevSelectedDataHashRef.current === currentSelectedDataHash;
     if (!areSetsEqual) {
       rootDOMElement.dispatchEvent(new CustomEvent('ibexa-tb-update-selected', {
@@ -9431,11 +9550,18 @@ var saveData = function saveData(_ref2) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   buildGetMenuActionsList: () => (/* binding */ buildGetMenuActionsList),
 /* harmony export */   getAllChildren: () => (/* binding */ getAllChildren),
 /* harmony export */   getMenuActions: () => (/* binding */ _getMenuActions)
 /* harmony export */ });
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
@@ -9443,16 +9569,20 @@ function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" 
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 
 var EXCLUDED_ACTION_IDS = ['preview'];
+var HIDE_REVEAL_ACTION_ID = 'hide';
 var isActionExcluded = function isActionExcluded(_ref) {
   var action = _ref.action,
     item = _ref.item,
     previewExcludedItemPath = _ref.previewExcludedItemPath;
-  if (!item.internalItem || !EXCLUDED_ACTION_IDS.includes(action.id)) {
+  var internalItem = item.internalItem;
+  if (action.id === HIDE_REVEAL_ACTION_ID && item.internalItem && item.internalItem.isInvisible && !item.internalItem.isHidden) {
+    return true;
+  }
+  if (!internalItem || !EXCLUDED_ACTION_IDS.includes(action.id)) {
     return false;
   }
-  var pathString = item.internalItem.pathString;
-  return previewExcludedItemPath.some(function (excludedPath) {
-    return pathString.startsWith(excludedPath);
+  return previewExcludedItemPath.length && previewExcludedItemPath.some(function (excludedPath) {
+    return internalItem.pathString.startsWith(excludedPath);
   });
 };
 var _getMenuActions = function getMenuActions(_ref2) {
@@ -9463,7 +9593,7 @@ var _getMenuActions = function getMenuActions(_ref2) {
     activeActionsIds = _ref2$activeActionsId === void 0 ? [] : _ref2$activeActionsId,
     _ref2$previewExcluded = _ref2.previewExcludedItemPath,
     previewExcludedItemPath = _ref2$previewExcluded === void 0 ? (_getAdminUiConfig$sit = (_getAdminUiConfig$sit2 = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_0__.getAdminUiConfig)().siteContext) === null || _getAdminUiConfig$sit2 === void 0 ? void 0 : _getAdminUiConfig$sit2.excludedPaths) !== null && _getAdminUiConfig$sit !== void 0 ? _getAdminUiConfig$sit : [] : _ref2$previewExcluded;
-  var filteredActions = previewExcludedItemPath.length && item ? actions.filter(function (action) {
+  var filteredActions = item ? actions.filter(function (action) {
     return !isActionExcluded({
       action: action,
       item: item,
@@ -9505,6 +9635,26 @@ var getAllChildren = function getAllChildren(_ref3) {
   };
   _getAllChildrenHelper([data]);
   return output;
+};
+var buildGetMenuActionsList = function buildGetMenuActionsList(treeBuilderConfig, builtinGetMenuActions) {
+  var _treeBuilderConfig$ge;
+  var unorderedGetMenuActionsList = [{
+    priority: 100,
+    callback: builtinGetMenuActions
+  }].concat(_toConsumableArray((_treeBuilderConfig$ge = treeBuilderConfig === null || treeBuilderConfig === void 0 ? void 0 : treeBuilderConfig.getMenuActions) !== null && _treeBuilderConfig$ge !== void 0 ? _treeBuilderConfig$ge : []));
+  var orderedGetMenuActionsList = unorderedGetMenuActionsList.toSorted(function (_ref4, _ref5) {
+    var priorityA = _ref4.priority;
+    var priorityB = _ref5.priority;
+    return priorityA - priorityB;
+  });
+  return function (menuActionArg) {
+    var output = menuActionArg;
+    orderedGetMenuActionsList.forEach(function (_ref6) {
+      var callback = _ref6.callback;
+      output = callback(output);
+    });
+    return output;
+  };
 };
 
 /***/ }),
@@ -9897,7 +10047,7 @@ var QUICK_ACTION_MODES = {
 var _window = window,
   ibexa = _window.ibexa;
 var TreeBuilderModule = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.forwardRef)(function (_ref, ref) {
-  var _ibexa$treeBuilder;
+  var _ibexa$treeBuilder, _ibexa$treeBuilder2;
   var actionsType = _ref.actionsType,
     actionsVisible = _ref.actionsVisible,
     callbackAddElement = _ref.callbackAddElement,
@@ -9985,8 +10135,8 @@ var TreeBuilderModule = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.forwa
   var menuActionsContextData = {
     actionsType: actionsType,
     actionsVisible: actionsVisible,
-    getMenuActions: getMenuActions,
-    actions: moduleMenuActions || (ibexa === null || ibexa === void 0 || (_ibexa$treeBuilder = ibexa.treeBuilder) === null || _ibexa$treeBuilder === void 0 || (_ibexa$treeBuilder = _ibexa$treeBuilder[moduleId]) === null || _ibexa$treeBuilder === void 0 ? void 0 : _ibexa$treeBuilder.menuActions) || []
+    getMenuActions: (0,_helpers_tree__WEBPACK_IMPORTED_MODULE_15__.buildGetMenuActionsList)(ibexa === null || ibexa === void 0 || (_ibexa$treeBuilder = ibexa.treeBuilder) === null || _ibexa$treeBuilder === void 0 ? void 0 : _ibexa$treeBuilder[moduleId], getMenuActions),
+    actions: moduleMenuActions || (ibexa === null || ibexa === void 0 || (_ibexa$treeBuilder2 = ibexa.treeBuilder) === null || _ibexa$treeBuilder2 === void 0 || (_ibexa$treeBuilder2 = _ibexa$treeBuilder2[moduleId]) === null || _ibexa$treeBuilder2 === void 0 ? void 0 : _ibexa$treeBuilder2.menuActions) || []
   };
   var treeClassName = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__.createCssClassNames)(_defineProperty({
     'c-tb-tree': true,

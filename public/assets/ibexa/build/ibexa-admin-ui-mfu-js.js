@@ -42,6 +42,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   createContentTypeDataMapByHref: () => (/* binding */ createContentTypeDataMapByHref),
 /* harmony export */   getContentTypeData: () => (/* binding */ getContentTypeData),
 /* harmony export */   getContentTypeDataByHref: () => (/* binding */ getContentTypeDataByHref),
+/* harmony export */   getContentTypeDataMapByHref: () => (/* binding */ getContentTypeDataMapByHref),
 /* harmony export */   getContentTypeIconUrl: () => (/* binding */ getContentTypeIconUrl),
 /* harmony export */   getContentTypeIconUrlByHref: () => (/* binding */ getContentTypeIconUrlByHref),
 /* harmony export */   getContentTypeIdentifierByHref: () => (/* binding */ getContentTypeIdentifierByHref),
@@ -95,6 +96,12 @@ var createContentTypeDataMapByHref = function createContentTypeDataMapByHref() {
     }
     return contentTypeDataMapByHref;
   }, {});
+};
+var getContentTypeDataMapByHref = function getContentTypeDataMapByHref() {
+  if (!contentTypesDataMapByHref) {
+    contentTypesDataMapByHref = createContentTypeDataMapByHref();
+  }
+  return contentTypesDataMapByHref;
 };
 
 /**
@@ -356,34 +363,44 @@ function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyri
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 
-var getErrorMessage = function getErrorMessage(response) {
+var defaultGetErrorMessage = function defaultGetErrorMessage() {
+  var error = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return error.errorMessage;
+};
+var getErrorMessageObject = function getErrorMessageObject(response) {
   var responseErrorMessage = response.json().then(function (jsonResponse) {
     var _jsonResponse$ErrorMe;
-    return (_jsonResponse$ErrorMe = jsonResponse.ErrorMessage) === null || _jsonResponse$ErrorMe === void 0 ? void 0 : _jsonResponse$ErrorMe.errorMessage;
+    return (_jsonResponse$ErrorMe = jsonResponse.ErrorMessage) !== null && _jsonResponse$ErrorMe !== void 0 ? _jsonResponse$ErrorMe : jsonResponse;
   });
   return responseErrorMessage;
 };
 var handleRequest = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(response) {
-    var Translator, responseErrorMessage, errorMessage, defaultErrorMsg;
+    var getErrorMessage,
+      Translator,
+      responseErrorMessageObject,
+      errorMessage,
+      defaultErrorMsg,
+      _args = arguments;
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
+          getErrorMessage = _args.length > 1 && _args[1] !== undefined ? _args[1] : defaultGetErrorMessage;
           if (response.ok) {
-            _context.next = 8;
+            _context.next = 9;
             break;
           }
           Translator = (0,_context_helper__WEBPACK_IMPORTED_MODULE_0__.getTranslator)();
-          _context.next = 4;
-          return getErrorMessage(response);
-        case 4:
-          responseErrorMessage = _context.sent;
-          errorMessage = responseErrorMessage || response.statusText;
+          _context.next = 5;
+          return getErrorMessageObject(response);
+        case 5:
+          responseErrorMessageObject = _context.sent;
+          errorMessage = getErrorMessage(responseErrorMessageObject) || response.statusText;
           defaultErrorMsg = Translator.trans(/*@Desc("Something went wrong. Try to refresh the page or contact your administrator.")*/'error.request.default_msg');
           throw Error(errorMessage || defaultErrorMsg);
-        case 8:
-          return _context.abrupt("return", response);
         case 9:
+          return _context.abrupt("return", response);
+        case 10:
         case "end":
           return _context.stop();
       }
@@ -394,13 +411,13 @@ var handleRequest = /*#__PURE__*/function () {
   };
 }();
 var getJsonFromResponse = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(response) {
+  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(response, getErrorMessage) {
     var parsedRequest;
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
           _context2.next = 2;
-          return handleRequest(response);
+          return handleRequest(response, getErrorMessage);
         case 2:
           parsedRequest = _context2.sent;
           return _context2.abrupt("return", parsedRequest.json());
@@ -410,7 +427,7 @@ var getJsonFromResponse = /*#__PURE__*/function () {
       }
     }, _callee2);
   }));
-  return function getJsonFromResponse(_x2) {
+  return function getJsonFromResponse(_x2, _x3) {
     return _ref2.apply(this, arguments);
   };
 }();
@@ -431,7 +448,7 @@ var getTextFromResponse = /*#__PURE__*/function () {
       }
     }, _callee3);
   }));
-  return function getTextFromResponse(_x3) {
+  return function getTextFromResponse(_x4) {
     return _ref3.apply(this, arguments);
   };
 }();
@@ -452,7 +469,7 @@ var getStatusFromResponse = /*#__PURE__*/function () {
       }
     }, _callee4);
   }));
-  return function getStatusFromResponse(_x4) {
+  return function getStatusFromResponse(_x5) {
     return _ref4.apply(this, arguments);
   };
 }();
@@ -511,41 +528,47 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 var _window = window,
   doc = _window.document;
-var lastInsertTooltipTarget = null;
 var TOOLTIPS_SELECTOR = '[title], [data-tooltip-title]';
 var observerConfig = {
   childList: true,
-  subtree: true
+  subtree: true,
+  attributes: true,
+  attributeFilter: ['title', 'data-tooltip-title', 'data-tooltip-extra-class', 'data-tooltip-manual-reparsing']
 };
+var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
 var resizeEllipsisObserver = new ResizeObserver(function (entries) {
   entries.forEach(function (entry) {
     parse(entry.target);
   });
 });
 var observer = new MutationObserver(function (mutationsList) {
-  if (lastInsertTooltipTarget) {
-    mutationsList.forEach(function (mutation) {
-      var addedNodes = mutation.addedNodes,
-        removedNodes = mutation.removedNodes;
-      if (addedNodes.length) {
-        addedNodes.forEach(function (addedNode) {
-          if (addedNode instanceof Element) {
-            parse(addedNode);
-          }
-        });
+  mutationsList.forEach(function (mutation) {
+    var type = mutation.type,
+      target = mutation.target,
+      addedNodes = mutation.addedNodes,
+      removedNodes = mutation.removedNodes;
+    if (type === 'attributes') {
+      var tooltipManualReparsing = target.dataset.tooltipManualReparsing;
+      if (!tooltipManualReparsing) {
+        parse(target.parentElement);
       }
-      if (removedNodes.length) {
-        removedNodes.forEach(function (removedNode) {
-          if (removedNode.classList && !removedNode.classList.contains('ibexa-tooltip')) {
-            lastInsertTooltipTarget = null;
-            doc.querySelectorAll('.ibexa-tooltip.show').forEach(function (tooltipNode) {
-              tooltipNode.remove();
-            });
-          }
+    }
+    addedNodes.forEach(function (addedNode) {
+      if (addedNode instanceof Element && !(addedNode !== null && addedNode !== void 0 && addedNode.classList.contains('ibexa-tooltip'))) {
+        parse(addedNode);
+      }
+    });
+    removedNodes.forEach(function (removedNode) {
+      if (removedNode.classList && !removedNode.classList.contains('ibexa-tooltip')) {
+        var triggeredNodes = removedNode.querySelectorAll("[data-bs-original-title]");
+        triggeredNodes.forEach(function (triggerBtn) {
+          var _tooltipInstance$tip;
+          var tooltipInstance = bootstrap.Tooltip.getOrCreateInstance(triggerBtn);
+          tooltipInstance === null || tooltipInstance === void 0 || (_tooltipInstance$tip = tooltipInstance.tip) === null || _tooltipInstance$tip === void 0 || _tooltipInstance$tip.remove();
         });
       }
     });
-  }
+  });
 });
 var modifyPopperConfig = function modifyPopperConfig(iframe, defaultBsPopperConfig) {
   if (!iframe) {
@@ -619,9 +642,13 @@ var isTitleEllipsized = function isTitleEllipsized(node) {
   var textHeight = getTextHeight(title, styles);
   return textHeight > nodeHeight;
 };
+var getContainer = function getContainer(tooltipNode) {
+  var tooltipContainerSelector = tooltipNode.dataset.tooltipContainerSelector;
+  var container = tooltipNode.closest(tooltipContainerSelector);
+  return container !== null && container !== void 0 ? container : doc.body;
+};
 var initializeTooltip = function initializeTooltip(tooltipNode, hasEllipsisStyle) {
   var _tooltipNode$dataset$, _tooltipNode$dataset$2, _tooltipNode$dataset$3;
-  var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
   var _tooltipNode$dataset = tooltipNode.dataset,
     delayShow = _tooltipNode$dataset.delayShow,
     delayHide = _tooltipNode$dataset.delayHide;
@@ -634,7 +661,7 @@ var initializeTooltip = function initializeTooltip(tooltipNode, hasEllipsisStyle
   var placement = (_tooltipNode$dataset$2 = tooltipNode.dataset.tooltipPlacement) !== null && _tooltipNode$dataset$2 !== void 0 ? _tooltipNode$dataset$2 : 'bottom';
   var trigger = (_tooltipNode$dataset$3 = tooltipNode.dataset.tooltipTrigger) !== null && _tooltipNode$dataset$3 !== void 0 ? _tooltipNode$dataset$3 : 'hover';
   var useHtml = tooltipNode.dataset.tooltipUseHtml !== undefined;
-  var container = tooltipNode.dataset.tooltipContainerSelector ? tooltipNode.closest(tooltipNode.dataset.tooltipContainerSelector) : 'body';
+  var container = getContainer(tooltipNode);
   var iframe = document.querySelector(tooltipNode.dataset.tooltipIframeSelector);
   new bootstrap.Tooltip(tooltipNode, {
     delay: delay,
@@ -644,9 +671,6 @@ var initializeTooltip = function initializeTooltip(tooltipNode, hasEllipsisStyle
     popperConfig: modifyPopperConfig.bind(null, iframe),
     html: useHtml,
     template: "<div class=\"tooltip ibexa-tooltip ".concat(extraClass, "\">\n                        <div class=\"tooltip-arrow ibexa-tooltip__arrow\"></div>\n                        <div class=\"tooltip-inner ibexa-tooltip__inner\"></div>\n                   </div>")
-  });
-  tooltipNode.addEventListener('inserted.bs.tooltip', function (event) {
-    lastInsertTooltipTarget = event.currentTarget;
   });
   if ((0,_browser_helper__WEBPACK_IMPORTED_MODULE_0__.isSafari)()) {
     if (tooltipNode.children) {
@@ -669,7 +693,6 @@ var parse = function parse() {
   if (!baseElement) {
     return;
   }
-  var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
   var tooltipNodes = _toConsumableArray(baseElement.querySelectorAll(TOOLTIPS_SELECTOR));
   if (baseElement instanceof Element) {
     tooltipNodes.push(baseElement);
@@ -725,7 +748,6 @@ var hideAll = function hideAll() {
   if (!baseElement) {
     return;
   }
-  var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
   var tooltipsNode = baseElement.querySelectorAll(TOOLTIPS_SELECTOR);
   var _iterator2 = _createForOfIteratorHelper(tooltipsNode),
     _step2;
@@ -823,7 +845,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
 /* harmony import */ var _helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
 /* harmony import */ var _urlIcon__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./urlIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/urlIcon.js");
-/* harmony import */ var _inculdedIcon__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./inculdedIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js");
+/* harmony import */ var _includedIcon__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./includedIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
@@ -839,7 +861,7 @@ var Icon = function Icon(props) {
     'ibexa-icon': true
   }, props.extraClasses, true));
   var isIconIncluded = props.useIncludedIcon || (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.isExternalInstance)();
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, isIconIncluded ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_inculdedIcon__WEBPACK_IMPORTED_MODULE_5__["default"], {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, isIconIncluded ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_includedIcon__WEBPACK_IMPORTED_MODULE_5__["default"], {
     cssClass: cssClass,
     name: props.name,
     defaultIconName: props.defaultIconName
@@ -867,9 +889,9 @@ Icon.defaultProps = {
 
 /***/ }),
 
-/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js":
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js":
 /*!*****************************************************************************************!*\
-  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js ***!
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js ***!
   \*****************************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -1023,7 +1045,7 @@ var iconsMap = {
   'upload-image': _ibexa_admin_ui_src_bundle_Resources_public_img_icons_upload_image_svg__WEBPACK_IMPORTED_MODULE_46__,
   warning: _ibexa_admin_ui_src_bundle_Resources_public_img_icons_warning_svg__WEBPACK_IMPORTED_MODULE_47__
 };
-var InculdedIcon = function InculdedIcon(props) {
+var IncludedIcon = function IncludedIcon(props) {
   var _iconsMap$name;
   var name = props.name,
     cssClass = props.cssClass,
@@ -1033,17 +1055,17 @@ var InculdedIcon = function InculdedIcon(props) {
     className: cssClass
   });
 };
-InculdedIcon.propTypes = {
+IncludedIcon.propTypes = {
   cssClass: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   name: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   defaultIconName: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string)
 };
-InculdedIcon.defaultProps = {
+IncludedIcon.defaultProps = {
   cssClass: '',
   name: 'about-info',
   defaultIconName: 'about-info'
 };
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (InculdedIcon);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (IncludedIcon);
 
 /***/ }),
 
@@ -2905,11 +2927,18 @@ var findFileTypeMapping = function findFileTypeMapping(mappings, file) {
     });
   });
 };
+var checkIsFileWithinMimeTypes = function checkIsFileWithinMimeTypes(mimeTypes, file) {
+  return !!mimeTypes.find(function (type) {
+    return type === file.type;
+  });
+};
 var isMimeTypeAllowed = function isMimeTypeAllowed(mappings, file) {
   return !!findFileTypeMapping(mappings, file);
 };
-var checkFileTypeAllowed = function checkFileTypeAllowed(file, locationMapping) {
-  return !locationMapping ? true : isMimeTypeAllowed(locationMapping.mappings, file);
+var checkFileTypeAllowed = function checkFileTypeAllowed(file, locationMapping, config) {
+  return !locationMapping ? config.defaultMappings.some(function (mapping) {
+    return checkIsFileWithinMimeTypes(mapping.mimeTypes, file);
+  }) : isMimeTypeAllowed(locationMapping.mappings, file);
 };
 var detectContentTypeMapping = function detectContentTypeMapping(file, parentInfo, config) {
   var locationMapping = config.locationMappings.find(function (item) {
@@ -3117,9 +3146,9 @@ var checkCanUpload = function checkCanUpload(file, parentInfo, config, errorCall
   });
   var maxFileSize = getMaxFileSize(file, parentInfo, config);
   if (!canCreateContent(file, parentInfo, config)) {
-    errorMsgs.push(Translator.trans(/*@Desc("You do not have permission to create this Content item")*/'disallowed_content_type.message', {}, 'ibexa_multi_file_upload'));
+    errorMsgs.push(Translator.trans(/*@Desc("You don’t have permission to create this content item.")*/'disallowed_content_type.message', {}, 'ibexa_multi_file_upload'));
   }
-  if (!checkFileTypeAllowed(file, locationMapping)) {
+  if (!checkFileTypeAllowed(file, locationMapping, config)) {
     errorMsgs.push(Translator.trans(/*@Desc("File type is not allowed")*/'disallowed_type.message', {}, 'ibexa_multi_file_upload'));
   }
   if (file.size > maxFileSize) {

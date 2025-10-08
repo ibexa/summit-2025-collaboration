@@ -1,0 +1,9 @@
+Laptop8ProductConnection:
+    type: relay-connection
+    config:
+        nodeType: Laptop8Product
+        connectionFields:
+            sliceSize:
+                type: Int!
+            orderBy:
+                type: String

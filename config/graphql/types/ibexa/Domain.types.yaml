@@ -7,6 +7,9 @@ Domain:
             content:
                 type: ItemGroupContent
                 resolve: '@=resolver("ContentTypeGroupByIdentifier", ["Content"])'
+            products:
+                type: DomainProducts
+                resolve: {  }
             users:
                 type: ItemGroupUsers
                 resolve: '@=resolver("ContentTypeGroupByIdentifier", ["Users"])'

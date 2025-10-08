@@ -191,6 +191,14 @@
 .ibexa-ca-company-tab-address-book .ibexa-ca-billing-address-table {
   margin-bottom: 3rem;
 }
+.ibexa-ca-company-tab-address-book__cell-wrapper {
+  max-width: 25rem;
+}
+.ibexa-ca-company-tab-address-book__address-details {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .ibexa-ca-company-tab-company-profile__top-wrapper {
   margin-bottom: 2rem;

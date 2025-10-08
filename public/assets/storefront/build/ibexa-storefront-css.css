@@ -1259,7 +1259,11 @@ a {
   align-self: flex-end;
 }
 .ibexa-store-product__discount-info {
+  width: 100%;
+}
+.ibexa-store-product__discount-price-info {
   display: flex;
+  align-items: center;
   gap: 5px;
 }
 
@@ -1512,6 +1516,7 @@ a {
   min-width: 100%;
   border-radius: 8px;
   overflow: hidden;
+  z-index: 1;
 }
 .ibexa-store-popup-menu__link {
   display: block;
@@ -1714,6 +1719,8 @@ a {
 }
 
 .ibexa-store-discount-badge {
+  display: flex;
+  align-items: center;
   background-color: #f7633a;
   color: #ffffff;
   font-weight: 600;
@@ -1722,14 +1729,63 @@ a {
   display: none;
 }
 .ibexa-store-discount-badge--small {
-  font-size: 14px;
-  line-height: 17px;
-  padding: 4px 8px;
+  font-size: 10px;
+  height: 21px;
+  padding: 2px 6px;
 }
 .ibexa-store-discount-badge--medium {
   font-size: 16px;
-  line-height: 24px;
+  height: 24px;
   padding: 2px 4px;
+}
+
+.ibexa-store-discount-info {
+  display: grid;
+  grid-template-areas: "badge name description action";
+  grid-template-columns: auto auto 1fr auto;
+  background: #ffffff;
+  border-bottom: 2px solid #ff4713;
+  padding-top: 12px;
+  padding-bottom: 2px;
+}
+.ibexa-store-discount-info__badge {
+  grid-area: badge;
+}
+.ibexa-store-discount-info__label {
+  grid-area: name;
+}
+.ibexa-store-discount-info__description {
+  grid-area: description;
+  font-size: 14px;
+  color: #71767c;
+  align-self: center;
+}
+.ibexa-store-discount-info__value {
+  grid-area: value;
+  color: #71767c;
+}
+.ibexa-store-discount-info__action {
+  grid-area: action;
+  justify-self: end;
+}
+.ibexa-store-discount-info__badge:not(:empty), .ibexa-store-discount-info__label:not(:empty), .ibexa-store-discount-info__description:not(:empty), .ibexa-store-discount-info__value:not(:empty), .ibexa-store-discount-info__action:not(:empty) {
+  margin-bottom: 10px;
+  margin-right: 10px;
+}
+.ibexa-store-discount-info__label, .ibexa-store-discount-info__description, .ibexa-store-discount-info__value {
+  display: flex;
+  align-items: center;
+}
+.ibexa-store-discount-info--small {
+  grid-template-areas: "badge name name action" "description description description description";
+  padding-left: 16px;
+  padding-right: 6px;
+}
+.ibexa-store-discount-info--small.ibexa-store-discount-info--no-description {
+  grid-template-areas: "badge name name action";
+}
+.ibexa-store-discount-info--coupon {
+  grid-template-areas: "badge value value action" "name name name name" "description description description description";
 }
 
 .ibexa-store-discount-price {
@@ -1850,6 +1906,13 @@ a {
   font-weight: 700;
   font-size: 16px;
 }
+.ibexa-store-maincart-item__discount-badge, .ibexa-store-maincart-item__price-original-net {
+  margin-left: 8px;
+}
+.ibexa-store-maincart-item__discount-name-wrapper {
+  display: flex;
+  justify-content: end;
+}
 .ibexa-store-maincart-item__subtotal-price-net-label, .ibexa-store-maincart-item__subtotal-price-net {
   font-weight: 700;
   text-align: right;
@@ -1859,8 +1922,13 @@ a {
   font-size: 16px;
   line-height: 24px;
 }
-.ibexa-store-maincart-item__subtotal-price-net {
+.ibexa-store-maincart-item__subtotal-price-wrapper {
   grid-area: subtotal;
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+.ibexa-store-maincart-item__subtotal-price-net {
   font-size: 20px;
   line-height: 28px;
   color: #4191ff;
@@ -1880,6 +1948,38 @@ a {
 }
 .ibexa-store-maincart-item--invalid .ibexa-store-maincart-item__image, .ibexa-store-maincart-item--invalid .ibexa-store-maincart-item__product-code-wrapper, .ibexa-store-maincart-item--invalid .ibexa-store-maincart-item__product-name, .ibexa-store-maincart-item--invalid .ibexa-store-maincart-item__quantity, .ibexa-store-maincart-item--invalid .ibexa-store-maincart-item__subtotal-price-net-label, .ibexa-store-maincart-item--invalid .ibexa-store-maincart-item__subtotal-price-net {
   opacity: 30%;
+}
+
+.ibexa-store-maincart-summary-coupon__input-container {
+  grid-template-areas: "input apply-btn" "error error";
+  column-gap: 10px;
+  display: none;
+}
+.ibexa-store-maincart-summary-coupon__input-container--visible {
+  display: grid;
+}
+.ibexa-store-maincart-summary-coupon__input {
+  grid-area: input;
+}
+.ibexa-store-maincart-summary-coupon__input--error {
+  border-color: #db0032;
+}
+.ibexa-store-maincart-summary-coupon__apply-btn {
+  grid-area: apply-btn;
+}
+.ibexa-store-maincart-summary-coupon__error {
+  grid-area: error;
+}
+.ibexa-store-maincart-summary-coupon__coupon {
+  display: none;
+}
+.ibexa-store-maincart-summary-coupon__coupon--visible {
+  display: grid;
+}
+.ibexa-store-maincart-summary-coupon__remove-btn {
+  grid-area: remove-btn;
+  justify-self: end;
+  color: #ff4713;
 }
 
 .ibexa-store-maincart-summary {
@@ -1930,6 +2030,71 @@ a {
 }
 .ibexa-store-maincart-summary__item-label::after {
   content: ":";
+}
+.ibexa-store-maincart-summary__coupons-container {
+  margin: 32px 0;
+}
+.ibexa-store-maincart-summary__discounts-info-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ibexa-store-maincart-summary__discounts-info--hidden {
+  display: none;
+}
+.ibexa-store-maincart-summary__discounts-info-toggler-label {
+  margin-right: 10px;
+}
+.ibexa-store-maincart-summary__discounts-info-toggler-label--show-more {
+  display: none;
+}
+.ibexa-store-maincart-summary__discounts-info-toggler-icon {
+  display: inline-block;
+  position: relative;
+  right: -2px;
+}
+.ibexa-store-maincart-summary__discounts-info-toggler-icon:after, .ibexa-store-maincart-summary__discounts-info-toggler-icon:before {
+  background-color: #3b424a;
+  content: "";
+  display: block;
+  width: 2px;
+  height: 6px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+.ibexa-store-maincart-summary__discounts-info-toggler-icon:after {
+  transform: translate(-3px, -50%) rotate(45deg);
+}
+.ibexa-store-maincart-summary__discounts-info-toggler-icon:before {
+  transform: translate(1px, -50%) rotate(-45deg);
+}
+.ibexa-store-maincart-summary__discounts-info-toggler-icon::before, .ibexa-store-maincart-summary__discounts-info-toggler-icon::after {
+  background-color: #4191ff;
+}
+.ibexa-store-maincart-summary__discounts-info-toggler {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  background-color: transparent;
+  font-weight: 600;
+  margin-top: 14px;
+  font-size: 14px;
+  padding: 4px;
+  cursor: pointer;
+}
+.ibexa-store-maincart-summary__discounts-info-toggler--hidden {
+  display: none;
+}
+.ibexa-store-maincart-summary__discounts-info-toggler--collapsed .ibexa-store-maincart-summary__discounts-info-toggler-label--show-more {
+  display: inline;
+}
+.ibexa-store-maincart-summary__discounts-info-toggler--collapsed .ibexa-store-maincart-summary__discounts-info-toggler-label--show-less {
+  display: none;
+}
+.ibexa-store-maincart-summary__discounts-info-toggler--collapsed .ibexa-store-maincart-summary__discounts-info-toggler-icon {
+  transform: rotate(180deg);
 }
 
 .ibexa-store-maincart {
@@ -2311,7 +2476,6 @@ a {
   text-align: left;
   flex: 0;
   padding: 0 16px;
-  min-width: 150px;
 }
 .ibexa-store-checkout-order-summary__item-count {
   flex: 0;
@@ -2321,6 +2485,12 @@ a {
   content: ":";
 }
 .ibexa-store-checkout-order-summary__item-net {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.ibexa-store-checkout-order-summary__item-net-current {
   font-weight: 700;
 }
 .ibexa-store-checkout-order-summary__item-summary-data {
@@ -2332,7 +2502,7 @@ a {
   font-weight: 700;
   padding-bottom: 8px;
 }
-.ibexa-store-checkout-order-summary__item-net, .ibexa-store-checkout-order-summary__item-subtotal-net {
+.ibexa-store-checkout-order-summary__item-subtotal-net {
   display: inline;
 }
 .ibexa-store-checkout-order-summary__item-subtotal-net {

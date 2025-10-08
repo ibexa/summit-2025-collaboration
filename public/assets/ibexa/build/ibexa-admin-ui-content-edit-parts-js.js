@@ -4650,7 +4650,7 @@ function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) 
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
 function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-(function (global, doc, ibexa, Translator, moment) {
+(function (global, doc, ibexa, Translator, bootstrap, moment) {
   var ENTER_KEY_CODE = 13;
   var STATUS_ERROR = 'error';
   var STATUS_OFF = 'off';
@@ -4658,10 +4658,12 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var STATUS_SAVED = 'saved';
   var STATUS_SAVING = 'saving';
   var inputTypeToPreventSubmit = ['checkbox', 'color', 'date', 'datetime-local', 'email', 'file', 'image', 'month', 'number', 'radio', 'range', 'reset', 'search', 'select-one', 'select-multiple', 'tel', 'text', 'time', 'url'];
+  var escapeHTML = ibexa.helpers.text.escapeHTML;
   var form = doc.querySelector('.ibexa-form-validate');
   var submitBtns = form.querySelectorAll('[type="submit"]:not([formnovalidate])');
   var menuButtonsToValidate = doc.querySelectorAll('button[data-validate]');
   var fields = doc.querySelectorAll('.ibexa-field-edit');
+  var autosaveNode = doc.querySelector('.ibexa-autosave');
   var getValidationResults = function getValidationResults(validator) {
     var isValid = validator.isValid();
     var validatorName = validator.constructor.name;
@@ -4753,29 +4755,30 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var isAutosaveEnabled = function isAutosaveEnabled() {
     return ibexa.adminUiConfig.autosave.enabled && form.querySelector('[name="ezplatform_content_forms_content_edit[autosave]"]');
   };
-  if (isAutosaveEnabled()) {
-    var AUTOSAVE_SUBMIT_BUTTON_NAME = 'ezplatform_content_forms_content_edit[autosave]';
-    var autosave = doc.querySelector('.ibexa-autosave');
-    var autosaveStatusSavedNode = autosave.querySelector('.ibexa-autosave__status-saved');
-    var currentAutosaveStatus = autosave.classList.contains('ibexa-autosave--on') ? STATUS_ON : STATUS_OFF;
+  if (autosaveNode) {
+    var currentAutosaveStatus = autosaveNode.classList.contains('ibexa-autosave--on') ? STATUS_ON : STATUS_OFF;
+    var isAutosaveSimple = autosaveNode.classList.contains('ibexa-autosave--simple');
+    var tooltipInstance = bootstrap.Tooltip.getOrCreateInstance(autosaveNode);
     var generateCssStatusClass = function generateCssStatusClass(status) {
       return "ibexa-autosave--".concat(status);
     };
     var setAutosaveStatus = function setAutosaveStatus(newStatus) {
-      if (!autosave) {
-        return;
-      }
       var oldCssStatusClass = generateCssStatusClass(currentAutosaveStatus);
       var newCssStatusClass = generateCssStatusClass(newStatus);
-      autosave.classList.remove(oldCssStatusClass);
-      autosave.classList.remove('ibexa-autosave--saved');
-      autosave.classList.add(newCssStatusClass);
+      autosaveNode.classList.remove(oldCssStatusClass);
+      autosaveNode.classList.remove('ibexa-autosave--saved');
+      autosaveNode.classList.add(newCssStatusClass);
       currentAutosaveStatus = newStatus;
+      setAutosaveTooltipContent();
     };
-    var setDraftSavedMessage = function setDraftSavedMessage() {
-      if (!autosave) {
-        return;
-      }
+    var setAutosaveTooltipContent = function setAutosaveTooltipContent() {
+      var statusMsgFromNode = autosaveNode.querySelector(".ibexa-autosave__status--".concat(currentAutosaveStatus)).innerText;
+      var tooltipContent = isAutosaveSimple ? escapeHTML(statusMsgFromNode) : Translator.trans(/*@Desc("You can turn autosave off in your user settings")*/'content.autosave.turn_off.message', {}, 'ibexa_content');
+      tooltipInstance.setContent({
+        '.tooltip-inner': tooltipContent
+      });
+    };
+    var setDraftSavedMessage = function setDraftSavedMessage(autosaveStatusSavedNode) {
       var userPreferredTimezone = ibexa.adminUiConfig.timezone;
       var saveDate = ibexa.helpers.timezone.convertDateToTimezone(new Date(), userPreferredTimezone);
       var saveTime = moment(saveDate).formatICU('HH:mm');
@@ -4783,22 +4786,35 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
         time: saveTime
       }, 'ibexa_content');
       autosaveStatusSavedNode.innerHTML = saveMessage;
-      autosave.classList.add('ibexa-autosave--saved');
+      autosaveNode.classList.add('ibexa-autosave--saved');
     };
-    setInterval(function () {
-      var formData = new FormData(form);
-      formData.set(AUTOSAVE_SUBMIT_BUTTON_NAME, true);
-      setAutosaveStatus(STATUS_SAVING);
-      fetch(form.target || window.location.href, {
-        method: 'POST',
-        body: formData
-      }).then(ibexa.helpers.request.getStatusFromResponse).then(function () {
-        setAutosaveStatus(STATUS_SAVED);
-        setDraftSavedMessage();
-      })["catch"](function () {
-        setAutosaveStatus(STATUS_ERROR);
-      });
-    }, ibexa.adminUiConfig.autosave.interval);
+    setAutosaveTooltipContent();
+    doc.body.addEventListener('ibexa:edit-content-change-header-size', function (_ref) {
+      var detail = _ref.detail;
+      isAutosaveSimple = detail.isHeaderSlim;
+      autosaveNode.classList.toggle('ibexa-autosave--simple', isAutosaveSimple);
+      setAutosaveTooltipContent();
+    });
+    if (isAutosaveEnabled()) {
+      var AUTOSAVE_SUBMIT_BUTTON_NAME = 'ezplatform_content_forms_content_edit[autosave]';
+      var autosaveStatusSavedNode = autosaveNode.querySelector('.ibexa-autosave__status--saved');
+      setInterval(function () {
+        var formData = new FormData(form);
+        formData.set(AUTOSAVE_SUBMIT_BUTTON_NAME, true);
+        setAutosaveStatus(STATUS_SAVING);
+        fetch(form.target || window.location.href, {
+          method: 'POST',
+          body: formData
+        }).then(ibexa.helpers.request.getStatusFromResponse).then(function () {
+          setAutosaveStatus(STATUS_SAVED);
+          setDraftSavedMessage(autosaveStatusSavedNode);
+        })["catch"](function () {
+          setAutosaveStatus(STATUS_ERROR);
+        })["finally"](function () {
+          setAutosaveTooltipContent();
+        });
+      }, ibexa.adminUiConfig.autosave.interval);
+    }
   }
   form.setAttribute('novalidate', true);
   form.onkeypress = function (event) {
@@ -4815,7 +4831,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   menuButtonsToValidate.forEach(function (btn) {
     btn.addEventListener('click', validateHandler, false);
   });
-})(window, window.document, window.ibexa, window.Translator, window.moment);
+})(window, window.document, window.ibexa, window.Translator, window.bootstrap, window.moment);
 
 /***/ }),
 
@@ -4827,33 +4843,17 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 
 (function (global, doc, ibexa) {
   var SCROLL_POSITION_TO_FIT = 50;
-  var HEADER_RIGHT_MARGIN = 50;
   var MIN_HEIGHT_DIFF_FOR_FITTING_HEADER = 150;
   var headerNode = doc.querySelector('.ibexa-edit-header');
   var contentNode = doc.querySelector('.ibexa-edit-content');
   if (!headerNode || !contentNode) {
     return;
   }
+  var detailsContainer = headerNode.querySelector('.ibexa-edit-header__container--details');
   var _headerNode$getBoundi = headerNode.getBoundingClientRect(),
     expandedHeaderHeight = _headerNode$getBoundi.height;
   var scrolledContent = doc.querySelector('.ibexa-edit-content > :first-child');
-  var controlZIndex = ibexa.helpers.modal.controlZIndex;
-  var fitEllipsizedTitle = function fitEllipsizedTitle() {
-    var headerBottomRowNode = headerNode.querySelector('.ibexa-edit-header__row--bottom');
-    var titleNode = headerBottomRowNode.querySelector('.ibexa-edit-header__name--ellipsized');
-    var firstMenuEntryNode = headerNode.querySelector('.ibexa-context-menu .ibexa-context-menu__item');
-    var _titleNode$getBoundin = titleNode.getBoundingClientRect(),
-      titleNodeLeft = _titleNode$getBoundin.left,
-      titleNodeWidth = _titleNode$getBoundin.width;
-    var _firstMenuEntryNode$g = firstMenuEntryNode.getBoundingClientRect(),
-      firstMenuEntryNodeLeft = _firstMenuEntryNode$g.left;
-    var bottomRowNodeWidthNew = firstMenuEntryNodeLeft - titleNodeLeft;
-    var titleNodeWidthNew = bottomRowNodeWidthNew - HEADER_RIGHT_MARGIN;
-    headerBottomRowNode.style.width = "".concat(bottomRowNodeWidthNew, "px");
-    if (titleNodeWidth > titleNodeWidthNew) {
-      titleNode.style.width = "".concat(titleNodeWidthNew, "px");
-    }
-  };
+  var controlManyZIndexes = ibexa.helpers.modal.controlManyZIndexes;
   var fitHeader = function fitHeader(event) {
     var _scrolledContent$getB = scrolledContent.getBoundingClientRect(),
       formHeight = _scrolledContent$getB.height;
@@ -4865,12 +4865,22 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var scrollTop = event.currentTarget.scrollTop;
     var shouldHeaderBeSlim = scrollTop > SCROLL_POSITION_TO_FIT;
     headerNode.classList.toggle('ibexa-edit-header--slim', shouldHeaderBeSlim);
-    if (shouldHeaderBeSlim) {
-      fitEllipsizedTitle();
-    }
+    doc.body.dispatchEvent(new CustomEvent('ibexa:edit-content-change-header-size', {
+      detail: {
+        isHeaderSlim: shouldHeaderBeSlim
+      }
+    }));
   };
+  var items = [{
+    container: headerNode
+  }];
+  if (detailsContainer) {
+    items.push({
+      container: detailsContainer
+    });
+  }
   contentNode.addEventListener('scroll', fitHeader, false);
-  controlZIndex(headerNode);
+  controlManyZIndexes(items, headerNode);
 })(window, window.document, window.ibexa);
 
 /***/ }),
@@ -6669,7 +6679,7 @@ function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf 
   var SELECTOR_LON_FIELD = '.ibexa-data-source__field--longitude';
   var SELECTOR_LAT_INPUT = '.ibexa-data-source__field--latitude .ibexa-data-source__input';
   var SELECTOR_LON_INPUT = '.ibexa-data-source__field--longitude .ibexa-data-source__input';
-  var SELECTOR_ADDRESS_ERROR_NODE = '.ibexa-data-source__field--address';
+  var SELECTOR_ADDRESS_ERROR_NODE = '.ibexa-data-source__field--address .ibexa-form-error';
   var SELECTOR_LAT_ERROR_NODE = '.ibexa-data-source__field--latitude';
   var SELECTOR_LON_ERROR_NODE = '.ibexa-data-source__field--longitude';
   var EVENT_BLUR = 'blur';
@@ -7283,7 +7293,7 @@ function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf 
       navigator.geolocation.getCurrentPosition(function (position) {
         return updateMapState(position.coords.latitude, position.coords.longitude);
       }, function (error) {
-        return ibexa.helpers.notification.showErrorNotification(error);
+        return ibexa.helpers.notification.showErrorNotification(error.message);
       });
     };
     var locationMarker;
@@ -7906,12 +7916,15 @@ function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf 
 /*!*********************************************************************************************!*\
   !*** ./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/fieldType/ezkeyword.js ***!
   \*********************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (() => {
 
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
 function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
 function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
@@ -7924,31 +7937,15 @@ function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.
 function _getPrototypeOf(t) { return _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function (t) { return t.__proto__ || Object.getPrototypeOf(t); }, _getPrototypeOf(t); }
 function _inherits(t, e) { if ("function" != typeof e && null !== e) throw new TypeError("Super expression must either be null or a function"); t.prototype = Object.create(e && e.prototype, { constructor: { value: t, writable: !0, configurable: !0 } }), Object.defineProperty(t, "prototype", { writable: !1 }), e && _setPrototypeOf(t, e); }
 function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) { return t.__proto__ = e, t; }, _setPrototypeOf(t, e); }
-
 (function (global, doc, ibexa) {
   var _this = this;
   var SELECTOR_FIELD = '.ibexa-field-edit--ezkeyword';
-  var SELECTOR_TAGGIFY = '.ibexa-data-source__taggify';
+  var SELECTOR_TAGGIFY_CONTAINER = '.ibexa-data-source__taggify';
+  var SELECTOR_TAGGIFY = '.ibexa-data-source__taggify .ibexa-taggify';
   var SELECTOR_ERROR_NODE = '.ibexa-form-error';
-  var CLASS_TAGGIFY_FOCUS = 'ibexa-data-source__taggify--focused';
-  var ENTER_KEY_CODE = 13;
-  var COMMA_KEY_CODE = 188;
-  var tagsObserverConfig = {
-    childList: true,
-    subtree: true
-  };
-  var addTooltipToTag = function addTooltipToTag(mutationList) {
-    mutationList.forEach(function (mutation) {
-      if (mutation.target.classList.contains('taggify__tags')) {
-        mutation.addedNodes.forEach(function (addedNode) {
-          var labelElement = addedNode.querySelector('.taggify__tag-label');
-          labelElement.title = labelElement.innerText;
-        });
-        (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_0__.parse)(mutation.target);
-      }
-    });
-  };
   var EzKeywordValidator = /*#__PURE__*/function (_ibexa$BaseFieldValid) {
+    "use strict";
+
     function EzKeywordValidator() {
       _classCallCheck(this, EzKeywordValidator);
       return _callSuper(this, EzKeywordValidator, arguments);
@@ -7996,15 +7993,14 @@ function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf 
     input.dispatchEvent(new Event('change'));
   };
   doc.querySelectorAll(SELECTOR_FIELD).forEach(function (field) {
-    var taggifyContainer = field.querySelector(SELECTOR_TAGGIFY);
-    var tagsObserver = new MutationObserver(addTooltipToTag);
-    tagsObserver.observe(taggifyContainer, tagsObserverConfig);
+    var taggifyContainer = field.querySelector(SELECTOR_TAGGIFY_CONTAINER);
+    var ibexaTaggifyNode = taggifyContainer.querySelector('.ibexa-taggify');
     var validator = new EzKeywordValidator({
       classInvalid: 'is-invalid',
       fieldSelector: SELECTOR_FIELD,
       eventsMap: [{
         isValueValidator: false,
-        selector: "".concat(SELECTOR_FIELD, " .taggify__input"),
+        selector: "".concat(SELECTOR_FIELD, " .ibexa-taggify__input"),
         eventName: 'blur',
         callback: 'validateKeywords',
         errorNodeSelectors: [SELECTOR_ERROR_NODE],
@@ -8017,37 +8013,49 @@ function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf 
         invalidStateSelectors: [SELECTOR_TAGGIFY]
       }]
     });
-    var taggify = new global.Taggify({
-      containerNode: taggifyContainer,
-      displayLabel: false,
-      displayInputValues: false,
-      hotKeys: [ENTER_KEY_CODE, COMMA_KEY_CODE]
-    });
     var keywordInput = field.querySelector('.ibexa-data-source__input-wrapper .ibexa-data-source__input.form-control');
+    var EzKeywordTaggify = /*#__PURE__*/function (_ibexa$core$Taggify) {
+      "use strict";
+
+      function EzKeywordTaggify() {
+        _classCallCheck(this, EzKeywordTaggify);
+        return _callSuper(this, EzKeywordTaggify, arguments);
+      }
+      _inherits(EzKeywordTaggify, _ibexa$core$Taggify);
+      return _createClass(EzKeywordTaggify, [{
+        key: "afterTagsUpdate",
+        value: function afterTagsUpdate() {
+          var tags = _toConsumableArray(this.tags);
+          var tagsInputValue = tags.join();
+          if (keywordInput.value !== tagsInputValue) {
+            keywordInput.value = tagsInputValue;
+            keywordInput.dispatchEvent(new Event('change'));
+          }
+        }
+      }]);
+    }(ibexa.core.Taggify);
+    var taggify = new EzKeywordTaggify({
+      container: ibexaTaggifyNode,
+      acceptKeys: ['Enter', ',']
+    });
     var updateKeywords = updateValue.bind(_this, keywordInput);
-    var addFocusState = function addFocusState() {
-      return taggifyContainer.classList.add(CLASS_TAGGIFY_FOCUS);
-    };
-    var removeFocusState = function removeFocusState() {
-      return taggifyContainer.classList.remove(CLASS_TAGGIFY_FOCUS);
-    };
     var taggifyInput = taggifyContainer.querySelector('.taggify__input');
     if (keywordInput.required) {
       taggifyInput.setAttribute('required', true);
     }
     validator.init();
+    taggify.init();
     if (keywordInput.value.length) {
-      taggify.updateTags(keywordInput.value.split(',').map(function (item) {
+      var tagsData = keywordInput.value.split(',').map(function (tag) {
         return {
-          id: Math.floor((1 + Math.random()) * 0x10000).toString(16),
-          label: item
+          name: tag,
+          value: tag
         };
-      }));
+      });
+      taggify.addTags(tagsData);
     }
     taggifyContainer.addEventListener('tagsCreated', updateKeywords, false);
     taggifyContainer.addEventListener('tagRemoved', updateKeywords, false);
-    taggifyInput.addEventListener('focus', addFocusState, false);
-    taggifyInput.addEventListener('blur', removeFocusState, false);
     ibexa.addConfig('fieldTypeValidators', [validator], true);
   });
 })(window, window.document, window.ibexa);
@@ -8299,6 +8307,11 @@ function _getPrototypeOf(t) { return _getPrototypeOf = Object.setPrototypeOf ? O
 function _inherits(t, e) { if ("function" != typeof e && null !== e) throw new TypeError("Super expression must either be null or a function"); t.prototype = Object.create(e && e.prototype, { constructor: { value: t, writable: !0, configurable: !0 } }), Object.defineProperty(t, "prototype", { writable: !1 }), e && _setPrototypeOf(t, e); }
 function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) { return t.__proto__ = e, t; }, _setPrototypeOf(t, e); }
 (function (global, doc, ibexa, React, ReactDOM, Translator) {
+  var dangerouslyInsertAdjacentHTML = ibexa.helpers.dom.dangerouslyInsertAdjacentHTML;
+  var _ibexa$helpers$text = ibexa.helpers.text,
+    escapeHTML = _ibexa$helpers$text.escapeHTML,
+    escapeHTMLAttribute = _ibexa$helpers$text.escapeHTMLAttribute;
+  var formatShortDateTime = ibexa.helpers.timezone.formatShortDateTime;
   var CLASS_FIELD_SINGLE = 'ibexa-field-edit--ezobjectrelation';
   var SELECTOR_FIELD_MULTIPLE = '.ibexa-field-edit--ezobjectrelationlist';
   var SELECTOR_FIELD_SINGLE = '.ibexa-field-edit--ezobjectrelation';
@@ -8382,8 +8395,7 @@ function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf 
     };
     var renderRows = function renderRows(items) {
       items.forEach(function (item, index) {
-        relationsContainer.insertAdjacentHTML('beforeend', renderRow(item, index));
-        var escapeHTML = ibexa.helpers.text.escapeHTML;
+        dangerouslyInsertAdjacentHTML(relationsContainer, 'beforeend', renderRow(item, index));
         var itemNodes = relationsContainer.querySelectorAll('.ibexa-relations__item');
         var itemNode = itemNodes[itemNodes.length - 1];
         var contentId = escapeHTML(item.ContentInfo.Content._id);
@@ -8397,6 +8409,7 @@ function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf 
         var itemActionsTriggerElement = itemNode.querySelector('.ibexa-embedded-item-actions__menu-trigger-btn');
         var itemNodeNameCell = itemNode.querySelector('.ibexa-relations__item-name');
         itemNode.dataset.contentId = contentId;
+        itemNode.dataset.locationId = locationId;
         itemNode.querySelector('.ibexa-relations__table-action--remove-item').addEventListener('click', removeItem, false);
         itemNodeNameCell.dataset.ibexaUpdateContentId = contentId;
         itemNodeNameCell.dataset.ibexaUpdateSourceDataPath = 'Content.Name';
@@ -8418,10 +8431,10 @@ function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf 
       sourceInput.dispatchEvent(new CustomEvent(EVENT_CUSTOM));
     };
     var onConfirm = function onConfirm(items) {
-      items = excludeDuplicatedItems(items);
-      renderRows(items);
+      var itemsWithoutDuplicate = excludeDuplicatedItems(items);
+      renderRows(itemsWithoutDuplicate);
       attachRowsEventHandlers();
-      selectedItems = [].concat(_toConsumableArray(selectedItems), _toConsumableArray(items.map(function (item) {
+      selectedItems = [].concat(_toConsumableArray(selectedItems), _toConsumableArray(itemsWithoutDuplicate.map(function (item) {
         return item.ContentInfo.Content._id;
       })));
       updateInputValue(selectedItems);
@@ -8432,36 +8445,40 @@ function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf 
     };
     var openUDW = function openUDW(event) {
       event.preventDefault();
+      var selectedItemsRow = fieldContainer.querySelectorAll(SELECTOR_ROW);
       var config = JSON.parse(event.currentTarget.dataset.udwConfig);
       var limit = parseInt(event.currentTarget.dataset.limit, 10);
+      var selectedLocations = _toConsumableArray(selectedItemsRow).reduce(function (locationsIds, selectedItemRow) {
+        var locationId = selectedItemRow.dataset.locationId;
+        var parsedLocationId = parseInt(locationId, 10);
+        return isNaN(parsedLocationId) ? locationsIds : [].concat(_toConsumableArray(locationsIds), [parsedLocationId]);
+      }, []);
       var title = limit === 1 ? Translator.trans(/*@Desc("Select a Content item")*/'ezobjectrelationlist.title.single', {}, 'ibexa_universal_discovery_widget') : Translator.trans(/*@Desc("Select Content item(s)")*/'ezobjectrelationlist.title.multi', {}, 'ibexa_universal_discovery_widget');
       udwRoot = ReactDOM.createRoot(udwContainer);
       udwRoot.render(React.createElement(ibexa.modules.UniversalDiscovery, _objectSpread(_objectSpread({
         onConfirm: onConfirm,
         onCancel: closeUDW,
         title: title,
-        startingLocationId: startingLocationId
+        startingLocationId: startingLocationId,
+        selectedLocations: selectedLocations,
+        isInitLocationsDeselectionBlocked: true
       }, config), {}, {
         multiple: isSingle ? false : selectedItemsLimit !== 1,
-        multipleItemsLimit: selectedItemsLimit > 1 ? selectedItemsLimit - selectedItems.length : selectedItemsLimit
+        multipleItemsLimit: selectedItemsLimit
       })));
     };
     var excludeDuplicatedItems = function excludeDuplicatedItems(items) {
-      selectedItemsMap = items.reduce(function (total, item) {
-        return _objectSpread(_objectSpread({}, total), {}, _defineProperty({}, item.ContentInfo.Content._id, item));
-      }, selectedItemsMap);
       return items.filter(function (item) {
-        return selectedItemsMap[item.ContentInfo.Content._id];
+        return !selectedItems.includes(item.ContentInfo.Content._id);
       });
     };
     var renderRow = function renderRow(item, index) {
-      var escapeHTML = ibexa.helpers.text.escapeHTML;
-      var formatShortDateTime = ibexa.helpers.timezone.formatShortDateTime;
       var contentTypeName = ibexa.helpers.contentType.getContentTypeName(item.ContentInfo.Content.ContentTypeInfo.identifier);
-      var contentName = escapeHTML(item.ContentInfo.Content.TranslatedName);
-      var contentId = escapeHTML(item.ContentInfo.Content._id);
+      var contentTypeNameHtmlAttributeEscaped = escapeHTMLAttribute(contentTypeName);
+      var contentNameHtmlEscaped = escapeHTML(item.ContentInfo.Content.TranslatedName);
+      var contentIdHtmlEscaped = escapeHTML(item.ContentInfo.Content._id);
       var rowTemplate = relationsWrapper.dataset.rowTemplate;
-      return rowTemplate.replace('{{ content_id }}', contentId).replace('{{ content_name }}', contentName).replace('{{ content_type_name }}', contentTypeName).replace('{{ published_date }}', formatShortDateTime(item.ContentInfo.Content.publishedDate)).replace('{{ order }}', selectedItems.length + index + 1);
+      return rowTemplate.replace('{{ content_id }}', contentIdHtmlEscaped).replace('{{ content_name }}', contentNameHtmlEscaped).replace('{{ content_type_name }}', contentTypeNameHtmlAttributeEscaped).replace('{{ published_date }}', formatShortDateTime(item.ContentInfo.Content.publishedDate)).replace('{{ order }}', selectedItems.length + index + 1);
     };
     var updateFieldState = function updateFieldState() {
       var tableHideMethod = selectedItems.length ? 'removeAttribute' : 'setAttribute';
@@ -8571,9 +8588,6 @@ function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf 
     var selectedItems = _toConsumableArray(fieldContainer.querySelectorAll(SELECTOR_ROW)).map(function (row) {
       return parseInt(row.dataset.contentId, 10);
     });
-    var selectedItemsMap = selectedItems.reduce(function (total, item) {
-      return _objectSpread(_objectSpread({}, total), {}, _defineProperty({}, item, item));
-    }, {});
     updateAddBtnState();
     attachRowsEventHandlers();
     [].concat(_toConsumableArray(fieldContainer.querySelectorAll(SELECTOR_BTN_ADD)), _toConsumableArray(fieldContainer.querySelectorAll('.ibexa-relations__cta-btn'))).forEach(function (btn) {
@@ -8890,7 +8904,7 @@ function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf 
   var SELECTOR_FIELD = '.ibexa-field-edit--eztime';
   var SELECTOR_INPUT = '.ibexa-data-source__input:not(.flatpickr-input)';
   var SELECTOR_FLATPICKR_INPUT = '.flatpickr-input';
-  var SELECTOR_ERROR_NODE = '.ibexa-data-source';
+  var SELECTOR_ERROR_NODE = '.ibexa-form-error';
   var EVENT_VALUE_CHANGED = 'change';
   var EzTimeValidator = /*#__PURE__*/function (_ibexa$BaseFieldValid) {
     "use strict";
@@ -9031,16 +9045,25 @@ function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf 
     return _createClass(EzUrlValidator, [{
       key: "validateUrl",
       value: function validateUrl(event) {
-        var input = event.currentTarget;
-        var isRequired = input.required;
-        var isEmpty = !input.value.trim();
-        var isError = isEmpty && isRequired;
-        var label = input.closest(SELECTOR_FIELD_LINK).querySelector(SELECTOR_LABEL).innerHTML;
         var result = {
-          isError: isError
+          isError: false,
+          errorMessage: null
         };
+        var input = event.currentTarget;
+        var urlValue = input.value.trim();
+        var isRequired = input.required;
+        var isEmpty = !urlValue;
+        var label = input.closest(SELECTOR_FIELD_LINK).querySelector(SELECTOR_LABEL).innerHTML;
         if (isRequired && isEmpty) {
+          result.isError = true;
           result.errorMessage = ibexa.errors.emptyField.replace('{fieldName}', label);
+        }
+        if (!isEmpty) {
+          var isUrlValid = ibexa.errors.urlRegexp.test(urlValue);
+          if (!isUrlValid) {
+            result.isError = true;
+            result.errorMessage = ibexa.errors.invalidUrl;
+          }
         }
         return result;
       }
@@ -9328,37 +9351,6 @@ var initValidator = function initValidator(container, selectorField, selectorErr
 
 /***/ }),
 
-/***/ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/browser.helper.js":
-/*!************************************************************************************************!*\
-  !*** ./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/browser.helper.js ***!
-  \************************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   isChrome: () => (/* binding */ isChrome),
-/* harmony export */   isEdge: () => (/* binding */ isEdge),
-/* harmony export */   isFirefox: () => (/* binding */ isFirefox),
-/* harmony export */   isSafari: () => (/* binding */ isSafari)
-/* harmony export */ });
-var userAgent = window.navigator.userAgent;
-var isEdge = function isEdge() {
-  return userAgent.includes('Edg');
-}; // Edge previously had Edge but they changed to Edg
-var isChrome = function isChrome() {
-  return userAgent.includes('Chrome') && !isEdge();
-};
-var isFirefox = function isFirefox() {
-  return userAgent.includes('Firefox');
-};
-var isSafari = function isSafari() {
-  return userAgent.includes('Safari') && !isChrome() && !isEdge();
-};
-
-
-/***/ }),
-
 /***/ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js":
 /*!************************************************************************************************!*\
   !*** ./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js ***!
@@ -9498,268 +9490,30 @@ var isExternalInstance = function isExternalInstance() {
 
 /***/ }),
 
-/***/ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper.js":
-/*!*************************************************************************************************!*\
-  !*** ./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper.js ***!
-  \*************************************************************************************************/
+/***/ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances.js":
+/*!**************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances.js ***!
+  \**************************************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   hideAll: () => (/* binding */ hideAll),
-/* harmony export */   observe: () => (/* binding */ observe),
-/* harmony export */   parse: () => (/* binding */ parse)
+/* harmony export */   clearInstance: () => (/* binding */ clearInstance),
+/* harmony export */   getInstance: () => (/* binding */ getInstance),
+/* harmony export */   setInstance: () => (/* binding */ setInstance)
 /* harmony export */ });
-/* harmony import */ var _browser_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./browser.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/browser.helper.js");
-/* harmony import */ var _context_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
-function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
-function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
-
-var _window = window,
-  doc = _window.document;
-var lastInsertTooltipTarget = null;
-var TOOLTIPS_SELECTOR = '[title], [data-tooltip-title]';
-var observerConfig = {
-  childList: true,
-  subtree: true
+var setInstance = function setInstance(domElement, instance) {
+  if (domElement.ibexaInstance) {
+    throw new Error('Instance for this DOM element already exists!');
+  }
+  domElement.ibexaInstance = instance;
 };
-var resizeEllipsisObserver = new ResizeObserver(function (entries) {
-  entries.forEach(function (entry) {
-    parse(entry.target);
-  });
-});
-var observer = new MutationObserver(function (mutationsList) {
-  if (lastInsertTooltipTarget) {
-    mutationsList.forEach(function (mutation) {
-      var addedNodes = mutation.addedNodes,
-        removedNodes = mutation.removedNodes;
-      if (addedNodes.length) {
-        addedNodes.forEach(function (addedNode) {
-          if (addedNode instanceof Element) {
-            parse(addedNode);
-          }
-        });
-      }
-      if (removedNodes.length) {
-        removedNodes.forEach(function (removedNode) {
-          if (removedNode.classList && !removedNode.classList.contains('ibexa-tooltip')) {
-            lastInsertTooltipTarget = null;
-            doc.querySelectorAll('.ibexa-tooltip.show').forEach(function (tooltipNode) {
-              tooltipNode.remove();
-            });
-          }
-        });
-      }
-    });
-  }
-});
-var modifyPopperConfig = function modifyPopperConfig(iframe, defaultBsPopperConfig) {
-  if (!iframe) {
-    return defaultBsPopperConfig;
-  }
-  var iframeDOMRect = iframe.getBoundingClientRect();
-  var offsetX = iframeDOMRect.x;
-  var offsetY = iframeDOMRect.y;
-  var offsetModifier = {
-    name: 'offset',
-    options: {
-      offset: function offset(_ref) {
-        var placement = _ref.placement;
-        var _placement$split = placement.split('-'),
-          _placement$split2 = _slicedToArray(_placement$split, 1),
-          basePlacement = _placement$split2[0];
-        switch (basePlacement) {
-          case 'top':
-            return [offsetX, -offsetY];
-          case 'bottom':
-            return [offsetX, offsetY];
-          case 'right':
-            return [offsetY, offsetX];
-          case 'left':
-            return [offsetY, -offsetX];
-          default:
-            return [];
-        }
-      }
-    }
-  };
-  var offsetModifierIndex = defaultBsPopperConfig.modifiers.findIndex(function (modifier) {
-    return modifier.name == 'offset';
-  });
-  if (offsetModifierIndex != -1) {
-    defaultBsPopperConfig.modifiers[offsetModifierIndex] = offsetModifier;
-  } else {
-    defaultBsPopperConfig.modifiers.push(offsetModifier);
-  }
-  return defaultBsPopperConfig;
+var getInstance = function getInstance(domElement) {
+  return domElement.ibexaInstance;
 };
-var getTextHeight = function getTextHeight(text, styles) {
-  var tag = doc.createElement('div');
-  tag.innerText = text;
-  for (var key in styles) {
-    tag.style[key] = styles[key];
-  }
-  doc.body.appendChild(tag);
-  var _tag$getBoundingClien = tag.getBoundingClientRect(),
-    texHeight = _tag$getBoundingClien.height;
-  doc.body.removeChild(tag);
-  return texHeight;
-};
-var isTitleEllipsized = function isTitleEllipsized(node) {
-  var title = node.dataset.originalTitle;
-  var _node$getBoundingClie = node.getBoundingClientRect(),
-    nodeWidth = _node$getBoundingClie.width,
-    nodeHeight = _node$getBoundingClie.height;
-  var computedNodeStyles = getComputedStyle(node);
-  var styles = {
-    width: "".concat(nodeWidth, "px"),
-    padding: computedNodeStyles.getPropertyValue('padding'),
-    'font-size': computedNodeStyles.getPropertyValue('font-size'),
-    'font-family': computedNodeStyles.getPropertyValue('font-family'),
-    'font-weight': computedNodeStyles.getPropertyValue('font-weight'),
-    'font-style': computedNodeStyles.getPropertyValue('font-style'),
-    'font-variant': computedNodeStyles.getPropertyValue('font-variant'),
-    'line-height': computedNodeStyles.getPropertyValue('line-height'),
-    'word-break': 'break-all'
-  };
-  var textHeight = getTextHeight(title, styles);
-  return textHeight > nodeHeight;
-};
-var initializeTooltip = function initializeTooltip(tooltipNode, hasEllipsisStyle) {
-  var _tooltipNode$dataset$, _tooltipNode$dataset$2, _tooltipNode$dataset$3;
-  var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
-  var _tooltipNode$dataset = tooltipNode.dataset,
-    delayShow = _tooltipNode$dataset.delayShow,
-    delayHide = _tooltipNode$dataset.delayHide;
-  var delay = {
-    show: delayShow ? parseInt(delayShow, 10) : 150,
-    hide: delayHide ? parseInt(delayHide, 10) : 75
-  };
-  var title = tooltipNode.title;
-  var extraClass = (_tooltipNode$dataset$ = tooltipNode.dataset.tooltipExtraClass) !== null && _tooltipNode$dataset$ !== void 0 ? _tooltipNode$dataset$ : '';
-  var placement = (_tooltipNode$dataset$2 = tooltipNode.dataset.tooltipPlacement) !== null && _tooltipNode$dataset$2 !== void 0 ? _tooltipNode$dataset$2 : 'bottom';
-  var trigger = (_tooltipNode$dataset$3 = tooltipNode.dataset.tooltipTrigger) !== null && _tooltipNode$dataset$3 !== void 0 ? _tooltipNode$dataset$3 : 'hover';
-  var useHtml = tooltipNode.dataset.tooltipUseHtml !== undefined;
-  var container = tooltipNode.dataset.tooltipContainerSelector ? tooltipNode.closest(tooltipNode.dataset.tooltipContainerSelector) : 'body';
-  var iframe = document.querySelector(tooltipNode.dataset.tooltipIframeSelector);
-  new bootstrap.Tooltip(tooltipNode, {
-    delay: delay,
-    placement: placement,
-    trigger: trigger,
-    container: container,
-    popperConfig: modifyPopperConfig.bind(null, iframe),
-    html: useHtml,
-    template: "<div class=\"tooltip ibexa-tooltip ".concat(extraClass, "\">\n                        <div class=\"tooltip-arrow ibexa-tooltip__arrow\"></div>\n                        <div class=\"tooltip-inner ibexa-tooltip__inner\"></div>\n                   </div>")
-  });
-  tooltipNode.addEventListener('inserted.bs.tooltip', function (event) {
-    lastInsertTooltipTarget = event.currentTarget;
-  });
-  if ((0,_browser_helper__WEBPACK_IMPORTED_MODULE_0__.isSafari)()) {
-    if (tooltipNode.children) {
-      var childWithTitle = _toConsumableArray(tooltipNode.children).find(function (child) {
-        return title === child.textContent;
-      });
-      var childHasEllipsisStyle = childWithTitle && getComputedStyle(childWithTitle).textOverflow === 'ellipsis';
-      if (childWithTitle && childHasEllipsisStyle) {
-        childWithTitle.classList.add('ibexa-safari-tooltip');
-      }
-    } else {
-      if (hasEllipsisStyle) {
-        tooltipNode.classList.add('ibexa-safari-tooltip');
-      }
-    }
-  }
-};
-var parse = function parse() {
-  var baseElement = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : doc;
-  if (!baseElement) {
-    return;
-  }
-  var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
-  var tooltipNodes = _toConsumableArray(baseElement.querySelectorAll(TOOLTIPS_SELECTOR));
-  if (baseElement instanceof Element) {
-    tooltipNodes.push(baseElement);
-  }
-  var _iterator = _createForOfIteratorHelper(tooltipNodes),
-    _step;
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var tooltipNode = _step.value;
-      var hasEllipsisStyle = getComputedStyle(tooltipNode).textOverflow === 'ellipsis';
-      var hasNewTitle = tooltipNode.hasAttribute('title');
-      var tooltipInitialized = !!tooltipNode.dataset.originalTitle;
-      var shouldHaveTooltip = !hasEllipsisStyle;
-      if (!tooltipInitialized && hasNewTitle) {
-        resizeEllipsisObserver.observe(tooltipNode);
-        tooltipNode.dataset.originalTitle = tooltipNode.title;
-        if (!shouldHaveTooltip) {
-          shouldHaveTooltip = isTitleEllipsized(tooltipNode);
-        }
-        if (shouldHaveTooltip) {
-          initializeTooltip(tooltipNode, hasEllipsisStyle);
-        } else {
-          tooltipNode.removeAttribute('title');
-        }
-      } else if (tooltipInitialized && (hasNewTitle || hasEllipsisStyle)) {
-        if (hasNewTitle) {
-          tooltipNode.dataset.originalTitle = tooltipNode.title;
-        }
-        var tooltipInstance = bootstrap.Tooltip.getInstance(tooltipNode);
-        var hasTooltip = !!tooltipInstance;
-        if (!shouldHaveTooltip) {
-          shouldHaveTooltip = isTitleEllipsized(tooltipNode);
-        }
-        if (hasTooltip && (hasNewTitle && shouldHaveTooltip || !shouldHaveTooltip)) {
-          tooltipInstance.dispose();
-        }
-        if (shouldHaveTooltip && (hasNewTitle || !hasTooltip)) {
-          tooltipNode.title = tooltipNode.dataset.originalTitle;
-          initializeTooltip(tooltipNode, hasEllipsisStyle);
-        } else {
-          tooltipNode.removeAttribute('title');
-        }
-      }
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
-  }
-};
-var hideAll = function hideAll() {
-  var baseElement = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : doc;
-  if (!baseElement) {
-    return;
-  }
-  var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
-  var tooltipsNode = baseElement.querySelectorAll(TOOLTIPS_SELECTOR);
-  var _iterator2 = _createForOfIteratorHelper(tooltipsNode),
-    _step2;
-  try {
-    for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-      var tooltipNode = _step2.value;
-      bootstrap.Tooltip.getOrCreateInstance(tooltipNode).hide();
-    }
-  } catch (err) {
-    _iterator2.e(err);
-  } finally {
-    _iterator2.f();
-  }
-};
-var observe = function observe() {
-  var baseElement = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : doc;
-  observer.observe(baseElement, observerConfig);
+var clearInstance = function clearInstance(domElement) {
+  delete domElement.ibexaInstance;
 };
 
 
@@ -9769,14 +9523,18 @@ var observe = function observe() {
 /*!***********************************************************************************************!*\
   !*** ./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/sidebar/extra.actions.js ***!
   \***********************************************************************************************/
-/***/ (() => {
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_object_instances__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances.js");
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
 function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
 (function (global, doc, ibexa) {
   var CLASS_HIDDEN = 'ibexa-extra-actions--hidden';
   var CLASS_EXPANDED = 'ibexa-context-menu--expanded';
@@ -9785,6 +9543,42 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var btns = _toConsumableArray(doc.querySelectorAll('.ibexa-btn--extra-actions'));
   var menu = doc.querySelector('.ibexa-context-menu');
   var backdrop = new ibexa.core.Backdrop();
+  var formsInitialData = new Map();
+  var saveInitialFormData = function saveInitialFormData(extraActionsContainer) {
+    var extraActionsInputs = extraActionsContainer.querySelectorAll('input, select');
+    extraActionsInputs.forEach(function (node) {
+      var value = node.type === 'radio' || node.type === 'checkbox' ? node.checked : node.value;
+      formsInitialData.set(node, value);
+    });
+  };
+  var restoreInitialFormData = function restoreInitialFormData(extraActionsContainer) {
+    if (formsInitialData.size === 0) {
+      return;
+    }
+    var extraActionsInputs = extraActionsContainer.querySelectorAll('input, select');
+    extraActionsInputs.forEach(function (node) {
+      var value = formsInitialData.get(node);
+      var prevValue = node.value;
+      if (node.type === 'radio' || node.type === 'checkbox') {
+        prevValue = node.checked;
+        node.checked = value;
+      } else if (node.tagName === 'SELECT') {
+        var dropdownContainer = node.closest('.ibexa-dropdown');
+        if (dropdownContainer) {
+          var dropdownInstance = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_object_instances__WEBPACK_IMPORTED_MODULE_0__.getInstance)(dropdownContainer);
+          dropdownInstance.selectOption(value);
+        } else {
+          node.value = value;
+        }
+      } else {
+        node.value = value;
+      }
+      if (value !== prevValue) {
+        node.dispatchEvent(new CustomEvent('change'));
+      }
+    });
+    formsInitialData.clear();
+  };
   var haveHiddenPart = function haveHiddenPart(element) {
     return element.classList.contains(CLASS_HIDDEN) && !element.classList.contains(CLASS_PREVENT_SHOW);
   };
@@ -9799,6 +9593,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     doc.body.dispatchEvent(new CustomEvent('ibexa-extra-actions:after-close'));
     removeBackdrop();
+    restoreInitialFormData(actions);
   };
   var toggleExtraActionsWidget = function toggleExtraActionsWidget(widgetData) {
     var actions = doc.querySelector(".ibexa-extra-actions[data-actions=\"".concat(widgetData.actions, "\"]"));
@@ -9821,9 +9616,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       backdrop.show();
       doc.body.addEventListener('click', _detectClickOutside, false);
       doc.body.classList.add('ibexa-scroll-disabled');
+      saveInitialFormData(actions);
     } else {
       doc.body.removeEventListener('click', _detectClickOutside);
       removeBackdrop();
+      restoreInitialFormData(actions);
     }
     if (focusElement) {
       focusElement.focus();

@@ -1,0 +1,12 @@
+Virtual2Product:
+    type: object
+    inherits:
+        - BaseProduct
+    config:
+        fields:
+            attributes:
+                type: Virtual2Attributes
+                resolve: '@=value'
+            fields:
+                type: Virtual2ContentFields
+                resolve: '@=value'

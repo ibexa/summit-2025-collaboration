@@ -1,0 +1,94 @@
+DomainProductTypes:
+    type: object
+    config:
+        fields:
+            book0:
+                type: Book0ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "book0")'
+            book1:
+                type: Book1ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "book1")'
+            book2:
+                type: Book2ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "book2")'
+            book3:
+                type: Book3ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "book3")'
+            book4:
+                type: Book4ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "book4")'
+            laptop0:
+                type: Laptop0ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "laptop0")'
+            laptop1:
+                type: Laptop1ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "laptop1")'
+            laptop2:
+                type: Laptop2ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "laptop2")'
+            laptop3:
+                type: Laptop3ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "laptop3")'
+            laptop4:
+                type: Laptop4ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "laptop4")'
+            laptop5:
+                type: Laptop5ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "laptop5")'
+            laptop6:
+                type: Laptop6ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "laptop6")'
+            laptop7:
+                type: Laptop7ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "laptop7")'
+            laptop8:
+                type: Laptop8ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "laptop8")'
+            laptop9:
+                type: Laptop9ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "laptop9")'
+            mouse0:
+                type: Mouse0ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "mouse0")'
+            mouse1:
+                type: Mouse1ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "mouse1")'
+            mouse2:
+                type: Mouse2ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "mouse2")'
+            mouse3:
+                type: Mouse3ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "mouse3")'
+            mouse4:
+                type: Mouse4ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "mouse4")'
+            mouse5:
+                type: Mouse5ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "mouse5")'
+            mouse6:
+                type: Mouse6ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "mouse6")'
+            mouse7:
+                type: Mouse7ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "mouse7")'
+            mouse8:
+                type: Mouse8ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "mouse8")'
+            mouse9:
+                type: Mouse9ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "mouse9")'
+            virtual0:
+                type: Virtual0ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "virtual0")'
+            virtual1:
+                type: Virtual1ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "virtual1")'
+            virtual2:
+                type: Virtual2ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "virtual2")'
+            virtual3:
+                type: Virtual3ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "virtual3")'
+            virtual4:
+                type: Virtual4ProductType
+                resolve: '@=query("ProductTypeByIdentifier", "virtual4")'

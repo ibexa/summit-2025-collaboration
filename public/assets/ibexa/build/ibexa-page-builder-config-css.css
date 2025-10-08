@@ -155,7 +155,7 @@
 }
 .ibexa-pb-block-config__tab-label {
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 .ibexa-pb-block-config .ibexa-tabs.ibexa-tabs--switcher .ibexa-tabs__tab .ibexa-tabs__link:hover {
   border: 0.0625rem solid #4191ff;
@@ -1348,6 +1348,9 @@
   display: flex;
   width: 50%;
   margin-left: 1rem;
+}
+.ibexa-segmentation__select-group {
+  max-width: 100%;
 }
 .ibexa-segmentation__item-actions {
   margin-left: auto;

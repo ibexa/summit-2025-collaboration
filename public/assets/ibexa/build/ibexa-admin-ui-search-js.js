@@ -24,22 +24,42 @@ function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 (function (global, doc, ibexa, flatpickr, React, ReactDOM) {
   var _this = this;
+  var _ibexa$helpers$text = ibexa.helpers.text,
+    escapeHTML = _ibexa$helpers$text.escapeHTML,
+    escapeHTMLAttribute = _ibexa$helpers$text.escapeHTMLAttribute;
+  var dangerouslySetInnerHTML = ibexa.helpers.dom.dangerouslySetInnerHTML;
+  var getInstance = ibexa.helpers.objectInstances.getInstance;
   var getUsersTimeout;
-  var CLASS_DATE_RANGE = 'ibexa-filters__range-wrapper';
-  var CLASS_VISIBLE_DATE_RANGE = 'ibexa-filters__range-wrapper--visible';
   var SELECTOR_TAG = '.ibexa-tag';
   var token = doc.querySelector('meta[name="CSRF-Token"]').content;
   var siteaccess = doc.querySelector('meta[name="SiteAccess"]').content;
   var filters = doc.querySelector('.ibexa-filters');
   var clearBtn = filters.querySelector('.ibexa-btn--clear');
   var applyBtn = filters.querySelector('.ibexa-btn--apply');
-  var dateFields = doc.querySelectorAll('.ibexa-filters__range-wrapper');
   var contentTypeSelect = doc.querySelector('.ibexa-filters__item--content-type .ibexa-filters__select');
   var sectionSelect = doc.querySelector('.ibexa-filters__item--section .ibexa-filters__select');
-  var lastModifiedSelect = doc.querySelector('.ibexa-filters__item--modified .ibexa-filters__select');
-  var lastModifiedDateRange = doc.querySelector('.ibexa-filters__item--modified .ibexa-filters__range-select');
-  var lastCreatedSelect = doc.querySelector('.ibexa-filters__item--created .ibexa-filters__select');
-  var lastCreatedDateRange = doc.querySelector('.ibexa-filters__item--created .ibexa-filters__range-select');
+  var lastModifiedSelectNode = doc.querySelector('.ibexa-filters__item--modified .ibexa-filters__select');
+  var lastModifiedSelect = getInstance(lastModifiedSelectNode);
+  var lastModifiedDateRangeNode = doc.querySelector('.ibexa-filters__item--modified .ibexa-date-time-range-single');
+  var lastModifiedDateRange = getInstance(lastModifiedDateRangeNode);
+  var _lastModifiedDateRang = lastModifiedDateRangeNode.dataset,
+    lastModifiedPeriodSelector = _lastModifiedDateRang.periodSelector,
+    lastModifiedStartSelector = _lastModifiedDateRang.startSelector,
+    lastModifiedEndSelector = _lastModifiedDateRang.endSelector;
+  var lastModifiedPeriod = doc.querySelector(lastModifiedPeriodSelector);
+  var lastModifiedStartDate = doc.querySelector(lastModifiedStartSelector);
+  var lastModifiedEndDate = doc.querySelector(lastModifiedEndSelector);
+  var lastCreatedSelectNode = doc.querySelector('.ibexa-filters__item--created .ibexa-filters__select');
+  var lastCreatedSelect = getInstance(lastCreatedSelectNode);
+  var lastCreatedDateRangeNode = doc.querySelector('.ibexa-filters__item--created .ibexa-date-time-range-single');
+  var lastCreatedDateRange = getInstance(lastCreatedDateRangeNode);
+  var _lastCreatedDateRange = lastCreatedDateRangeNode.dataset,
+    lastCreatedPeriodSelector = _lastCreatedDateRange.periodSelector,
+    lastCreatedStartDateSelector = _lastCreatedDateRange.startSelector,
+    lastCreatedEndDateSelector = _lastCreatedDateRange.endSelector;
+  var lastCreatedPeriod = doc.querySelector(lastCreatedPeriodSelector);
+  var lastCreatedStartDate = doc.querySelector(lastCreatedStartDateSelector);
+  var lastCreatedEndDate = doc.querySelector(lastCreatedEndDateSelector);
   var creatorInput = doc.querySelector('.ibexa-filters__item--creator .ibexa-input');
   var searchCreatorInput = doc.querySelector('#search_creator');
   var usersList = doc.querySelector('.ibexa-filters__item--creator .ibexa-filters__user-list');
@@ -47,24 +67,13 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var selectSubtreeBtn = doc.querySelector('.ibexa-filters__item--subtree .ibexa-tag-view-select__btn-select-path');
   var subtreeInput = doc.querySelector('#search_subtree');
   var showMoreBtns = doc.querySelectorAll('.ibexa-content-type-selector__show-more');
-  var dateConfig = {
-    mode: 'range',
-    locale: {
-      rangeSeparator: ' - '
-    },
-    formatDate: function formatDate(date) {
-      return ibexa.helpers.timezone.formatShortDateTime(date, null, ibexa.adminUiConfig.dateFormat.shortDate);
-    }
-  };
   var clearFilters = function clearFilters(event) {
     event.preventDefault();
     var option = contentTypeSelect.querySelector('option');
     var defaultText = option.dataset["default"];
-    var lastModifiedDataRange = doc.querySelector(lastModifiedSelect.dataset.targetSelector);
-    var lastCreatedDataRange = doc.querySelector(lastCreatedSelect.dataset.targetSelector);
-    var lastModifiedPeriod = doc.querySelector(lastModifiedDataRange.dataset.periodSelector);
+    var lastModifiedDataRange = doc.querySelector(lastModifiedSelectNode.dataset.targetSelector);
+    var lastCreatedDataRange = doc.querySelector(lastCreatedSelectNode.dataset.targetSelector);
     var lastModifiedEnd = doc.querySelector(lastModifiedDataRange.dataset.endSelector);
-    var lastCreatedPeriod = doc.querySelector(lastCreatedDataRange.dataset.periodSelector);
     var lastCreatedEnd = doc.querySelector(lastCreatedDataRange.dataset.endSelector);
     option.innerHTML = defaultText;
     contentTypeCheckboxes.forEach(function (checkbox) {
@@ -74,9 +83,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     if (sectionSelect) {
       sectionSelect[0].selected = true;
     }
-    lastModifiedSelect[0].selected = true;
-    lastCreatedSelect[0].selected = true;
-    lastModifiedSelect.querySelector('option').selected = true;
+    lastModifiedSelectNode[0].selected = true;
+    lastCreatedSelectNode[0].selected = true;
+    lastModifiedSelectNode.querySelector('option').selected = true;
     lastModifiedPeriod.value = '';
     lastModifiedEnd.value = '';
     lastCreatedPeriod.value = '';
@@ -91,27 +100,19 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var isSectionSelected = sectionSelect ? !!sectionSelect.value : false;
     var isCreatorSelected = !!searchCreatorInput.value;
     var isSubtreeSelected = !!subtreeInput.value.trim().length;
-    var isModifiedSelected = !!lastModifiedSelect.value;
-    var isCreatedSelected = !!lastCreatedSelect.value;
-    if (lastModifiedSelect.value === 'custom_range') {
-      var lastModifiedWrapper = lastModifiedDateRange.closest(".".concat(CLASS_DATE_RANGE));
-      var _lastModifiedWrapper$ = lastModifiedWrapper.dataset,
-        periodSelector = _lastModifiedWrapper$.periodSelector,
-        endSelector = _lastModifiedWrapper$.endSelector;
-      var lastModifiedPeriodValue = doc.querySelector(periodSelector).value;
-      var lastModifiedEndDate = doc.querySelector(endSelector).value;
-      if (!lastModifiedPeriodValue || !lastModifiedEndDate) {
+    var isModifiedSelected = !!lastModifiedSelectNode.value;
+    var isCreatedSelected = !!lastCreatedSelectNode.value;
+    if (lastModifiedSelectNode.value === 'custom_range') {
+      var lastModifiedStartDateValue = lastModifiedStartDate.value;
+      var lastModifiedEndDateValue = lastModifiedEndDate.value;
+      if (!lastModifiedStartDateValue || !lastModifiedEndDateValue) {
         isModifiedSelected = false;
       }
     }
-    if (lastCreatedSelect.value === 'custom_range') {
-      var lastCreatedWrapper = lastCreatedDateRange.closest(".".concat(CLASS_DATE_RANGE));
-      var _lastCreatedWrapper$d = lastCreatedWrapper.dataset,
-        _periodSelector = _lastCreatedWrapper$d.periodSelector,
-        _endSelector = _lastCreatedWrapper$d.endSelector;
-      var lastCreatedPeriodValue = doc.querySelector(_periodSelector).value;
-      var lastCreatedEndDate = doc.querySelector(_endSelector).value;
-      if (!lastCreatedPeriodValue || !lastCreatedEndDate) {
+    if (lastCreatedSelectNode.value === 'custom_range') {
+      var lastCreatedStartDateValue = lastCreatedStartDate.value;
+      var lastCreatedEndDateValue = lastCreatedEndDate.value;
+      if (!lastCreatedStartDateValue || !lastCreatedEndDateValue) {
         isCreatedSelected = false;
       }
     }
@@ -119,56 +120,34 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var methodName = isEnabled ? 'removeAttribute' : 'setAttribute';
     applyBtn[methodName]('disabled', !isEnabled);
   };
-  var toggleDatesSelectVisibility = function toggleDatesSelectVisibility(event) {
+  var toggleDatesSelectVisibility = function toggleDatesSelectVisibility(event, select, dateRange) {
     var datesRangeNode = doc.querySelector(event.target.dataset.targetSelector);
-    if (event.target.value !== 'custom_range') {
+    if (select.value !== 'custom_range') {
+      dateRange.toggleHidden(true);
+      dateRange.clearDates();
       doc.querySelector(datesRangeNode.dataset.periodSelector).value = event.target.value;
-      doc.querySelector(datesRangeNode.dataset.endSelector).value = '';
-      datesRangeNode.classList.remove(CLASS_VISIBLE_DATE_RANGE);
       toggleDisabledStateOnApplyBtn();
       return;
     }
-    datesRangeNode.classList.add(CLASS_VISIBLE_DATE_RANGE);
+    dateRange.toggleHidden(false);
   };
   var filterByContentType = function filterByContentType() {
     var selectedCheckboxes = _toConsumableArray(contentTypeCheckboxes).filter(function (checkbox) {
       return checkbox.checked;
     });
     var contentTypesText = selectedCheckboxes.map(function (checkbox) {
-      return checkbox.dataset.name;
+      return escapeHTML(checkbox.dataset.name);
     }).join(', ');
     var _contentTypeSelect = _slicedToArray(contentTypeSelect, 1),
       option = _contentTypeSelect[0];
     var defaultText = option.dataset["default"];
-    option.innerHTML = contentTypesText || defaultText;
+    dangerouslySetInnerHTML(option, contentTypesText || defaultText);
     toggleDisabledStateOnApplyBtn();
-  };
-  var setSelectedDateRange = function setSelectedDateRange(timestamps, _ref) {
-    var dates = _ref.dates,
-      inputField = _ref.inputField;
-    var dateRange = inputField.closest('.ibexa-filters__range-wrapper');
-    if (dates.length === 2) {
-      var startDate = getUnixTimestampUTC(dates[0]);
-      var endDate = getUnixTimestampUTC(dates[1]);
-      var secondsInDay = 86400;
-      var days = (endDate - startDate) / secondsInDay;
-      doc.querySelector(dateRange.dataset.periodSelector).value = "P0Y0M".concat(days, "D");
-      doc.querySelector(dateRange.dataset.endSelector).value = endDate;
-    } else if (dates.length === 0) {
-      doc.querySelector(dateRange.dataset.periodSelector).value = '';
-      doc.querySelector(dateRange.dataset.endSelector).value = '';
-    }
-    toggleDisabledStateOnApplyBtn();
-  };
-  var getUnixTimestampUTC = function getUnixTimestampUTC(dateObject) {
-    var date = new Date(Date.UTC(dateObject.getFullYear(), dateObject.getMonth(), dateObject.getDate()));
-    date = Math.floor(date.getTime() / 1000);
-    return date;
   };
   var getUsersList = function getUsersList(value) {
     var body = JSON.stringify({
       ViewInput: {
-        identifier: "find-user-by-name-".concat(value),
+        identifier: "find-user-by-name-".concat(encodeURIComponent(value)),
         "public": false,
         ContentQuery: {
           FacetBuilders: {},
@@ -199,7 +178,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }).then(showUsersList);
   };
   var createUsersListItem = function createUsersListItem(user) {
-    return "<li data-id=\"".concat(user._id, "\" data-name=\"").concat(user.TranslatedName, "\" class=\"ibexa-filters__user-item\">").concat(user.TranslatedName, "</li>");
+    var userNameHtmlEscaped = escapeHTML(user.TranslatedName);
+    var userNameHtmlAttributeEscaped = escapeHTMLAttribute(user.TranslatedName);
+    return "<li data-id=\"".concat(user._id, "\" data-name=\"").concat(userNameHtmlAttributeEscaped, "\" class=\"ibexa-filters__user-item\">").concat(userNameHtmlEscaped, "</li>");
   };
   var showUsersList = function showUsersList(data) {
     var hits = data.View.Result.searchHits.searchHit;
@@ -207,7 +188,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       return total + createUsersListItem(hit.value.Content);
     }, '');
     var methodName = users ? 'addEventListener' : 'removeEventListener';
-    usersList.innerHTML = users;
+    dangerouslySetInnerHTML(usersList, users);
     usersList.classList.remove('ibexa-filters__user-list--hidden');
     doc.querySelector('body')[methodName]('click', _handleClickOutsideUserList, false);
   };
@@ -243,20 +224,6 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     usersList.classList.add('ibexa-filters__user-list--hidden');
     doc.querySelector('body').removeEventListener('click', _handleClickOutsideUserList, false);
   };
-  var initFlatPickr = function initFlatPickr(dateRangeField) {
-    var _dateRangeField$query = dateRangeField.querySelector('.ibexa-filters__range-select').dataset,
-      start = _dateRangeField$query.start,
-      end = _dateRangeField$query.end;
-    var defaultDate = start && end ? [start, end] : [];
-    var dateTimePickerWidget = new ibexa.core.DateTimePicker({
-      container: dateRangeField,
-      onChange: setSelectedDateRange,
-      flatpickrConfig: _objectSpread(_objectSpread({}, dateConfig), {}, {
-        defaultDate: defaultDate
-      })
-    });
-    dateTimePickerWidget.init();
-  };
   var removeSearchTag = function removeSearchTag(event) {
     var tag = event.currentTarget.closest(SELECTOR_TAG);
     var form = event.currentTarget.closest('form');
@@ -277,15 +244,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     subtreeInput.value = '';
     removeSearchTag(event);
   };
-  var clearDataRange = function clearDataRange(event, selector) {
-    var dataRange = doc.querySelector(selector);
-    var rangeSelect = dataRange.parentNode.querySelector('.ibexa-filters__select');
-    var periodInput = doc.querySelector(dataRange.dataset.periodSelector);
-    var endDateInput = doc.querySelector(dataRange.dataset.endSelector);
-    rangeSelect[0].selected = true;
-    periodInput.value = '';
-    endDateInput.vaue = '';
-    dataRange.classList.remove(CLASS_VISIBLE_DATE_RANGE);
+  var clearDataRange = function clearDataRange(event, select, dateRange) {
+    select.clearCurrentSelection();
+    dateRange.clearDates();
+    dateRange.toggleHidden(true);
     removeSearchTag(event);
   };
   var clearCreator = function clearCreator(event) {
@@ -306,10 +268,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       return clearContentType(event);
     },
     'last-modified': function lastModified(event) {
-      return clearDataRange(event, lastModifiedSelect.dataset.targetSelector);
+      return clearDataRange(event, lastModifiedSelect, lastModifiedDateRange);
     },
     'last-created': function lastCreated(event) {
-      return clearDataRange(event, lastCreatedSelect.dataset.targetSelector);
+      return clearDataRange(event, lastCreatedSelect, lastCreatedDateRange);
     }
   };
   var showMoreContentTypes = function showMoreContentTypes(event) {
@@ -344,7 +306,6 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       multiple: true
     }, config)));
   };
-  dateFields.forEach(initFlatPickr);
   filterByContentType();
   clearBtn.addEventListener('click', clearFilters, false);
   if (sectionSelect) {
@@ -359,9 +320,19 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   for (var tagType in clearSearchTagBtnMethods) {
     _loop(tagType);
   }
+  lastModifiedPeriod.addEventListener('change', toggleDisabledStateOnApplyBtn, false);
+  lastModifiedStartDate.addEventListener('change', toggleDisabledStateOnApplyBtn, false);
+  lastModifiedEndDate.addEventListener('change', toggleDisabledStateOnApplyBtn, false);
+  lastCreatedPeriod.addEventListener('change', toggleDisabledStateOnApplyBtn, false);
+  lastCreatedStartDate.addEventListener('change', toggleDisabledStateOnApplyBtn, false);
+  lastCreatedEndDate.addEventListener('change', toggleDisabledStateOnApplyBtn, false);
   subtreeInput.addEventListener('change', toggleDisabledStateOnApplyBtn, false);
-  lastModifiedSelect.addEventListener('change', toggleDatesSelectVisibility, false);
-  lastCreatedSelect.addEventListener('change', toggleDatesSelectVisibility, false);
+  lastModifiedSelectNode.addEventListener('change', function (event) {
+    return toggleDatesSelectVisibility(event, lastModifiedSelectNode, lastModifiedDateRange);
+  }, false);
+  lastCreatedSelectNode.addEventListener('change', function (event) {
+    return toggleDatesSelectVisibility(event, lastCreatedSelectNode, lastCreatedDateRange);
+  }, false);
   creatorInput.addEventListener('keyup', handleTyping, false);
   usersList.addEventListener('click', handleSelectUser, false);
   contentTypeCheckboxes.forEach(function (checkbox) {
@@ -435,7 +406,8 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var _event$currentTarget$ = event.currentTarget.dataset,
       contentId = _event$currentTarget$.contentId,
       versionNo = _event$currentTarget$.versionNo,
-      languageCode = _event$currentTarget$.languageCode;
+      languageCode = _event$currentTarget$.languageCode,
+      withConfirm = _event$currentTarget$.withConfirm;
     var contentInfoInput = versionEditForm.querySelector("input[name=\"".concat(versionEditFormName, "[content_info]\"]"));
     var versionInfoContentInfoInput = versionEditForm.querySelector("input[name=\"".concat(versionEditFormName, "[version_info][content_info]\"]"));
     var versionInfoVersionNoInput = versionEditForm.querySelector("input[name=\"".concat(versionEditFormName, "[version_info][version_no]\"]"));
@@ -463,6 +435,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     var showModal = function showModal(modalHtml) {
       var wrapper = doc.querySelector('.ibexa-modal-wrapper');
       wrapper.innerHTML = modalHtml;
+      var conflictModal = doc.querySelector('#version-draft-conflict-modal');
       var addDraftButton = wrapper.querySelector('.ibexa-btn--add-draft');
       if (addDraftButton) {
         addDraftButton.addEventListener('click', addDraft, false);
@@ -472,7 +445,10 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
           return wrapperBtnEvent.preventDefault();
         }, false);
       });
-      bootstrap.Modal.getOrCreateInstance(doc.querySelector('#version-draft-conflict-modal')).show();
+      bootstrap.Modal.getOrCreateInstance(conflictModal).show();
+      conflictModal.addEventListener('hide.bs.modal', function () {
+        doc.body.dispatchEvent(new CustomEvent('ibexa:edit-content-reset-language-selector'));
+      });
     };
     var handleCanEditCheck = function handleCanEditCheck(response) {
       if (response.canEdit) {
@@ -491,7 +467,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       } else if (response.status === 403) {
         response.text().then(showErrorNotification);
       } else if (response.status === 200) {
-        submitVersionEditForm();
+        if (!withConfirm) {
+          submitVersionEditForm();
+        }
       }
     };
     event.preventDefault();
@@ -527,57 +505,85 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       _classCallCheck(this, EditTranslation);
       this.container = config.container;
       this.toggler = config.container.querySelector('.ibexa-btn--translations-list-toggler');
-      this.translationsList = config.container.querySelector('.ibexa-translation-selector__list-wrapper');
+      this.extraActionsContainer = config.container.querySelector('.ibexa-extra-actions');
+      this.closeBtn = config.container.querySelector('.ibexa-extra-actions__close-btn');
+      this.confirmBtn = config.container.querySelector('.ibexa-extra-actions__confirm-btn');
+      this.languagesBtns = config.container.querySelectorAll('.ibexa-btn--select-language');
       this.backdrop = config.backdrop;
       this.tableNode = null;
-      this.hideTranslationsList = this.hideTranslationsList.bind(this);
-      this.showTranslationsList = this.showTranslationsList.bind(this);
+      this.hideExtraActionPanel = this.hideExtraActionPanel.bind(this);
+      this.showExtraActionPanel = this.showExtraActionPanel.bind(this);
+      this.setActiveLanguage = this.setActiveLanguage.bind(this);
+      this.resetLanguageSelector = this.resetLanguageSelector.bind(this);
       this.setPosition = this.setPosition.bind(this);
     }
     return _createClass(EditTranslation, [{
       key: "setPosition",
       value: function setPosition() {
-        var topOffset = parseInt(this.translationsList.dataset.topOffset, 10);
+        var topOffset = parseInt(this.extraActionsContainer.dataset.topOffset, 10);
         var topPosition = window.scrollY > topOffset ? 0 : topOffset - window.scrollY;
         var height = window.scrollY > topOffset ? window.innerHeight : window.innerHeight + window.scrollY - topOffset;
-        this.translationsList.style.top = "".concat(topPosition, "px");
-        this.translationsList.style.height = "".concat(height, "px");
+        this.extraActionsContainer.style.top = "".concat(topPosition, "px");
+        this.extraActionsContainer.style.height = "".concat(height, "px");
       }
     }, {
-      key: "hideTranslationsList",
-      value: function hideTranslationsList(event) {
-        var closestTranslationSelector = event.target.closest('.ibexa-translation-selector');
-        var clickedOnTranslationsList = closestTranslationSelector && closestTranslationSelector.isSameNode(this.container);
-        var clickedOnDraftConflictModal = event.target.closest('.ibexa-modal--version-draft-conflict');
-        if (clickedOnTranslationsList || clickedOnDraftConflictModal) {
-          return;
-        }
+      key: "hideExtraActionPanel",
+      value: function hideExtraActionPanel() {
         if (this.tableNode) {
           this.tableNode.classList.add('ibexa-table--last-column-sticky');
           this.tableNode = null;
         }
         this.backdrop.hide();
-        this.translationsList.classList.add('ibexa-translation-selector__list-wrapper--hidden');
-        doc.removeEventListener('click', this.hideTranslationsList, false);
+        this.extraActionsContainer.classList.add('ibexa-extra-actions--hidden');
+        this.closeBtn.removeEventListener('click', this.hideExtraActionPanel, false);
       }
     }, {
-      key: "showTranslationsList",
-      value: function showTranslationsList(_ref) {
+      key: "showExtraActionPanel",
+      value: function showExtraActionPanel(_ref) {
         var currentTarget = _ref.currentTarget;
-        this.translationsList.classList.remove('ibexa-translation-selector__list-wrapper--hidden');
+        this.extraActionsContainer.classList.remove('ibexa-extra-actions--hidden');
         this.tableNode = currentTarget.closest('.ibexa-table--last-column-sticky');
         if (this.tableNode) {
           this.tableNode.classList.remove('ibexa-table--last-column-sticky');
         }
         this.setPosition();
         this.backdrop.show();
-        doc.addEventListener('click', this.hideTranslationsList, false);
+        this.closeBtn.addEventListener('click', this.hideExtraActionPanel, false);
         ibexa.helpers.tooltips.hideAll();
+      }
+    }, {
+      key: "setActiveLanguage",
+      value: function setActiveLanguage(event) {
+        var _event$currentTarget$ = event.currentTarget.dataset,
+          contentId = _event$currentTarget$.contentId,
+          languageCode = _event$currentTarget$.languageCode;
+        this.confirmBtn.dataset.contentId = contentId;
+        this.confirmBtn.dataset.languageCode = languageCode;
+        this.confirmBtn.disabled = false;
+        this.languagesBtns.forEach(function (btn) {
+          return btn.classList.remove('ibexa-btn--active');
+        });
+        event.currentTarget.classList.add('ibexa-btn--active');
+      }
+    }, {
+      key: "resetLanguageSelector",
+      value: function resetLanguageSelector() {
+        this.confirmBtn.dataset.contentId = null;
+        this.confirmBtn.dataset.languageCode = null;
+        this.confirmBtn.disabled = true;
+        this.languagesBtns.forEach(function (btn) {
+          return btn.classList.remove('ibexa-btn--active');
+        });
       }
     }, {
       key: "init",
       value: function init() {
-        this.toggler.addEventListener('click', this.showTranslationsList, false);
+        var _this = this;
+        this.toggler.addEventListener('click', this.showExtraActionPanel, false);
+        this.languagesBtns.forEach(function (btn) {
+          btn.addEventListener('click', _this.setActiveLanguage, false);
+        });
+        document.body.addEventListener('ibexa:edit-content-reset-language-selector', this.resetLanguageSelector, false);
       }
     }]);
   }();

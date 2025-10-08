@@ -1,0 +1,64 @@
+ProductTypesList:
+    type: enum
+    config:
+        values:
+            book0:
+                value: Book0ProductType
+            book1:
+                value: Book1ProductType
+            book2:
+                value: Book2ProductType
+            book3:
+                value: Book3ProductType
+            book4:
+                value: Book4ProductType
+            laptop0:
+                value: Laptop0ProductType
+            laptop1:
+                value: Laptop1ProductType
+            laptop2:
+                value: Laptop2ProductType
+            laptop3:
+                value: Laptop3ProductType
+            laptop4:
+                value: Laptop4ProductType
+            laptop5:
+                value: Laptop5ProductType
+            laptop6:
+                value: Laptop6ProductType
+            laptop7:
+                value: Laptop7ProductType
+            laptop8:
+                value: Laptop8ProductType
+            laptop9:
+                value: Laptop9ProductType
+            mouse0:
+                value: Mouse0ProductType
+            mouse1:
+                value: Mouse1ProductType
+            mouse2:
+                value: Mouse2ProductType
+            mouse3:
+                value: Mouse3ProductType
+            mouse4:
+                value: Mouse4ProductType
+            mouse5:
+                value: Mouse5ProductType
+            mouse6:
+                value: Mouse6ProductType
+            mouse7:
+                value: Mouse7ProductType
+            mouse8:
+                value: Mouse8ProductType
+            mouse9:
+                value: Mouse9ProductType
+            virtual0:
+                value: Virtual0ProductType
+            virtual1:
+                value: Virtual1ProductType
+            virtual2:
+                value: Virtual2ProductType
+            virtual3:
+                value: Virtual3ProductType
+            virtual4:
+                value: Virtual4ProductType

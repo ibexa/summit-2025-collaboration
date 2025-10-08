@@ -63,8 +63,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       dateInputNodes.forEach(function (dateInputNode) {
         if (!dateInputNode.disabled) {
           var datePickerNode = dateInputNode.closest('.ibexa-picker');
-          var datePickerInstance = ibexa.helpers.objectInstances.getInstance(datePickerNode);
-          datePickerInstance.clear();
+          if (datePickerNode) {
+            var datePickerInstance = ibexa.helpers.objectInstances.getInstance(datePickerNode);
+            datePickerInstance.clear();
+          }
+          var dateTimeRangeSingleNode = dateInputNode.closest('.ibexa-date-time-range-single');
+          if (dateTimeRangeSingleNode) {
+            var dateTimeRangeSingleInstance = ibexa.helpers.objectInstances.getInstance(dateTimeRangeSingleNode);
+            dateTimeRangeSingleInstance.clearDates();
+          }
         }
       });
       dropdownNodes.forEach(function (dropdownNode) {
@@ -81,13 +88,21 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     };
     var handleFormClear = function handleFormClear() {
       clearForm();
-      clearBtn.disabled = true;
-      applyBtn.disabled = !checkFieldsValuesChanged();
-      applyBtn.click();
+      if (clearBtn) {
+        clearBtn.disabled = true;
+      }
+      if (applyBtn) {
+        applyBtn.disabled = !checkFieldsValuesChanged();
+        applyBtn.click();
+      }
     };
     var handleInputChange = function handleInputChange() {
-      clearBtn.disabled = checkAreFiltersCleared();
-      applyBtn.disabled = !checkFieldsValuesChanged();
+      if (clearBtn) {
+        clearBtn.disabled = checkAreFiltersCleared();
+      }
+      if (applyBtn) {
+        applyBtn.disabled = !checkFieldsValuesChanged();
+      }
     };
     dropdownNodes.forEach(function (dropdownNode) {
       var dropdown = dropdownNode.ibexaInstance;
@@ -123,14 +138,18 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 /*!*************************************************************************!*\
   !*** ./public/bundles/ibexaadminui/js/scripts/sidebar/extra.actions.js ***!
   \*************************************************************************/
-/***/ (() => {
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_object_instances__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances.js");
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
 function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
 (function (global, doc, ibexa) {
   var CLASS_HIDDEN = 'ibexa-extra-actions--hidden';
   var CLASS_EXPANDED = 'ibexa-context-menu--expanded';
@@ -139,6 +158,42 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
   var btns = _toConsumableArray(doc.querySelectorAll('.ibexa-btn--extra-actions'));
   var menu = doc.querySelector('.ibexa-context-menu');
   var backdrop = new ibexa.core.Backdrop();
+  var formsInitialData = new Map();
+  var saveInitialFormData = function saveInitialFormData(extraActionsContainer) {
+    var extraActionsInputs = extraActionsContainer.querySelectorAll('input, select');
+    extraActionsInputs.forEach(function (node) {
+      var value = node.type === 'radio' || node.type === 'checkbox' ? node.checked : node.value;
+      formsInitialData.set(node, value);
+    });
+  };
+  var restoreInitialFormData = function restoreInitialFormData(extraActionsContainer) {
+    if (formsInitialData.size === 0) {
+      return;
+    }
+    var extraActionsInputs = extraActionsContainer.querySelectorAll('input, select');
+    extraActionsInputs.forEach(function (node) {
+      var value = formsInitialData.get(node);
+      var prevValue = node.value;
+      if (node.type === 'radio' || node.type === 'checkbox') {
+        prevValue = node.checked;
+        node.checked = value;
+      } else if (node.tagName === 'SELECT') {
+        var dropdownContainer = node.closest('.ibexa-dropdown');
+        if (dropdownContainer) {
+          var dropdownInstance = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_object_instances__WEBPACK_IMPORTED_MODULE_0__.getInstance)(dropdownContainer);
+          dropdownInstance.selectOption(value);
+        } else {
+          node.value = value;
+        }
+      } else {
+        node.value = value;
+      }
+      if (value !== prevValue) {
+        node.dispatchEvent(new CustomEvent('change'));
+      }
+    });
+    formsInitialData.clear();
+  };
   var haveHiddenPart = function haveHiddenPart(element) {
     return element.classList.contains(CLASS_HIDDEN) && !element.classList.contains(CLASS_PREVENT_SHOW);
   };
@@ -153,6 +208,7 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }
     doc.body.dispatchEvent(new CustomEvent('ibexa-extra-actions:after-close'));
     removeBackdrop();
+    restoreInitialFormData(actions);
   };
   var toggleExtraActionsWidget = function toggleExtraActionsWidget(widgetData) {
     var actions = doc.querySelector(".ibexa-extra-actions[data-actions=\"".concat(widgetData.actions, "\"]"));
@@ -175,9 +231,11 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       backdrop.show();
       doc.body.addEventListener('click', _detectClickOutside, false);
       doc.body.classList.add('ibexa-scroll-disabled');
+      saveInitialFormData(actions);
     } else {
       doc.body.removeEventListener('click', _detectClickOutside);
       removeBackdrop();
+      restoreInitialFormData(actions);
     }
     if (focusElement) {
       focusElement.focus();
@@ -214,6 +272,35 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     }, false);
   });
 })(window, window.document, window.ibexa);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances.js":
+/*!**************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/object.instances.js ***!
+  \**************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   clearInstance: () => (/* binding */ clearInstance),
+/* harmony export */   getInstance: () => (/* binding */ getInstance),
+/* harmony export */   setInstance: () => (/* binding */ setInstance)
+/* harmony export */ });
+var setInstance = function setInstance(domElement, instance) {
+  if (domElement.ibexaInstance) {
+    throw new Error('Instance for this DOM element already exists!');
+  }
+  domElement.ibexaInstance = instance;
+};
+var getInstance = function getInstance(domElement) {
+  return domElement.ibexaInstance;
+};
+var clearInstance = function clearInstance(domElement) {
+  delete domElement.ibexaInstance;
+};
+
 
 /***/ })
 

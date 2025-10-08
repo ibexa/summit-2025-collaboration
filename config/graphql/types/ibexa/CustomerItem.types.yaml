@@ -20,14 +20,14 @@ CustomerItem:
             userAccount:
                 type: String
                 resolve: '@=resolver("ItemFieldValue", [value, "user_account", args]).id'
-            customerGroup:
-                type: String
-                resolve: '@=resolver("ItemFieldValue", [value, "customer_group", args])'
             image:
                 type: ImageFieldValue
                 resolve: '@=resolver("ItemFieldValue", [value, "image", args])'
                 args:
                     language: { type: RepositoryLanguage }
+            customerGroup:
+                type: String
+                resolve: '@=resolver("ItemFieldValue", [value, "customer_group", args])'
             billingAddress:
                 type: String
                 resolve: '@=resolver("ItemFieldValue", [value, "billing_address", args])'

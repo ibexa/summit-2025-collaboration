@@ -18,12 +18,14 @@ final class CartSessionCreateStruct extends AbstractSessionCreateStruct
 
     public function __construct(
         string $token,
-        int $ownerId,
         string $cartIdentifier,
+        int $ownerId,
+        bool $isActive,
+        bool $hasPublicLink,
         ?DateTimeImmutable $createdAt = null,
         ?DateTimeImmutable $updatedAt = null
     ) {
-        parent::__construct($token, $ownerId, $createdAt, $updatedAt);
+        parent::__construct( $token, $ownerId,$isActive, $hasPublicLink, $createdAt, $updatedAt);
 
         $this->cartIdentifier = $cartIdentifier;
     }

@@ -1,5 +1,72 @@
 (self["webpackChunk"] = self["webpackChunk"] || []).push([["ibexa-dashboard-blocks-js"],{
 
+/***/ "./public/bundles/ibexaadminui/js/scripts/sidebar/instant.filter.js":
+/*!**************************************************************************!*\
+  !*** ./public/bundles/ibexaadminui/js/scripts/sidebar/instant.filter.js ***!
+  \**************************************************************************/
+/***/ (() => {
+
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+(function (global, doc) {
+  var filterTimeout;
+  var SELECTOR_ITEM = '.ibexa-instant-filter__group-item';
+  var timeout = 200;
+  var filters = doc.querySelectorAll('.ibexa-instant-filter');
+  var toggleGroupDisplay = function toggleGroupDisplay(group) {
+    var areChildrenHidden = _toConsumableArray(group.querySelectorAll(SELECTOR_ITEM)).every(function (item) {
+      return item.hasAttribute('hidden');
+    });
+    group.toggleAttribute('hidden', areChildrenHidden);
+  };
+  var filterItems = function filterItems(itemsMap, groups, event) {
+    window.clearTimeout(filterTimeout);
+    filterTimeout = window.setTimeout(function () {
+      var query = event.target.value.toLowerCase();
+      var results = itemsMap.filter(function (item) {
+        return item.label.includes(query);
+      });
+      itemsMap.forEach(function (item) {
+        return item.element.setAttribute('hidden', true);
+      });
+      results.forEach(function (item) {
+        return item.element.removeAttribute('hidden');
+      });
+      groups.forEach(toggleGroupDisplay);
+    }, timeout);
+  };
+  var initFilter = function initFilter(filter) {
+    var filterInput = filter.querySelector('.ibexa-instant-filter__input');
+    var groups = _toConsumableArray(filter.querySelectorAll('.ibexa-instant-filter__group'));
+    var items = _toConsumableArray(filter.querySelectorAll(SELECTOR_ITEM));
+    var itemsMap = items.reduce(function (total, item) {
+      return [].concat(_toConsumableArray(total), [{
+        label: item.textContent.toLowerCase(),
+        element: item
+      }]);
+    }, []);
+    filterInput.addEventListener('change', filterItems.bind(filter, itemsMap, groups), false);
+    filterInput.addEventListener('blur', filterItems.bind(filter, itemsMap, groups), false);
+    filterInput.addEventListener('keyup', filterItems.bind(filter, itemsMap, groups), false);
+    filterInput.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+      }
+    }, false);
+  };
+  doc.body.addEventListener('ibexa-instant-filters:add-group', function (event) {
+    var filterContainer = event.detail.container.closest('.ibexa-instant-filter');
+    initFilter(filterContainer);
+  });
+  filters.forEach(initFilter);
+})(window, window.document);
+
+/***/ }),
+
 /***/ "./vendor/ibexa/activity-log/src/bundle/Resources/public/js/recent.activity.block.js":
 /*!*******************************************************************************************!*\
   !*** ./vendor/ibexa/activity-log/src/bundle/Resources/public/js/recent.activity.block.js ***!
@@ -284,6 +351,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 },
 /******/ __webpack_require__ => { // webpackRuntimeModules
 /******/ var __webpack_exec__ = (moduleId) => (__webpack_require__(__webpack_require__.s = moduleId))
-/******/ var __webpack_exports__ = (__webpack_exec__("./vendor/ibexa/dashboard/src/bundle/Resources/public/js/dashboard.blocks.js"), __webpack_exec__("./vendor/ibexa/dashboard/src/bundle/Resources/public/js/blocks/quick.actions.js"), __webpack_exec__("./vendor/ibexa/personalization/src/bundle/Resources/public/js/dashboard/blocks/top_clicks.js"), __webpack_exec__("./vendor/ibexa/product-catalog/src/bundle/Resources/public/js/product.category.block.js"), __webpack_exec__("./vendor/ibexa/activity-log/src/bundle/Resources/public/js/recent.activity.block.js"), __webpack_exec__("./vendor/ibexa/order-management/src/bundle/Resources/public/js/orders.status.block.js"));
+/******/ var __webpack_exports__ = (__webpack_exec__("./vendor/ibexa/dashboard/src/bundle/Resources/public/js/dashboard.blocks.js"), __webpack_exec__("./vendor/ibexa/dashboard/src/bundle/Resources/public/js/blocks/quick.actions.js"), __webpack_exec__("./public/bundles/ibexaadminui/js/scripts/sidebar/instant.filter.js"), __webpack_exec__("./vendor/ibexa/personalization/src/bundle/Resources/public/js/dashboard/blocks/top_clicks.js"), __webpack_exec__("./vendor/ibexa/product-catalog/src/bundle/Resources/public/js/product.category.block.js"), __webpack_exec__("./vendor/ibexa/activity-log/src/bundle/Resources/public/js/recent.activity.block.js"), __webpack_exec__("./vendor/ibexa/order-management/src/bundle/Resources/public/js/orders.status.block.js"));
 /******/ }
 ]);

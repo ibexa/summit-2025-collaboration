@@ -63,8 +63,15 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
       dateInputNodes.forEach(function (dateInputNode) {
         if (!dateInputNode.disabled) {
           var datePickerNode = dateInputNode.closest('.ibexa-picker');
-          var datePickerInstance = ibexa.helpers.objectInstances.getInstance(datePickerNode);
-          datePickerInstance.clear();
+          if (datePickerNode) {
+            var datePickerInstance = ibexa.helpers.objectInstances.getInstance(datePickerNode);
+            datePickerInstance.clear();
+          }
+          var dateTimeRangeSingleNode = dateInputNode.closest('.ibexa-date-time-range-single');
+          if (dateTimeRangeSingleNode) {
+            var dateTimeRangeSingleInstance = ibexa.helpers.objectInstances.getInstance(dateTimeRangeSingleNode);
+            dateTimeRangeSingleInstance.clearDates();
+          }
         }
       });
       dropdownNodes.forEach(function (dropdownNode) {
@@ -81,13 +88,21 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
     };
     var handleFormClear = function handleFormClear() {
       clearForm();
-      clearBtn.disabled = true;
-      applyBtn.disabled = !checkFieldsValuesChanged();
-      applyBtn.click();
+      if (clearBtn) {
+        clearBtn.disabled = true;
+      }
+      if (applyBtn) {
+        applyBtn.disabled = !checkFieldsValuesChanged();
+        applyBtn.click();
+      }
     };
     var handleInputChange = function handleInputChange() {
-      clearBtn.disabled = checkAreFiltersCleared();
-      applyBtn.disabled = !checkFieldsValuesChanged();
+      if (clearBtn) {
+        clearBtn.disabled = checkAreFiltersCleared();
+      }
+      if (applyBtn) {
+        applyBtn.disabled = !checkFieldsValuesChanged();
+      }
     };
     dropdownNodes.forEach(function (dropdownNode) {
       var dropdown = dropdownNode.ibexaInstance;
@@ -176,6 +191,7 @@ var UserInvitationModal = /*#__PURE__*/function () {
     this.fileInput = this.modal.querySelector('.ibexa-user-invitation-modal__file-input');
     this.fakeSubmitBtn = this.modal.querySelector('.ibexa-user-invitation-modal__fake-submit-btn');
     this.realSubmitBtn = this.modal.querySelector('.ibexa-user-invitation-modal__real-submit-btn');
+    this.form = this.modal.querySelector('.ibexa-user-invitation-modal__form');
     this.lastScrolledToEntryWithIssue = null;
     this.attachEntryListeners = this.attachEntryListeners.bind(this);
     this.preventDefaultAction = this.preventDefaultAction.bind(this);
@@ -623,6 +639,7 @@ var UserInvitationModal = /*#__PURE__*/function () {
     key: "init",
     value: function init() {
       var _this4 = this;
+      var ENTER_KEY_CODE = 13;
       this.initialEntries = this.entriesContainer.querySelectorAll('.ibexa-user-invitation-modal__entry');
       this.entryCounter = this.initialEntries.length;
       this.initialEntries.forEach(function (initialEntry) {
@@ -671,6 +688,11 @@ var UserInvitationModal = /*#__PURE__*/function () {
         }
       }, false);
       this.updateModalTitle();
+      this.form.addEventListener('keydown', function (event) {
+        if (event.keyCode === ENTER_KEY_CODE) {
+          event.preventDefault();
+        }
+      }, false);
     }
   }]);
 }();

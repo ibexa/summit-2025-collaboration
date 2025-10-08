@@ -37,6 +37,6 @@ ArticleItem:
                 resolve: '@=resolver("ItemFieldValue", [value, "enable_comments", args]) !== null ? resolver("ItemFieldValue", [value, "enable_comments", args]).bool : null'
             image:
                 type: Item
-                resolve: '@=resolver("RelationFieldValue", [resolver("ItemFieldValue", [value, "image", args]), false])'
+                resolve: '@=resolver("RelationFieldValue", [resolver("ItemFieldValue", [value, "image", args]), false, args])'
                 args:
                     language: { type: RepositoryLanguage }

@@ -78,6 +78,9 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
             return !hiddenTabsLinksIds.includes(popupMenuItem.dataset.tabLinkId);
           });
           popupMenu.updatePosition();
+          if (hiddenTabsWithoutSelector.size > 0) {
+            tabMore.classList.add('ibexa-tabs__tab--more-visible');
+          }
         }
       });
       adaptiveItems.init();

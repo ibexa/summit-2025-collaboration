@@ -1,0 +1,12 @@
+Book3Product:
+    type: object
+    inherits:
+        - BaseProduct
+    config:
+        fields:
+            attributes:
+                type: Book3Attributes
+                resolve: '@=value'
+            fields:
+                type: Book3ContentFields
+                resolve: '@=value'

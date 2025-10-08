@@ -1,0 +1,12 @@
+Mouse5Product:
+    type: object
+    inherits:
+        - BaseProduct
+    config:
+        fields:
+            attributes:
+                type: Mouse5Attributes
+                resolve: '@=value'
+            fields:
+                type: Mouse5ContentFields
+                resolve: '@=value'

@@ -1,0 +1,4 @@
+Book1ProductType:
+    type: object
+    inherits:
+        - BaseProductType

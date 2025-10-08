@@ -8,10 +8,10 @@ CustomerItemCreateInput:
                 type: String!
             userAccount:
                 type: String!
-            customerGroup:
-                type: String
             image:
                 type: ImageFieldInput
+            customerGroup:
+                type: String
             billingAddress:
                 type: String
             shippingAddress:

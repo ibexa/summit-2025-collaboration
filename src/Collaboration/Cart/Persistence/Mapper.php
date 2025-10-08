@@ -17,6 +17,8 @@ use Ibexa\Collaboration\Persistence\Values\AbstractSession;
  *     id: int,
  *     token: string,
  *     owner_id: int,
+ *     is_active: bool,
+ *     has_public_link: bool,
  *     created_at: \DateTimeImmutable,
  *     updated_at: \DateTimeImmutable,
  *     cart_cart_identifier: string,
@@ -33,6 +35,8 @@ final class Mapper implements MapperInterface
             $row['cart_cart_identifier'],
             $row['token'],
             $row['owner_id'],
+            $row['is_active'],
+            $row['has_public_link'],
             $row['created_at'],
             $row['updated_at']
         );

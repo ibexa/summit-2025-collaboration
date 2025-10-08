@@ -36,6 +36,8 @@ function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 (function (global, doc, ibexa, Translator) {
+  var escapeHTML = ibexa.helpers.text.escapeHTML;
+  var dangerouslyInsertAdjacentHTML = ibexa.helpers.dom.dangerouslyInsertAdjacentHTML;
   var collection = doc.querySelector('.ibexa-pb-product-collection');
   var collectionListHeader = collection.querySelector('.ibexa-pb-product-collection__list-header');
   var selectProductBtn = collection.querySelector('.ibexa-pb-product-collection__select-product-btn');
@@ -80,7 +82,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     });
     return fetchRequest(request);
   };
-  var loadProductView = function loadProductView(productList) {
+  var loadProductView = function loadProductView(productsCodes) {
     var request = prepareRequest("/api/ibexa/v2/product/catalog/products/view", {
       method: 'POST',
       headers: {
@@ -91,10 +93,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         ViewInput: {
           identifier: 'Default',
           ProductQuery: {
-            limit: productList.length,
+            limit: productsCodes.length,
             offset: 0,
             Filter: {
-              ProductCodeCriterion: productList
+              ProductCodeCriterion: productsCodes
             },
             SortClauses: {
               ProductName: 'descending'
@@ -130,7 +132,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     var listTitle = Translator.trans(/*@Desc("Product list (%count%)")*/'product.collection.product_list', {
       count: collectionLength
     }, 'ibexa_page_builder_block');
-    collectionListHeader.innerHTML = listTitle;
+    collectionListHeader.innerText = listTitle;
   };
   var toggleError = function toggleError(errorType) {
     var errors = doc.querySelectorAll('.ibexa-pb-product-collection__error');
@@ -268,9 +270,12 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     productCodeInput.value = '';
     addProductBtn.disabled = true;
     collectionListWrapper.dataset.nextIndexId = index + 1;
+    var productNameHtmlEscaped = escapeHTML(name);
+    var productCodeHtmlEscaped = escapeHTML(productCode);
+    var productTypeHtmlEscaped = escapeHTML(productType);
     var itemTemplate = collectionList.dataset.itemTemplate;
-    var renderedItem = itemTemplate.replaceAll('__product_name__', name).replaceAll('__product_code__', productCode).replaceAll('__product_type__', productType).replaceAll('__location_id__', locationId).replaceAll('__content_id__', contentId).replaceAll('__id__', index);
-    collectionList.insertAdjacentHTML('beforeend', renderedItem);
+    var renderedItem = itemTemplate.replaceAll('__product_name__', productNameHtmlEscaped).replaceAll('__product_code__', productCodeHtmlEscaped).replaceAll('__product_type__', productTypeHtmlEscaped).replaceAll('__location_id__', locationId).replaceAll('__content_id__', contentId).replaceAll('__id__', index);
+    dangerouslyInsertAdjacentHTML(collectionList, 'beforeend', renderedItem);
     collectionListWrapper.classList.remove(PRODUCTS_LIST_NO_ITEMS_CLASS);
     var addedProductRow = collectionList.lastElementChild;
     attachListenersToProduct(addedProductRow, hiddenProductItem);

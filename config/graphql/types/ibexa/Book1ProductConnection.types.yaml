@@ -1,0 +1,9 @@
+Book1ProductConnection:
+    type: relay-connection
+    config:
+        nodeType: Book1Product
+        connectionFields:
+            sliceSize:
+                type: Int!
+            orderBy:
+                type: String

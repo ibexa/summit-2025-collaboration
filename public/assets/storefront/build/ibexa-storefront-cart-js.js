@@ -217,14 +217,22 @@ var Cart = /*#__PURE__*/function () {
         var result = response.CartView.Result;
         if (result.count === 0) {
           _this3.createCart();
-          return;
+          return {
+            response: response,
+            cartSummaryLoaded: null
+          };
         }
         var firstCart = result.CartList.Cart[0];
-        _service_cart__WEBPACK_IMPORTED_MODULE_0__.loadCartSummary(firstCart.identifier).then(function (summaryResponse) {
+        var cartSummaryLoaded = _service_cart__WEBPACK_IMPORTED_MODULE_0__.loadCartSummary(firstCart.identifier);
+        cartSummaryLoaded.then(function (summaryResponse) {
           _this3.cartData = result.CartList.Cart[0];
           _this3.cartSummary = summaryResponse.CartSummary;
           _this3.onCartDataChanged();
         });
+        return {
+          response: response,
+          cartSummaryLoaded: cartSummaryLoaded
+        };
       });
     }
   }, {
@@ -1136,9 +1144,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   deleteCart: () => (/* binding */ deleteCart),
 /* harmony export */   deleteCartEntry: () => (/* binding */ deleteCartEntry),
 /* harmony export */   emptyCart: () => (/* binding */ emptyCart),
+/* harmony export */   handleRequest: () => (/* binding */ handleRequest),
 /* harmony export */   loadCart: () => (/* binding */ loadCart),
 /* harmony export */   loadCartSummary: () => (/* binding */ loadCartSummary),
 /* harmony export */   loadUserCarts: () => (/* binding */ loadUserCarts),
+/* harmony export */   prepareRequest: () => (/* binding */ prepareRequest),
 /* harmony export */   updateProductQuantity: () => (/* binding */ updateProductQuantity)
 /* harmony export */ });
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
@@ -1224,7 +1234,7 @@ var loadCartSummary = function loadCartSummary(cartIdentifier) {
   var request = prepareRequest("/api/ibexa/v2/cart/".concat(cartIdentifier, "/summary"), {
     method: 'GET',
     headers: {
-      Accept: 'application/json'
+      Accept: 'application/vnd.ibexa.api.ShortCartSummary+json'
     }
   }, 'ibexa-rest-cart-summary');
   return fetch(request).then(function (response) {
@@ -1424,7 +1434,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _ibexa_cart_src_bundle_Resources_public_js_component_cart__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-cart/src/bundle/Resources/public/js/component/cart */ "./vendor/ibexa/cart/src/bundle/Resources/public/js/component/cart.js");
 /* harmony import */ var _ibexa_cart_src_bundle_Resources_public_js_service_cart__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-cart/src/bundle/Resources/public/js/service/cart */ "./vendor/ibexa/cart/src/bundle/Resources/public/js/service/cart.js");
-/* harmony import */ var _helper_error_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/error.helper */ "./vendor/ibexa/storefront/src/bundle/Resources/public/js/helper/error.helper.js");
+/* harmony import */ var _service_discount__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../service/discount */ "./vendor/ibexa/storefront/src/bundle/Resources/public/js/service/discount.js");
+/* harmony import */ var _helper_error_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/error.helper */ "./vendor/ibexa/storefront/src/bundle/Resources/public/js/helper/error.helper.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
 function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
@@ -1444,6 +1455,7 @@ function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf 
 
 
 
+
 var StorefrontCart = /*#__PURE__*/function (_Cart) {
   function StorefrontCart() {
     _classCallCheck(this, StorefrontCart);
@@ -1453,7 +1465,7 @@ var StorefrontCart = /*#__PURE__*/function (_Cart) {
   return _createClass(StorefrontCart, [{
     key: "createCart",
     value: function createCart() {
-      return _superPropGet(StorefrontCart, "createCart", this, 3)(arguments)["catch"](_helper_error_helper__WEBPACK_IMPORTED_MODULE_2__.errorHandler);
+      return _superPropGet(StorefrontCart, "createCart", this, 3)(arguments)["catch"](_helper_error_helper__WEBPACK_IMPORTED_MODULE_3__.errorHandler);
     }
   }, {
     key: "loadCart",
@@ -1463,34 +1475,59 @@ var StorefrontCart = /*#__PURE__*/function (_Cart) {
       var cartIdentifier = (_document$querySelect = document.querySelector('meta[name="CartIdentifier"]')) === null || _document$querySelect === void 0 ? void 0 : _document$querySelect.content;
       if (cartIdentifier) {
         return _ibexa_cart_src_bundle_Resources_public_js_service_cart__WEBPACK_IMPORTED_MODULE_1__.loadCart(cartIdentifier).then(function (response) {
-          _ibexa_cart_src_bundle_Resources_public_js_service_cart__WEBPACK_IMPORTED_MODULE_1__.loadCartSummary(cartIdentifier).then(function (summaryResponse) {
+          var cartSummaryLoaded = _ibexa_cart_src_bundle_Resources_public_js_service_cart__WEBPACK_IMPORTED_MODULE_1__.loadCartSummary(cartIdentifier);
+          cartSummaryLoaded.then(function (summaryResponse) {
             _this.cartData = response.Cart;
             _this.cartSummary = summaryResponse.CartSummary;
             _this.onCartDataChanged();
           });
-        })["catch"](_helper_error_helper__WEBPACK_IMPORTED_MODULE_2__.errorHandler);
+          return {
+            response: response,
+            cartSummaryLoaded: cartSummaryLoaded
+          };
+        })["catch"](_helper_error_helper__WEBPACK_IMPORTED_MODULE_3__.errorHandler);
       }
-      return _superPropGet(StorefrontCart, "loadCart", this, 3)(arguments)["catch"](_helper_error_helper__WEBPACK_IMPORTED_MODULE_2__.errorHandler);
+      return _superPropGet(StorefrontCart, "loadCart", this, 3)(arguments)["catch"](_helper_error_helper__WEBPACK_IMPORTED_MODULE_3__.errorHandler);
     }
   }, {
     key: "addProduct",
     value: function addProduct() {
-      return _superPropGet(StorefrontCart, "addProduct", this, 3)(arguments)["catch"](_helper_error_helper__WEBPACK_IMPORTED_MODULE_2__.errorHandler);
+      return _superPropGet(StorefrontCart, "addProduct", this, 3)(arguments)["catch"](_helper_error_helper__WEBPACK_IMPORTED_MODULE_3__.errorHandler);
     }
   }, {
     key: "updateEntryQuantity",
     value: function updateEntryQuantity() {
-      return _superPropGet(StorefrontCart, "updateEntryQuantity", this, 3)(arguments)["catch"](_helper_error_helper__WEBPACK_IMPORTED_MODULE_2__.errorHandler);
+      return _superPropGet(StorefrontCart, "updateEntryQuantity", this, 3)(arguments)["catch"](_helper_error_helper__WEBPACK_IMPORTED_MODULE_3__.errorHandler);
     }
   }, {
     key: "removeEntry",
     value: function removeEntry() {
-      return _superPropGet(StorefrontCart, "removeEntry", this, 3)(arguments)["catch"](_helper_error_helper__WEBPACK_IMPORTED_MODULE_2__.errorHandler);
+      return _superPropGet(StorefrontCart, "removeEntry", this, 3)(arguments)["catch"](_helper_error_helper__WEBPACK_IMPORTED_MODULE_3__.errorHandler);
     }
   }, {
     key: "empty",
     value: function empty() {
-      return _superPropGet(StorefrontCart, "empty", this, 3)(arguments)["catch"](_helper_error_helper__WEBPACK_IMPORTED_MODULE_2__.errorHandler);
+      return _superPropGet(StorefrontCart, "empty", this, 3)(arguments)["catch"](_helper_error_helper__WEBPACK_IMPORTED_MODULE_3__.errorHandler);
+    }
+  }, {
+    key: "addCoupon",
+    value: function addCoupon(coupon) {
+      var _this2 = this;
+      return _service_discount__WEBPACK_IMPORTED_MODULE_2__.addCoupon(this.cartData.identifier, coupon).then(function (response) {
+        var cartLoaded = _this2.loadCart();
+        return {
+          response: response,
+          cartLoaded: cartLoaded
+        };
+      });
+    }
+  }, {
+    key: "removeCoupon",
+    value: function removeCoupon(coupon) {
+      var _this3 = this;
+      return _service_discount__WEBPACK_IMPORTED_MODULE_2__.removeCoupon(this.cartData.identifier, coupon).then(function () {
+        return _this3.loadCart();
+      })["catch"](_helper_error_helper__WEBPACK_IMPORTED_MODULE_3__.errorHandler);
     }
   }]);
 }(_ibexa_cart_src_bundle_Resources_public_js_component_cart__WEBPACK_IMPORTED_MODULE_0__["default"]);
@@ -1509,7 +1546,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ StorefrontMaincart)
 /* harmony export */ });
 /* harmony import */ var _ibexa_cart_src_bundle_Resources_public_js_component_maincart__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-cart/src/bundle/Resources/public/js/component/maincart */ "./vendor/ibexa/cart/src/bundle/Resources/public/js/component/maincart.js");
-/* harmony import */ var _ibexa_cart_src_bundle_Resources_public_js_component_summary__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-cart/src/bundle/Resources/public/js/component/summary */ "./vendor/ibexa/cart/src/bundle/Resources/public/js/component/summary.js");
+/* harmony import */ var _summary__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./summary */ "./vendor/ibexa/storefront/src/bundle/Resources/public/js/cart/summary.js");
 /* harmony import */ var _ibexa_cart_src_bundle_Resources_public_js_helper_text_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-cart/src/bundle/Resources/public/js/helper/text.helper */ "./vendor/ibexa/cart/src/bundle/Resources/public/js/helper/text.helper.js");
 /* harmony import */ var _helper_error_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/error.helper */ "./vendor/ibexa/storefront/src/bundle/Resources/public/js/helper/error.helper.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
@@ -1556,7 +1593,7 @@ var StorefrontMaincart = /*#__PURE__*/function (_Maincart) {
     value: function init() {
       _superPropGet(StorefrontMaincart, "init", this, 3)(arguments);
       this.attachStorefrontMaincartListeners();
-      this.cartSummary = new _ibexa_cart_src_bundle_Resources_public_js_component_summary__WEBPACK_IMPORTED_MODULE_1__["default"]({
+      this.cartSummary = new _summary__WEBPACK_IMPORTED_MODULE_1__["default"]({
         container: this.summaryWrapperNode
       });
       this.cartSummary.init();
@@ -1576,16 +1613,41 @@ var StorefrontMaincart = /*#__PURE__*/function (_Maincart) {
   }, {
     key: "updateItem",
     value: function updateItem(entry) {
-      var _entrySummary$Price$R, _entrySummary$Price, _entrySummary$Subtota, _entrySummary$Subtota2;
+      var _entrySummary$Price$R, _entrySummary$Price, _entrySummary$Subtota, _entrySummary$Subtota2, _entrySummary$Price$R2, _entrySummary$Price2, _entrySummary$Origina, _entrySummary$Origina2, _entrySummary$Price3;
       _superPropGet(StorefrontMaincart, "updateItem", this, 3)(arguments);
       var entrySummary = this.cart.getEntrySummaryByIdentifier(entry.identifier);
       var productPriceNetFormatted = (_entrySummary$Price$R = entrySummary === null || entrySummary === void 0 || (_entrySummary$Price = entrySummary.Price) === null || _entrySummary$Price === void 0 || (_entrySummary$Price = _entrySummary$Price.RestPrice) === null || _entrySummary$Price === void 0 ? void 0 : _entrySummary$Price.formatted) !== null && _entrySummary$Price$R !== void 0 ? _entrySummary$Price$R : '';
       var subtotalPriceNetFormatted = (_entrySummary$Subtota = entrySummary === null || entrySummary === void 0 || (_entrySummary$Subtota2 = entrySummary.SubtotalPrice) === null || _entrySummary$Subtota2 === void 0 || (_entrySummary$Subtota2 = _entrySummary$Subtota2.RestPrice) === null || _entrySummary$Subtota2 === void 0 ? void 0 : _entrySummary$Subtota2.formatted) !== null && _entrySummary$Subtota !== void 0 ? _entrySummary$Subtota : '';
+      var originalPriceNetFormatted = (_entrySummary$Price$R2 = entrySummary === null || entrySummary === void 0 || (_entrySummary$Price2 = entrySummary.Price) === null || _entrySummary$Price2 === void 0 || (_entrySummary$Price2 = _entrySummary$Price2.RestPrice) === null || _entrySummary$Price2 === void 0 || (_entrySummary$Price2 = _entrySummary$Price2.Price) === null || _entrySummary$Price2 === void 0 || (_entrySummary$Price2 = _entrySummary$Price2.RestPrice) === null || _entrySummary$Price2 === void 0 ? void 0 : _entrySummary$Price2.formatted) !== null && _entrySummary$Price$R2 !== void 0 ? _entrySummary$Price$R2 : '';
+      var originalSubtotalPriceNetFormatted = (_entrySummary$Origina = entrySummary === null || entrySummary === void 0 || (_entrySummary$Origina2 = entrySummary.OriginalSubtotalPrice) === null || _entrySummary$Origina2 === void 0 || (_entrySummary$Origina2 = _entrySummary$Origina2.RestPrice) === null || _entrySummary$Origina2 === void 0 ? void 0 : _entrySummary$Origina2.formatted) !== null && _entrySummary$Origina !== void 0 ? _entrySummary$Origina : '';
+      var priceStamps = entrySummary === null || entrySummary === void 0 || (_entrySummary$Price3 = entrySummary.Price) === null || _entrySummary$Price3 === void 0 || (_entrySummary$Price3 = _entrySummary$Price3.RestPrice) === null || _entrySummary$Price3 === void 0 || (_entrySummary$Price3 = _entrySummary$Price3.Price) === null || _entrySummary$Price3 === void 0 ? void 0 : _entrySummary$Price3.PriceStamps;
+      var discountBadgeFormatted = '';
+      var lastStamp = priceStamps === null || priceStamps === void 0 ? void 0 : priceStamps[priceStamps.length - 1];
+      var discount = lastStamp === null || lastStamp === void 0 ? void 0 : lastStamp.Discount;
+      if (discount) {
+        discountBadgeFormatted = lastStamp.discountValue;
+      }
       var itemNode = this.findItemByEntryIdentifier(entry.identifier);
       var subtotalPriceNode = itemNode.querySelector('.ibexa-store-maincart-item__subtotal-price-net');
       var priceNode = itemNode.querySelector('.ibexa-store-maincart-item__price-net');
+      var subtotalOriginalPriceNode = itemNode.querySelector('.ibexa-store-maincart-item__subtotal-original-price-net');
+      var originalPriceNode = itemNode.querySelector('.ibexa-store-maincart-item__price-original-net');
+      var discountBadge = itemNode.querySelector('.ibexa-store-maincart-item__discount-badge');
       subtotalPriceNode.innerText = this.netPriceTemplate.replace('{{ price }}', subtotalPriceNetFormatted);
       priceNode.innerText = this.netPriceTemplate.replace('{{ price }}', productPriceNetFormatted);
+      if (subtotalOriginalPriceNode && originalSubtotalPriceNetFormatted !== subtotalPriceNetFormatted) {
+        subtotalOriginalPriceNode.innerText = this.netPriceTemplate.replace('{{ price }}', originalSubtotalPriceNetFormatted);
+      } else if (subtotalOriginalPriceNode) {
+        subtotalOriginalPriceNode.innerText = '';
+      }
+      if (originalPriceNode && originalPriceNetFormatted && originalPriceNetFormatted !== productPriceNetFormatted) {
+        originalPriceNode.innerText = this.netPriceTemplate.replace('{{ price }}', originalPriceNetFormatted);
+      } else if (originalPriceNode) {
+        originalPriceNode.innerText = '';
+      }
+      if (discountBadge) {
+        discountBadge.innerText = (0,_ibexa_cart_src_bundle_Resources_public_js_helper_text_helper__WEBPACK_IMPORTED_MODULE_2__.escapeHTML)(discountBadgeFormatted);
+      }
       this.setAvailability(entry, itemNode);
     }
   }, {
@@ -1617,14 +1679,23 @@ var StorefrontMaincart = /*#__PURE__*/function (_Maincart) {
   }, {
     key: "renderItem",
     value: function renderItem(entry) {
-      var _entrySummary$Price$R2, _entrySummary$Price2, _entrySummary$Subtota3, _entrySummary$Subtota4, _entrySummary$Product, _entrySummary$Product2, _entrySummary$Product3, _entrySummary$Product4;
+      var _entrySummary$Price$R3, _entrySummary$Price4, _entrySummary$Subtota3, _entrySummary$Subtota4, _entrySummary$Price$R4, _entrySummary$Price5, _entrySummary$Origina3, _entrySummary$Origina4, _entrySummary$Price6, _entrySummary$Product, _entrySummary$Product2, _entrySummary$Product3, _entrySummary$Product4;
       var entrySummary = this.cart.getEntrySummaryByIdentifier(entry.identifier);
-      var productPriceNetFormatted = (_entrySummary$Price$R2 = entrySummary === null || entrySummary === void 0 || (_entrySummary$Price2 = entrySummary.Price) === null || _entrySummary$Price2 === void 0 || (_entrySummary$Price2 = _entrySummary$Price2.RestPrice) === null || _entrySummary$Price2 === void 0 ? void 0 : _entrySummary$Price2.formatted) !== null && _entrySummary$Price$R2 !== void 0 ? _entrySummary$Price$R2 : '';
+      var productPriceNetFormatted = (_entrySummary$Price$R3 = entrySummary === null || entrySummary === void 0 || (_entrySummary$Price4 = entrySummary.Price) === null || _entrySummary$Price4 === void 0 || (_entrySummary$Price4 = _entrySummary$Price4.RestPrice) === null || _entrySummary$Price4 === void 0 ? void 0 : _entrySummary$Price4.formatted) !== null && _entrySummary$Price$R3 !== void 0 ? _entrySummary$Price$R3 : '';
       var subtotalPriceNetFormatted = (_entrySummary$Subtota3 = entrySummary === null || entrySummary === void 0 || (_entrySummary$Subtota4 = entrySummary.SubtotalPrice) === null || _entrySummary$Subtota4 === void 0 || (_entrySummary$Subtota4 = _entrySummary$Subtota4.RestPrice) === null || _entrySummary$Subtota4 === void 0 ? void 0 : _entrySummary$Subtota4.formatted) !== null && _entrySummary$Subtota3 !== void 0 ? _entrySummary$Subtota3 : '';
+      var originalPriceNetFormatted = (_entrySummary$Price$R4 = entrySummary === null || entrySummary === void 0 || (_entrySummary$Price5 = entrySummary.Price) === null || _entrySummary$Price5 === void 0 || (_entrySummary$Price5 = _entrySummary$Price5.RestPrice) === null || _entrySummary$Price5 === void 0 || (_entrySummary$Price5 = _entrySummary$Price5.Price) === null || _entrySummary$Price5 === void 0 || (_entrySummary$Price5 = _entrySummary$Price5.RestPrice) === null || _entrySummary$Price5 === void 0 ? void 0 : _entrySummary$Price5.formatted) !== null && _entrySummary$Price$R4 !== void 0 ? _entrySummary$Price$R4 : '';
+      var originalSubtotalPriceNetFormatted = (_entrySummary$Origina3 = entrySummary === null || entrySummary === void 0 || (_entrySummary$Origina4 = entrySummary.OriginalSubtotalPrice) === null || _entrySummary$Origina4 === void 0 || (_entrySummary$Origina4 = _entrySummary$Origina4.RestPrice) === null || _entrySummary$Origina4 === void 0 ? void 0 : _entrySummary$Origina4.formatted) !== null && _entrySummary$Origina3 !== void 0 ? _entrySummary$Origina3 : '';
+      var priceStamps = entrySummary === null || entrySummary === void 0 || (_entrySummary$Price6 = entrySummary.Price) === null || _entrySummary$Price6 === void 0 || (_entrySummary$Price6 = _entrySummary$Price6.RestPrice) === null || _entrySummary$Price6 === void 0 || (_entrySummary$Price6 = _entrySummary$Price6.Price) === null || _entrySummary$Price6 === void 0 ? void 0 : _entrySummary$Price6.PriceStamps;
+      var discountBadgeFormatted = '';
+      var lastStamp = priceStamps === null || priceStamps === void 0 ? void 0 : priceStamps[priceStamps.length - 1];
+      var discount = lastStamp === null || lastStamp === void 0 ? void 0 : lastStamp.Discount;
+      if (discount) {
+        discountBadgeFormatted = lastStamp.discountValue;
+      }
       var productCode = (_entrySummary$Product = entrySummary === null || entrySummary === void 0 || (_entrySummary$Product2 = entrySummary.Product) === null || _entrySummary$Product2 === void 0 ? void 0 : _entrySummary$Product2.code) !== null && _entrySummary$Product !== void 0 ? _entrySummary$Product : '';
       var productThumbnailImg = (_entrySummary$Product3 = entrySummary === null || entrySummary === void 0 || (_entrySummary$Product4 = entrySummary.Product) === null || _entrySummary$Product4 === void 0 || (_entrySummary$Product4 = _entrySummary$Product4.Thumbnail) === null || _entrySummary$Product4 === void 0 ? void 0 : _entrySummary$Product4.resource) !== null && _entrySummary$Product3 !== void 0 ? _entrySummary$Product3 : '/placeholder';
       var itemRenderedPartly = _superPropGet(StorefrontMaincart, "renderItem", this, 3)([entry]);
-      var itemRendered = itemRenderedPartly.replaceAll('{{ product_name }}', (0,_ibexa_cart_src_bundle_Resources_public_js_helper_text_helper__WEBPACK_IMPORTED_MODULE_2__.escapeHTML)(this.cart.getEntryProductName(entry.identifier))).replaceAll('{{ product_code }}', (0,_ibexa_cart_src_bundle_Resources_public_js_helper_text_helper__WEBPACK_IMPORTED_MODULE_2__.escapeHTML)(productCode)).replaceAll('{{ product_price_net }}', this.netPriceTemplate.replace('{{ price }}', productPriceNetFormatted)).replaceAll('{{ product_image_url }}', (0,_ibexa_cart_src_bundle_Resources_public_js_helper_text_helper__WEBPACK_IMPORTED_MODULE_2__.escapeHTML)(productThumbnailImg)).replaceAll('{{ subtotal_price }}', this.netPriceTemplate.replace('{{ price }}', subtotalPriceNetFormatted));
+      var itemRendered = itemRenderedPartly.replaceAll('{{ product_name }}', (0,_ibexa_cart_src_bundle_Resources_public_js_helper_text_helper__WEBPACK_IMPORTED_MODULE_2__.escapeHTML)(this.cart.getEntryProductName(entry.identifier))).replaceAll('{{ product_code }}', (0,_ibexa_cart_src_bundle_Resources_public_js_helper_text_helper__WEBPACK_IMPORTED_MODULE_2__.escapeHTML)(productCode)).replaceAll('{{ product_price_net }}', this.netPriceTemplate.replace('{{ price }}', productPriceNetFormatted)).replaceAll('{{ product_image_url }}', (0,_ibexa_cart_src_bundle_Resources_public_js_helper_text_helper__WEBPACK_IMPORTED_MODULE_2__.escapeHTML)(productThumbnailImg)).replaceAll('{{ subtotal_price }}', this.netPriceTemplate.replace('{{ price }}', subtotalPriceNetFormatted)).replaceAll('{{ product_price_original_net }}', originalPriceNetFormatted ? this.netPriceTemplate.replace('{{ price }}', originalPriceNetFormatted) : '').replaceAll('{{ product_price_original_subtotal }}', originalSubtotalPriceNetFormatted !== subtotalPriceNetFormatted ? this.netPriceTemplate.replace('{{ price }}', originalSubtotalPriceNetFormatted) : '').replaceAll('{{ discount_badge }}', (0,_ibexa_cart_src_bundle_Resources_public_js_helper_text_helper__WEBPACK_IMPORTED_MODULE_2__.escapeHTML)(discountBadgeFormatted));
       return itemRendered;
     }
   }, {
@@ -1850,6 +1921,385 @@ var StorefrontQuickOrder = /*#__PURE__*/function (_QuickOrder) {
 
 /***/ }),
 
+/***/ "./vendor/ibexa/storefront/src/bundle/Resources/public/js/cart/summary.js":
+/*!********************************************************************************!*\
+  !*** ./vendor/ibexa/storefront/src/bundle/Resources/public/js/cart/summary.js ***!
+  \********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ StorefrontSummary)
+/* harmony export */ });
+/* harmony import */ var _ibexa_cart_src_bundle_Resources_public_js_helper_text_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-cart/src/bundle/Resources/public/js/helper/text.helper */ "./vendor/ibexa/cart/src/bundle/Resources/public/js/helper/text.helper.js");
+/* harmony import */ var _ibexa_cart_src_bundle_Resources_public_js_component_summary__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-cart/src/bundle/Resources/public/js/component/summary */ "./vendor/ibexa/cart/src/bundle/Resources/public/js/component/summary.js");
+/* harmony import */ var _helper_error_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/error.helper */ "./vendor/ibexa/storefront/src/bundle/Resources/public/js/helper/error.helper.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+function _possibleConstructorReturn(t, e) { if (e && ("object" == _typeof(e) || "function" == typeof e)) return e; if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined"); return _assertThisInitialized(t); }
+function _assertThisInitialized(e) { if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); return e; }
+function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+function _superPropGet(t, o, e, r) { var p = _get(_getPrototypeOf(1 & r ? t.prototype : t), o, e); return 2 & r && "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
+function _get() { return _get = "undefined" != typeof Reflect && Reflect.get ? Reflect.get.bind() : function (e, t, r) { var p = _superPropBase(e, t); if (p) { var n = Object.getOwnPropertyDescriptor(p, t); return n.get ? n.get.call(arguments.length < 3 ? e : r) : n.value; } }, _get.apply(null, arguments); }
+function _superPropBase(t, o) { for (; !{}.hasOwnProperty.call(t, o) && null !== (t = _getPrototypeOf(t));); return t; }
+function _getPrototypeOf(t) { return _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function (t) { return t.__proto__ || Object.getPrototypeOf(t); }, _getPrototypeOf(t); }
+function _inherits(t, e) { if ("function" != typeof e && null !== e) throw new TypeError("Super expression must either be null or a function"); t.prototype = Object.create(e && e.prototype, { constructor: { value: t, writable: !0, configurable: !0 } }), Object.defineProperty(t, "prototype", { writable: !1 }), e && _setPrototypeOf(t, e); }
+function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) { return t.__proto__ = e, t; }, _setPrototypeOf(t, e); }
+
+
+
+var STATUS_NOT_FOUND = 404;
+var DISCOUNT_INFOS_TOGGLER_LIMIT = 2;
+var StorefrontSummary = /*#__PURE__*/function (_Summary) {
+  function StorefrontSummary(options) {
+    var _this$summaryCouponsC, _this$summaryCouponsC2, _this$summaryCouponsC3, _this$summaryCouponsC4, _this$summaryCouponsC5, _this$summaryCouponsC6, _this$summaryCouponsC7, _this$summaryCouponsC8, _this$summaryCouponsC9, _this$couponCouponNod, _this$couponCouponNod2, _this$summaryCouponsC10, _this$summaryCouponsC11, _this$summaryCouponsC12, _this$summaryCouponsC13, _this$summaryCouponsC14, _this$summaryCouponsC15, _this$summaryCouponsC16, _this$summaryCouponsC17, _this$summaryCouponsC18, _this$summaryCouponsC19;
+    var _this;
+    _classCallCheck(this, StorefrontSummary);
+    _this = _callSuper(this, StorefrontSummary, [options]);
+    _this.summaryDiscountNode = _this.summaryNode.querySelector('.ibexa-store-maincart-summary__item--discount');
+    _this.summaryCouponsContainer = _this.summaryNode.querySelector('.ibexa-store-maincart-summary__coupons-container');
+    _this.isCouponEnabled = !!_this.summaryCouponsContainer;
+    _this.couponInputContainerNode = (_this$summaryCouponsC = _this.summaryCouponsContainer) === null || _this$summaryCouponsC === void 0 ? void 0 : _this$summaryCouponsC.querySelector('.ibexa-store-maincart-summary-coupon__input-container');
+    _this.couponInputNode = (_this$summaryCouponsC2 = (_this$summaryCouponsC3 = _this.summaryCouponsContainer) === null || _this$summaryCouponsC3 === void 0 ? void 0 : _this$summaryCouponsC3.querySelector('.ibexa-store-maincart-summary-coupon__input')) !== null && _this$summaryCouponsC2 !== void 0 ? _this$summaryCouponsC2 : null;
+    _this.couponApplyBtnNode = (_this$summaryCouponsC4 = (_this$summaryCouponsC5 = _this.summaryCouponsContainer) === null || _this$summaryCouponsC5 === void 0 ? void 0 : _this$summaryCouponsC5.querySelector('.ibexa-store-maincart-summary-coupon__apply-btn')) !== null && _this$summaryCouponsC4 !== void 0 ? _this$summaryCouponsC4 : null;
+    _this.couponInputErrorNode = (_this$summaryCouponsC6 = (_this$summaryCouponsC7 = _this.summaryCouponsContainer) === null || _this$summaryCouponsC7 === void 0 ? void 0 : _this$summaryCouponsC7.querySelector('.ibexa-store-maincart-summary-coupon__error')) !== null && _this$summaryCouponsC6 !== void 0 ? _this$summaryCouponsC6 : null;
+    _this.couponCouponNode = (_this$summaryCouponsC8 = (_this$summaryCouponsC9 = _this.summaryCouponsContainer) === null || _this$summaryCouponsC9 === void 0 ? void 0 : _this$summaryCouponsC9.querySelector('.ibexa-store-maincart-summary-coupon__coupon')) !== null && _this$summaryCouponsC8 !== void 0 ? _this$summaryCouponsC8 : null;
+    _this.couponBadgeTemplate = (_this$couponCouponNod = (_this$couponCouponNod2 = _this.couponCouponNode) === null || _this$couponCouponNod2 === void 0 ? void 0 : _this$couponCouponNod2.dataset.couponBadgeTemplate) !== null && _this$couponCouponNod !== void 0 ? _this$couponCouponNod : null;
+    _this.couponBadgeNode = (_this$summaryCouponsC10 = (_this$summaryCouponsC11 = _this.summaryCouponsContainer) === null || _this$summaryCouponsC11 === void 0 ? void 0 : _this$summaryCouponsC11.querySelector('.ibexa-store-discount-badge')) !== null && _this$summaryCouponsC10 !== void 0 ? _this$summaryCouponsC10 : null;
+    _this.couponDescriptionNode = (_this$summaryCouponsC12 = (_this$summaryCouponsC13 = _this.summaryCouponsContainer) === null || _this$summaryCouponsC13 === void 0 ? void 0 : _this$summaryCouponsC13.querySelector('.ibexa-store-discount-info__description')) !== null && _this$summaryCouponsC12 !== void 0 ? _this$summaryCouponsC12 : null;
+    _this.couponValueNode = (_this$summaryCouponsC14 = (_this$summaryCouponsC15 = _this.summaryCouponsContainer) === null || _this$summaryCouponsC15 === void 0 ? void 0 : _this$summaryCouponsC15.querySelector('.ibexa-store-discount-info__value')) !== null && _this$summaryCouponsC14 !== void 0 ? _this$summaryCouponsC14 : null;
+    _this.couponLabelNode = (_this$summaryCouponsC16 = (_this$summaryCouponsC17 = _this.summaryCouponsContainer) === null || _this$summaryCouponsC17 === void 0 ? void 0 : _this$summaryCouponsC17.querySelector('.ibexa-store-discount-info__label')) !== null && _this$summaryCouponsC16 !== void 0 ? _this$summaryCouponsC16 : null;
+    _this.couponRemoveBtnNode = (_this$summaryCouponsC18 = (_this$summaryCouponsC19 = _this.summaryCouponsContainer) === null || _this$summaryCouponsC19 === void 0 ? void 0 : _this$summaryCouponsC19.querySelector('.ibexa-store-maincart-summary-coupon__remove-btn')) !== null && _this$summaryCouponsC18 !== void 0 ? _this$summaryCouponsC18 : null;
+    _this.discountInfoContainer = _this.summaryNode.querySelector('.ibexa-store-maincart-summary__discounts-info-container');
+    _this.discountInfoToggler = _this.summaryNode.querySelector('.ibexa-store-maincart-summary__discounts-info-toggler');
+    _this.handleCouponAdd = _this.handleCouponAdd.bind(_this);
+    _this.handleCouponRemove = _this.handleCouponRemove.bind(_this);
+    _this.handleDiscountsInfosTogglerBtnClick = _this.handleDiscountsInfosTogglerBtnClick.bind(_this);
+    return _this;
+  }
+  _inherits(StorefrontSummary, _Summary);
+  return _createClass(StorefrontSummary, [{
+    key: "attachSummaryListeners",
+    value: function attachSummaryListeners() {
+      var _this2 = this;
+      _superPropGet(StorefrontSummary, "attachSummaryListeners", this, 3)(arguments);
+      if (this.isCouponEnabled) {
+        this.couponApplyBtnNode.addEventListener('click', this.handleCouponAdd, false);
+        this.couponInputNode.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter') {
+            _this2.handleCouponAdd();
+          }
+        }, false);
+        this.couponRemoveBtnNode.addEventListener('click', this.handleCouponRemove, false);
+      }
+      if (this.discountInfoToggler) {
+        this.discountInfoToggler.addEventListener('click', this.handleDiscountsInfosTogglerBtnClick, false);
+      }
+    }
+  }, {
+    key: "handleCouponAdd",
+    value: function () {
+      var _handleCouponAdd = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+        var _this$couponInputNode, errorInfoCouponNotFound, errorInfoGeneralError, _yield$this$cart$addC, couponResponse, cartLoaded, _yield$cartLoaded, cartSummaryLoaded, _yield$cartSummaryLoa, CartSummary, isAnyCouponApplied;
+        return _regeneratorRuntime().wrap(function _callee$(_context) {
+          while (1) switch (_context.prev = _context.next) {
+            case 0:
+              _this$couponInputNode = this.couponInputNode.dataset, errorInfoCouponNotFound = _this$couponInputNode.errorInfoCouponNotFound, errorInfoGeneralError = _this$couponInputNode.errorInfoGeneralError;
+              this.toggleCouponInputDisabledState(true);
+              _context.prev = 2;
+              _context.next = 5;
+              return this.cart.addCoupon(this.couponInputNode.value);
+            case 5:
+              _yield$this$cart$addC = _context.sent;
+              couponResponse = _yield$this$cart$addC.response;
+              cartLoaded = _yield$this$cart$addC.cartLoaded;
+              if (couponResponse.ok) {
+                _context.next = 11;
+                break;
+              }
+              if (couponResponse.status === STATUS_NOT_FOUND) {
+                this.toggleCouponInputErrorState(true, errorInfoCouponNotFound);
+              } else {
+                this.toggleCouponInputErrorState(true, errorInfoGeneralError);
+              }
+              return _context.abrupt("return");
+            case 11:
+              _context.next = 13;
+              return cartLoaded;
+            case 13:
+              _yield$cartLoaded = _context.sent;
+              cartSummaryLoaded = _yield$cartLoaded.cartSummaryLoaded;
+              _context.next = 17;
+              return cartSummaryLoaded;
+            case 17:
+              _yield$cartSummaryLoa = _context.sent;
+              CartSummary = _yield$cartSummaryLoa.CartSummary;
+              isAnyCouponApplied = CartSummary.SummaryEntryCollection.SummaryEntry.some(function (summaryEntry) {
+                var discountPriceStamp = summaryEntry.Price.RestPrice.Price.PriceStamps.find(function (priceStamp) {
+                  return priceStamp['_media-type'] === 'application/vnd.ibexa.api.DiscountStamp+json';
+                });
+                if (!discountPriceStamp) {
+                  return false;
+                }
+                var discount = discountPriceStamp.Discount;
+                return discount.DiscountConditions.some(function (discountCondition) {
+                  return discountCondition.identifier === 'is_valid_discount_code';
+                });
+              });
+              if (isAnyCouponApplied) {
+                this.toggleCouponInputErrorState(false);
+              } else {
+                this.toggleCouponInputErrorState(true, errorInfoCouponNotFound);
+              }
+              _context.next = 26;
+              break;
+            case 23:
+              _context.prev = 23;
+              _context.t0 = _context["catch"](2);
+              (0,_helper_error_helper__WEBPACK_IMPORTED_MODULE_2__.errorHandler)(_context.t0);
+            case 26:
+            case "end":
+              return _context.stop();
+          }
+        }, _callee, this, [[2, 23]]);
+      }));
+      function handleCouponAdd() {
+        return _handleCouponAdd.apply(this, arguments);
+      }
+      return handleCouponAdd;
+    }()
+  }, {
+    key: "handleCouponRemove",
+    value: function handleCouponRemove() {
+      this.couponRemoveBtnNode.disabled = true;
+      var appliedCoupon = this.getAppliedCoupon();
+      this.cart.removeCoupon(appliedCoupon.code);
+    }
+  }, {
+    key: "handleDiscountsInfosTogglerBtnClick",
+    value: function handleDiscountsInfosTogglerBtnClick() {
+      var isCollapsed = this.discountInfoToggler.classList.contains('ibexa-store-maincart-summary__discounts-info-toggler--collapsed');
+      var discountInfos = _toConsumableArray(this.discountInfoContainer.children);
+      this.discountInfoToggler.classList.toggle('ibexa-store-maincart-summary__discounts-info-toggler--collapsed', !isCollapsed);
+      if (isCollapsed) {
+        discountInfos.forEach(function (discountInfo) {
+          discountInfo.classList.remove('ibexa-store-maincart-summary__discounts-info--hidden');
+        });
+      } else {
+        var discountInfosToHide = discountInfos.slice(DISCOUNT_INFOS_TOGGLER_LIMIT - discountInfos.length);
+        discountInfosToHide.forEach(function (discountInfo) {
+          discountInfo.classList.add('ibexa-store-maincart-summary__discounts-info--hidden');
+        });
+      }
+    }
+  }, {
+    key: "getAppliedCoupon",
+    value: function getAppliedCoupon() {
+      var _cartData$context$car, _cartData$context;
+      var cartData = this.cart.cartData;
+      var cartDiscountCode = (_cartData$context$car = (_cartData$context = cartData.context) === null || _cartData$context === void 0 ? void 0 : _cartData$context.cart_discount_code) !== null && _cartData$context$car !== void 0 ? _cartData$context$car : null;
+      if (!cartDiscountCode) {
+        return null;
+      }
+      var summary = this.cart.getCartSummary();
+      var _iterator = _createForOfIteratorHelper(summary.SummaryEntryCollection.SummaryEntry),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var _discountPriceStamp$d;
+          var summaryEntry = _step.value;
+          var discountPriceStamp = summaryEntry.Price.RestPrice.Price.PriceStamps.find(function (priceStamp) {
+            return priceStamp['_media-type'] === 'application/vnd.ibexa.api.DiscountStamp+json';
+          });
+          if (!discountPriceStamp) {
+            continue;
+          }
+          var discount = discountPriceStamp.Discount;
+          var discountCodeCondition = discount.DiscountConditions.find(function (discountCondition) {
+            return discountCondition.identifier === 'is_valid_discount_code';
+          });
+          if (!discountCodeCondition) {
+            continue;
+          }
+          var discountValue = (_discountPriceStamp$d = discountPriceStamp.discountValue) !== null && _discountPriceStamp$d !== void 0 ? _discountPriceStamp$d : null;
+          if (discountValue) {
+            return {
+              code: cartDiscountCode,
+              discountValue: discountValue,
+              discount: discount
+            };
+          }
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      return null;
+    }
+  }, {
+    key: "insertSummaryDiscountData",
+    value: function insertSummaryDiscountData() {
+      var _summary$TotalDiscoun, _summary$TotalDiscoun2;
+      if (!this.summaryDiscountNode) {
+        return;
+      }
+      var summary = this.cart.getCartSummary();
+      var discountPriceFormatted = (_summary$TotalDiscoun = (_summary$TotalDiscoun2 = summary.TotalDiscount) === null || _summary$TotalDiscoun2 === void 0 ? void 0 : _summary$TotalDiscoun2.RestPrice.formatted) !== null && _summary$TotalDiscoun !== void 0 ? _summary$TotalDiscoun : null;
+      var totalDiscount = discountPriceFormatted ? "-".concat(discountPriceFormatted) : '0';
+      var discountValueNode = this.summaryDiscountNode.querySelector('.ibexa-crt-summary__item-value');
+      discountValueNode.innerText = totalDiscount;
+    }
+  }, {
+    key: "toggleCouponInputErrorState",
+    value: function toggleCouponInputErrorState(hasError) {
+      var errorMessage = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+      this.couponInputErrorNode.innerText = errorMessage;
+      this.couponInputNode.classList.toggle('ibexa-store-maincart-summary-coupon__input--error', hasError);
+    }
+  }, {
+    key: "toggleCouponInputDisabledState",
+    value: function toggleCouponInputDisabledState(isDisabled) {
+      this.couponApplyBtnNode.disabled = isDisabled;
+      this.couponInputNode.disabled = isDisabled;
+    }
+  }, {
+    key: "resetCouponInput",
+    value: function resetCouponInput() {
+      this.couponInputNode.value = '';
+    }
+  }, {
+    key: "insertCouponData",
+    value: function insertCouponData(appliedCoupon) {
+      var couponInfo = appliedCoupon.discountValue,
+        couponCode = appliedCoupon.code,
+        discount = appliedCoupon.discount;
+      this.couponLabelNode.innerText = discount.label;
+      this.couponDescriptionNode.innerText = discount.labelDescription;
+      this.couponValueNode.innerText = couponInfo;
+      this.couponBadgeNode.innerText = this.couponBadgeTemplate.replaceAll('{{ coupon_code }}', couponCode);
+      this.couponRemoveBtnNode.disabled = false;
+    }
+  }, {
+    key: "insertSummaryCouponData",
+    value: function insertSummaryCouponData(appliedCoupon) {
+      var isCouponApplied = !!appliedCoupon;
+      if (isCouponApplied) {
+        this.insertCouponData(appliedCoupon);
+        this.resetCouponInput();
+      } else {
+        this.toggleCouponInputDisabledState(false);
+      }
+      this.couponInputContainerNode.classList.toggle('ibexa-store-maincart-summary-coupon__input-container--visible', !isCouponApplied);
+      this.couponCouponNode.classList.toggle('ibexa-store-maincart-summary-coupon__coupon--visible', isCouponApplied);
+    }
+  }, {
+    key: "insertSummaryDiscountInfos",
+    value: function insertSummaryDiscountInfos() {
+      if (!this.discountInfoContainer) {
+        return;
+      }
+      var discountInfoTemplate = this.discountInfoContainer.dataset.discountInfoTemplate;
+      var fragment = document.createDocumentFragment();
+      var summary = this.cart.getCartSummary();
+      var appliedDiscountsDataMap = summary.SummaryEntryCollection.SummaryEntry.reduce(function (discountsMap, summaryEntry) {
+        var discountPriceStamp = summaryEntry.Price.RestPrice.Price.PriceStamps.find(function (priceStamp) {
+          return priceStamp['_media-type'] === 'application/vnd.ibexa.api.DiscountStamp+json';
+        });
+        if (!discountPriceStamp) {
+          return discountsMap;
+        }
+        var discount = discountPriceStamp.Discount;
+        var discountCodeCondition = discount.DiscountConditions.find(function (discountCondition) {
+          return discountCondition.identifier === 'is_valid_discount_code';
+        });
+        if (discountCodeCondition) {
+          return discountsMap;
+        }
+        var discountValue = discountPriceStamp.discountValue,
+          _discountPriceStamp$D = discountPriceStamp.Discount,
+          id = _discountPriceStamp$D.id,
+          label = _discountPriceStamp$D.label,
+          labelDescription = _discountPriceStamp$D.labelDescription;
+        return _objectSpread(_objectSpread({}, discountsMap), {}, _defineProperty({}, id, {
+          discountValue: discountValue,
+          label: label,
+          labelDescription: labelDescription
+        }));
+      }, {});
+      Object.values(appliedDiscountsDataMap).forEach(function (_ref) {
+        var discountValue = _ref.discountValue,
+          label = _ref.label,
+          labelDescription = _ref.labelDescription;
+        var container = document.createElement('div');
+        var discountLabelHtmlEscaped = (0,_ibexa_cart_src_bundle_Resources_public_js_helper_text_helper__WEBPACK_IMPORTED_MODULE_0__.escapeHTML)(label !== null && label !== void 0 ? label : '');
+        var discountDescriptionHtmlEscaped = (0,_ibexa_cart_src_bundle_Resources_public_js_helper_text_helper__WEBPACK_IMPORTED_MODULE_0__.escapeHTML)(labelDescription !== null && labelDescription !== void 0 ? labelDescription : '');
+        var renderedItemTemplate = discountInfoTemplate.replace('{{ badge_content }}', discountValue).replace('{{ label }}', discountLabelHtmlEscaped).replace('{{ description }}', discountDescriptionHtmlEscaped);
+        container.insertAdjacentHTML('beforeend', renderedItemTemplate);
+        var discountInfoNode = container.querySelector('.ibexa-store-discount-info');
+        if (!labelDescription) {
+          discountInfoNode.classList.add('ibexa-store-discount-info--no-description');
+          var descriptionNode = discountInfoNode.querySelector('.ibexa-store-discount-info__description');
+          descriptionNode.remove();
+        }
+        fragment.append(discountInfoNode);
+      });
+      this.discountInfoContainer.innerHTML = null;
+      this.discountInfoContainer.appendChild(fragment);
+    }
+  }, {
+    key: "updateDiscountsInfosTogglerBtnState",
+    value: function updateDiscountsInfosTogglerBtnState() {
+      if (!this.discountInfoContainer || !this.discountInfoToggler) {
+        return;
+      }
+      var discountInfos = _toConsumableArray(this.discountInfoContainer.children);
+      var isTogglerVisible = discountInfos.length > DISCOUNT_INFOS_TOGGLER_LIMIT;
+      this.discountInfoToggler.classList.toggle('ibexa-store-maincart-summary__discounts-info-toggler--hidden', !isTogglerVisible);
+      if (isTogglerVisible) {
+        this.discountInfoToggler.classList.add('ibexa-store-maincart-summary__discounts-info-toggler--collapsed');
+        var discountInfosToHide = discountInfos.slice(DISCOUNT_INFOS_TOGGLER_LIMIT - discountInfos.length);
+        discountInfosToHide.forEach(function (discountInfo) {
+          discountInfo.classList.add('ibexa-store-maincart-summary__discounts-info--hidden');
+        });
+      }
+    }
+  }, {
+    key: "insertSummaryData",
+    value: function insertSummaryData() {
+      _superPropGet(StorefrontSummary, "insertSummaryData", this, 3)(arguments);
+      this.insertSummaryDiscountData();
+      this.insertSummaryDiscountInfos();
+      this.updateDiscountsInfosTogglerBtnState();
+      if (this.isCouponEnabled) {
+        var appliedCoupon = this.getAppliedCoupon();
+        this.insertSummaryCouponData(appliedCoupon);
+      }
+    }
+  }]);
+}(_ibexa_cart_src_bundle_Resources_public_js_component_summary__WEBPACK_IMPORTED_MODULE_1__["default"]);
+
+
+/***/ }),
+
 /***/ "./vendor/ibexa/storefront/src/bundle/Resources/public/js/helper/error.helper.js":
 /*!***************************************************************************************!*\
   !*** ./vendor/ibexa/storefront/src/bundle/Resources/public/js/helper/error.helper.js ***!
@@ -1864,6 +2314,54 @@ var errorHandler = function errorHandler(error) {
   if (error.message) {
     console.warn(error.message);
   }
+};
+
+/***/ }),
+
+/***/ "./vendor/ibexa/storefront/src/bundle/Resources/public/js/service/discount.js":
+/*!************************************************************************************!*\
+  !*** ./vendor/ibexa/storefront/src/bundle/Resources/public/js/service/discount.js ***!
+  \************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   addCoupon: () => (/* binding */ addCoupon),
+/* harmony export */   removeCoupon: () => (/* binding */ removeCoupon)
+/* harmony export */ });
+/* harmony import */ var _ibexa_cart_src_bundle_Resources_public_js_service_cart__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-cart/src/bundle/Resources/public/js/service/cart */ "./vendor/ibexa/cart/src/bundle/Resources/public/js/service/cart.js");
+
+var addCoupon = function addCoupon(cartIdentifier, coupon) {
+  var request = _ibexa_cart_src_bundle_Resources_public_js_service_cart__WEBPACK_IMPORTED_MODULE_0__.prepareRequest("/api/ibexa/v2/discounts_codes/".concat(cartIdentifier, "/apply"), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/vnd.ibexa.api.DiscountCode+json',
+      Accept: 'application/vnd.ibexa.api.DiscountCode+json'
+    },
+    body: JSON.stringify({
+      DiscountCode: {
+        code: coupon
+      }
+    })
+  }, 'ibexa-rest-cart_coupon-add');
+  return fetch(request);
+};
+var removeCoupon = function removeCoupon(cartIdentifier, coupon) {
+  var request = _ibexa_cart_src_bundle_Resources_public_js_service_cart__WEBPACK_IMPORTED_MODULE_0__.prepareRequest("/api/ibexa/v2/discounts_codes/".concat(cartIdentifier, "/drop"), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/vnd.ibexa.api.DiscountCode+json',
+      Accept: 'application/vnd.ibexa.api.DiscountCode+json'
+    },
+    body: JSON.stringify({
+      DiscountCode: {
+        code: coupon
+      }
+    })
+  }, 'ibexa-rest-cart_coupon-drop');
+  return fetch(request).then(function (response) {
+    return _ibexa_cart_src_bundle_Resources_public_js_service_cart__WEBPACK_IMPORTED_MODULE_0__.handleRequest(response);
+  });
 };
 
 /***/ })

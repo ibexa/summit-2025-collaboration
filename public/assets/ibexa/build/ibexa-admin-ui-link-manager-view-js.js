@@ -15,7 +15,8 @@
     var _event$currentTarget$ = event.currentTarget.dataset,
       contentId = _event$currentTarget$.contentId,
       versionNo = _event$currentTarget$.versionNo,
-      languageCode = _event$currentTarget$.languageCode;
+      languageCode = _event$currentTarget$.languageCode,
+      withConfirm = _event$currentTarget$.withConfirm;
     var contentInfoInput = versionEditForm.querySelector("input[name=\"".concat(versionEditFormName, "[content_info]\"]"));
     var versionInfoContentInfoInput = versionEditForm.querySelector("input[name=\"".concat(versionEditFormName, "[version_info][content_info]\"]"));
     var versionInfoVersionNoInput = versionEditForm.querySelector("input[name=\"".concat(versionEditFormName, "[version_info][version_no]\"]"));
@@ -43,6 +44,7 @@
     var showModal = function showModal(modalHtml) {
       var wrapper = doc.querySelector('.ibexa-modal-wrapper');
       wrapper.innerHTML = modalHtml;
+      var conflictModal = doc.querySelector('#version-draft-conflict-modal');
       var addDraftButton = wrapper.querySelector('.ibexa-btn--add-draft');
       if (addDraftButton) {
         addDraftButton.addEventListener('click', addDraft, false);
@@ -52,7 +54,10 @@
           return wrapperBtnEvent.preventDefault();
         }, false);
       });
-      bootstrap.Modal.getOrCreateInstance(doc.querySelector('#version-draft-conflict-modal')).show();
+      bootstrap.Modal.getOrCreateInstance(conflictModal).show();
+      conflictModal.addEventListener('hide.bs.modal', function () {
+        doc.body.dispatchEvent(new CustomEvent('ibexa:edit-content-reset-language-selector'));
+      });
     };
     var handleCanEditCheck = function handleCanEditCheck(response) {
       if (response.canEdit) {
@@ -71,7 +76,9 @@
       } else if (response.status === 403) {
         response.text().then(showErrorNotification);
       } else if (response.status === 200) {
-        submitVersionEditForm();
+        if (!withConfirm) {
+          submitVersionEditForm();
+        }
       }
     };
     event.preventDefault();

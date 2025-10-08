@@ -1,0 +1,9 @@
+Virtual4ProductConnection:
+    type: relay-connection
+    config:
+        nodeType: Virtual4Product
+        connectionFields:
+            sliceSize:
+                type: Int!
+            orderBy:
+                type: String

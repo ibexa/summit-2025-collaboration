@@ -24,10 +24,12 @@ final class CartSession extends AbstractSession
         string $token,
         User $owner,
         ParticipantCollectionInterface $participants,
+        bool $isActive,
+        bool $hasPublicLink,
         DateTimeInterface $createdAt,
         DateTimeInterface $updatedAt
     ) {
-        parent::__construct($id, $token, $owner, $participants, $createdAt, $updatedAt);
+        parent::__construct($id, $token, $owner, $participants, $isActive, $hasPublicLink, $createdAt, $updatedAt);
 
         $this->cart = $cart;
     }

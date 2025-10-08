@@ -34,11 +34,40 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 
 var _window = window,
   ibexa = _window.ibexa;
+var SECTION_ADJUSTMENT = 24;
+var PICKER_ADJUSTMENT = 2;
 var DEFAULT_CONFIG = {
   enableTime: true,
   time_24hr: true,
   formatDate: function formatDate(date) {
     return (0,_helpers_timezone_helper__WEBPACK_IMPORTED_MODULE_1__.formatShortDateTime)(date, null);
+  },
+  onOpen: function onOpen(selectedDates, dateStr, instance) {
+    instance.scrollHandler = function () {
+      if (instance.isOpen) {
+        var calendarContainer = instance.calendarContainer,
+          input = instance.input;
+        var rect = input.getBoundingClientRect();
+        var pickerHeight = calendarContainer.offsetHeight;
+        var spaceBelow = __webpack_require__.g.innerHeight - (rect.bottom + SECTION_ADJUSTMENT);
+        if (pickerHeight > spaceBelow) {
+          calendarContainer.style.top = "".concat(rect.top + __webpack_require__.g.scrollY - pickerHeight - PICKER_ADJUSTMENT, "px");
+          calendarContainer.classList.remove('arrowTop');
+          calendarContainer.classList.add('arrowBottom');
+        } else {
+          calendarContainer.style.top = "".concat(rect.bottom + __webpack_require__.g.scrollY + PICKER_ADJUSTMENT, "px");
+          calendarContainer.classList.remove('arrowBottom');
+          calendarContainer.classList.add('arrowTop');
+        }
+      }
+    };
+    window.addEventListener('scroll', instance.scrollHandler, true);
+    document.addEventListener('scroll', instance.scrollHandler, true);
+    instance.scrollHandler();
+  },
+  onClose: function onClose(selectedDates, dateStr, instance) {
+    window.removeEventListener('scroll', instance.scrollHandler, true);
+    document.removeEventListener('scroll', instance.scrollHandler, true);
   }
 };
 var DateTimePicker = /*#__PURE__*/function () {
@@ -60,7 +89,8 @@ var DateTimePicker = /*#__PURE__*/function () {
       onChange: this.onChange,
       ignoredFocusElements: [this.actionsWrapper]
     }, (_config$flatpickrConf = config.flatpickrConfig) !== null && _config$flatpickrConf !== void 0 ? _config$flatpickrConf : {});
-    (0,_helpers_object_instances__WEBPACK_IMPORTED_MODULE_2__.setInstance)(this.container, this);
+    (0,_helpers_object_instances__WEBPACK_IMPORTED_MODULE_2__.setInstance)(this.container, this); // TODO: remove in 5.0
+    (0,_helpers_object_instances__WEBPACK_IMPORTED_MODULE_2__.setInstance)(this.fieldWrapper, this);
   }
   return _createClass(DateTimePicker, [{
     key: "clear",
@@ -187,6 +217,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   createContentTypeDataMapByHref: () => (/* binding */ createContentTypeDataMapByHref),
 /* harmony export */   getContentTypeData: () => (/* binding */ getContentTypeData),
 /* harmony export */   getContentTypeDataByHref: () => (/* binding */ getContentTypeDataByHref),
+/* harmony export */   getContentTypeDataMapByHref: () => (/* binding */ getContentTypeDataMapByHref),
 /* harmony export */   getContentTypeIconUrl: () => (/* binding */ getContentTypeIconUrl),
 /* harmony export */   getContentTypeIconUrlByHref: () => (/* binding */ getContentTypeIconUrlByHref),
 /* harmony export */   getContentTypeIdentifierByHref: () => (/* binding */ getContentTypeIdentifierByHref),
@@ -240,6 +271,12 @@ var createContentTypeDataMapByHref = function createContentTypeDataMapByHref() {
     }
     return contentTypeDataMapByHref;
   }, {});
+};
+var getContentTypeDataMapByHref = function getContentTypeDataMapByHref() {
+  if (!contentTypesDataMapByHref) {
+    contentTypesDataMapByHref = createContentTypeDataMapByHref();
+  }
+  return contentTypesDataMapByHref;
 };
 
 /**
@@ -607,6 +644,77 @@ var findLocationsByIds = function findLocationsByIds(idList, callback) {
 
 /***/ }),
 
+/***/ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/middle.ellipsis.js":
+/*!*************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/middle.ellipsis.js ***!
+  \*************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   parse: () => (/* binding */ parse),
+/* harmony export */   parseAll: () => (/* binding */ parseAll),
+/* harmony export */   update: () => (/* binding */ update)
+/* harmony export */ });
+/* harmony import */ var _tooltips_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tooltips.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper.js");
+/* harmony import */ var _text_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./text.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/text.helper.js");
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+
+var _window = window,
+  doc = _window.document;
+var resizeEllipsisObserver = new ResizeObserver(function (entries) {
+  entries.forEach(function (entry) {
+    parse(entry.target);
+  });
+});
+var parse = function parse() {
+  var baseElement = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : doc;
+  var isHTMLElement = baseElement instanceof Element || baseElement instanceof Document;
+  if (!isHTMLElement) {
+    console.warn('Provided element does not belong to Document interface');
+    return;
+  }
+  var middleEllipsisContainers = _toConsumableArray(baseElement.querySelectorAll('.ibexa-middle-ellipsis'));
+  if (baseElement instanceof Element && baseElement.classList.contains('ibexa-middle-ellipsis')) {
+    middleEllipsisContainers.push(baseElement);
+  }
+  middleEllipsisContainers.forEach(function (middleEllipsisContainer) {
+    var partStart = middleEllipsisContainer.querySelector('.ibexa-middle-ellipsis__name--start');
+    var isEllipsized = partStart.scrollWidth > partStart.offsetWidth;
+    if (!isEllipsized) {
+      middleEllipsisContainer.dataset.bsOriginalTitle = '';
+    } else {
+      var partStartContentNode = partStart.querySelector('.ibexa-middle-ellipsis__name-ellipsized');
+      middleEllipsisContainer.dataset.bsOriginalTitle = partStartContentNode.innerHTML;
+    }
+    middleEllipsisContainer.classList.toggle('ibexa-middle-ellipsis--ellipsized', isEllipsized);
+    (0,_tooltips_helper__WEBPACK_IMPORTED_MODULE_0__.parse)(middleEllipsisContainer);
+    resizeEllipsisObserver.observe(middleEllipsisContainer);
+  });
+};
+// @deprecated, will be removed in 5.0
+var parseAll = function parseAll() {
+  return parse(doc);
+};
+var update = function update(baseElement, content) {
+  var contentElements = _toConsumableArray(baseElement.querySelectorAll('.ibexa-middle-ellipsis__name-ellipsized'));
+  var contentEscaped = (0,_text_helper__WEBPACK_IMPORTED_MODULE_1__.escapeHTML)(content);
+  baseElement.dataset.bsOriginalTitle = contentEscaped;
+  contentElements.forEach(function (contentElement) {
+    contentElement.innerHTML = contentEscaped;
+  });
+  parse(baseElement);
+};
+
+
+/***/ }),
+
 /***/ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/notification.helper.js":
 /*!*****************************************************************************************************!*\
   !*** ./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/notification.helper.js ***!
@@ -828,34 +936,44 @@ function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyri
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 
-var getErrorMessage = function getErrorMessage(response) {
+var defaultGetErrorMessage = function defaultGetErrorMessage() {
+  var error = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return error.errorMessage;
+};
+var getErrorMessageObject = function getErrorMessageObject(response) {
   var responseErrorMessage = response.json().then(function (jsonResponse) {
     var _jsonResponse$ErrorMe;
-    return (_jsonResponse$ErrorMe = jsonResponse.ErrorMessage) === null || _jsonResponse$ErrorMe === void 0 ? void 0 : _jsonResponse$ErrorMe.errorMessage;
+    return (_jsonResponse$ErrorMe = jsonResponse.ErrorMessage) !== null && _jsonResponse$ErrorMe !== void 0 ? _jsonResponse$ErrorMe : jsonResponse;
   });
   return responseErrorMessage;
 };
 var handleRequest = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(response) {
-    var Translator, responseErrorMessage, errorMessage, defaultErrorMsg;
+    var getErrorMessage,
+      Translator,
+      responseErrorMessageObject,
+      errorMessage,
+      defaultErrorMsg,
+      _args = arguments;
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
+          getErrorMessage = _args.length > 1 && _args[1] !== undefined ? _args[1] : defaultGetErrorMessage;
           if (response.ok) {
-            _context.next = 8;
+            _context.next = 9;
             break;
           }
           Translator = (0,_context_helper__WEBPACK_IMPORTED_MODULE_0__.getTranslator)();
-          _context.next = 4;
-          return getErrorMessage(response);
-        case 4:
-          responseErrorMessage = _context.sent;
-          errorMessage = responseErrorMessage || response.statusText;
+          _context.next = 5;
+          return getErrorMessageObject(response);
+        case 5:
+          responseErrorMessageObject = _context.sent;
+          errorMessage = getErrorMessage(responseErrorMessageObject) || response.statusText;
           defaultErrorMsg = Translator.trans(/*@Desc("Something went wrong. Try to refresh the page or contact your administrator.")*/'error.request.default_msg');
           throw Error(errorMessage || defaultErrorMsg);
-        case 8:
-          return _context.abrupt("return", response);
         case 9:
+          return _context.abrupt("return", response);
+        case 10:
         case "end":
           return _context.stop();
       }
@@ -866,13 +984,13 @@ var handleRequest = /*#__PURE__*/function () {
   };
 }();
 var getJsonFromResponse = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(response) {
+  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(response, getErrorMessage) {
     var parsedRequest;
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
           _context2.next = 2;
-          return handleRequest(response);
+          return handleRequest(response, getErrorMessage);
         case 2:
           parsedRequest = _context2.sent;
           return _context2.abrupt("return", parsedRequest.json());
@@ -882,7 +1000,7 @@ var getJsonFromResponse = /*#__PURE__*/function () {
       }
     }, _callee2);
   }));
-  return function getJsonFromResponse(_x2) {
+  return function getJsonFromResponse(_x2, _x3) {
     return _ref2.apply(this, arguments);
   };
 }();
@@ -903,7 +1021,7 @@ var getTextFromResponse = /*#__PURE__*/function () {
       }
     }, _callee3);
   }));
-  return function getTextFromResponse(_x3) {
+  return function getTextFromResponse(_x4) {
     return _ref3.apply(this, arguments);
   };
 }();
@@ -924,7 +1042,7 @@ var getStatusFromResponse = /*#__PURE__*/function () {
       }
     }, _callee4);
   }));
-  return function getStatusFromResponse(_x4) {
+  return function getStatusFromResponse(_x5) {
     return _ref4.apply(this, arguments);
   };
 }();
@@ -1058,41 +1176,47 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 var _window = window,
   doc = _window.document;
-var lastInsertTooltipTarget = null;
 var TOOLTIPS_SELECTOR = '[title], [data-tooltip-title]';
 var observerConfig = {
   childList: true,
-  subtree: true
+  subtree: true,
+  attributes: true,
+  attributeFilter: ['title', 'data-tooltip-title', 'data-tooltip-extra-class', 'data-tooltip-manual-reparsing']
 };
+var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
 var resizeEllipsisObserver = new ResizeObserver(function (entries) {
   entries.forEach(function (entry) {
     parse(entry.target);
   });
 });
 var observer = new MutationObserver(function (mutationsList) {
-  if (lastInsertTooltipTarget) {
-    mutationsList.forEach(function (mutation) {
-      var addedNodes = mutation.addedNodes,
-        removedNodes = mutation.removedNodes;
-      if (addedNodes.length) {
-        addedNodes.forEach(function (addedNode) {
-          if (addedNode instanceof Element) {
-            parse(addedNode);
-          }
-        });
+  mutationsList.forEach(function (mutation) {
+    var type = mutation.type,
+      target = mutation.target,
+      addedNodes = mutation.addedNodes,
+      removedNodes = mutation.removedNodes;
+    if (type === 'attributes') {
+      var tooltipManualReparsing = target.dataset.tooltipManualReparsing;
+      if (!tooltipManualReparsing) {
+        parse(target.parentElement);
       }
-      if (removedNodes.length) {
-        removedNodes.forEach(function (removedNode) {
-          if (removedNode.classList && !removedNode.classList.contains('ibexa-tooltip')) {
-            lastInsertTooltipTarget = null;
-            doc.querySelectorAll('.ibexa-tooltip.show').forEach(function (tooltipNode) {
-              tooltipNode.remove();
-            });
-          }
+    }
+    addedNodes.forEach(function (addedNode) {
+      if (addedNode instanceof Element && !(addedNode !== null && addedNode !== void 0 && addedNode.classList.contains('ibexa-tooltip'))) {
+        parse(addedNode);
+      }
+    });
+    removedNodes.forEach(function (removedNode) {
+      if (removedNode.classList && !removedNode.classList.contains('ibexa-tooltip')) {
+        var triggeredNodes = removedNode.querySelectorAll("[data-bs-original-title]");
+        triggeredNodes.forEach(function (triggerBtn) {
+          var _tooltipInstance$tip;
+          var tooltipInstance = bootstrap.Tooltip.getOrCreateInstance(triggerBtn);
+          tooltipInstance === null || tooltipInstance === void 0 || (_tooltipInstance$tip = tooltipInstance.tip) === null || _tooltipInstance$tip === void 0 || _tooltipInstance$tip.remove();
         });
       }
     });
-  }
+  });
 });
 var modifyPopperConfig = function modifyPopperConfig(iframe, defaultBsPopperConfig) {
   if (!iframe) {
@@ -1166,9 +1290,13 @@ var isTitleEllipsized = function isTitleEllipsized(node) {
   var textHeight = getTextHeight(title, styles);
   return textHeight > nodeHeight;
 };
+var getContainer = function getContainer(tooltipNode) {
+  var tooltipContainerSelector = tooltipNode.dataset.tooltipContainerSelector;
+  var container = tooltipNode.closest(tooltipContainerSelector);
+  return container !== null && container !== void 0 ? container : doc.body;
+};
 var initializeTooltip = function initializeTooltip(tooltipNode, hasEllipsisStyle) {
   var _tooltipNode$dataset$, _tooltipNode$dataset$2, _tooltipNode$dataset$3;
-  var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
   var _tooltipNode$dataset = tooltipNode.dataset,
     delayShow = _tooltipNode$dataset.delayShow,
     delayHide = _tooltipNode$dataset.delayHide;
@@ -1181,7 +1309,7 @@ var initializeTooltip = function initializeTooltip(tooltipNode, hasEllipsisStyle
   var placement = (_tooltipNode$dataset$2 = tooltipNode.dataset.tooltipPlacement) !== null && _tooltipNode$dataset$2 !== void 0 ? _tooltipNode$dataset$2 : 'bottom';
   var trigger = (_tooltipNode$dataset$3 = tooltipNode.dataset.tooltipTrigger) !== null && _tooltipNode$dataset$3 !== void 0 ? _tooltipNode$dataset$3 : 'hover';
   var useHtml = tooltipNode.dataset.tooltipUseHtml !== undefined;
-  var container = tooltipNode.dataset.tooltipContainerSelector ? tooltipNode.closest(tooltipNode.dataset.tooltipContainerSelector) : 'body';
+  var container = getContainer(tooltipNode);
   var iframe = document.querySelector(tooltipNode.dataset.tooltipIframeSelector);
   new bootstrap.Tooltip(tooltipNode, {
     delay: delay,
@@ -1191,9 +1319,6 @@ var initializeTooltip = function initializeTooltip(tooltipNode, hasEllipsisStyle
     popperConfig: modifyPopperConfig.bind(null, iframe),
     html: useHtml,
     template: "<div class=\"tooltip ibexa-tooltip ".concat(extraClass, "\">\n                        <div class=\"tooltip-arrow ibexa-tooltip__arrow\"></div>\n                        <div class=\"tooltip-inner ibexa-tooltip__inner\"></div>\n                   </div>")
-  });
-  tooltipNode.addEventListener('inserted.bs.tooltip', function (event) {
-    lastInsertTooltipTarget = event.currentTarget;
   });
   if ((0,_browser_helper__WEBPACK_IMPORTED_MODULE_0__.isSafari)()) {
     if (tooltipNode.children) {
@@ -1216,7 +1341,6 @@ var parse = function parse() {
   if (!baseElement) {
     return;
   }
-  var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
   var tooltipNodes = _toConsumableArray(baseElement.querySelectorAll(TOOLTIPS_SELECTOR));
   if (baseElement instanceof Element) {
     tooltipNodes.push(baseElement);
@@ -1272,7 +1396,6 @@ var hideAll = function hideAll() {
   if (!baseElement) {
     return;
   }
-  var bootstrap = (0,_context_helper__WEBPACK_IMPORTED_MODULE_1__.getBootstrap)();
   var tooltipsNode = baseElement.querySelectorAll(TOOLTIPS_SELECTOR);
   var _iterator2 = _createForOfIteratorHelper(tooltipsNode),
     _step2;
@@ -1318,6 +1441,113 @@ var getId = function getId() {
   return userId ? parseInt(userId, 10) : 0;
 };
 
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/alert/alert.js":
+/*!***********************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/alert/alert.js ***!
+  \***********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _icon_icon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+
+
+
+var ICON_NAME_MAP = {
+  info: 'about',
+  error: 'notice',
+  warning: 'warning',
+  success: 'approved'
+};
+var SIZES = ['small', 'medium', 'large'];
+var Alert = function Alert(_ref) {
+  var type = _ref.type,
+    title = _ref.title,
+    subtitle = _ref.subtitle,
+    size = _ref.size,
+    iconNameProp = _ref.iconName,
+    iconPath = _ref.iconPath,
+    showSubtitleBelow = _ref.showSubtitleBelow,
+    showCloseBtn = _ref.showCloseBtn,
+    onClose = _ref.onClose,
+    extraClasses = _ref.extraClasses,
+    children = _ref.children;
+  var className = (0,_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__.createCssClassNames)(_defineProperty(_defineProperty(_defineProperty({
+    'alert ibexa-alert': true
+  }, "ibexa-alert--".concat(type), true), "ibexa-alert--".concat(size), true), extraClasses, true));
+  var contentClassName = (0,_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__.createCssClassNames)({
+    'ibexa-alert__content': true,
+    'ibexa-alert__content--subtitle-below': showSubtitleBelow
+  });
+  var iconName = undefined;
+  if (!iconPath) {
+    iconName = iconNameProp ? iconNameProp : ICON_NAME_MAP[type];
+  }
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: className,
+    role: "alert"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_icon_icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    name: iconName,
+    customPath: iconPath,
+    extraClasses: "ibexa-icon--small ibexa-alert__icon"
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: contentClassName
+  }, title && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-alert__title"
+  }, title), subtitle && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-alert__subtitle"
+  }, subtitle), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-alert__extra_content"
+  }, children)), showCloseBtn && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    className: "btn ibexa-btn ibexa-btn--no-text ibexa-alert__close-btn",
+    type: "button",
+    onClick: onClose
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_icon_icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    name: "discard",
+    extraClasses: "ibexa-icon--tiny"
+  })));
+};
+Alert.propTypes = {
+  type: prop_types__WEBPACK_IMPORTED_MODULE_1___default().oneOf(Object.values(ICON_NAME_MAP)).isRequired,
+  title: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  subtitle: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  iconName: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  iconPath: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  showSubtitleBelow: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  showCloseBtn: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  onClose: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func),
+  extraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  children: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().element),
+  size: prop_types__WEBPACK_IMPORTED_MODULE_1___default().oneOf(SIZES)
+};
+Alert.defaultProps = {
+  title: null,
+  subtitle: null,
+  iconName: null,
+  iconPath: null,
+  showSubtitleBelow: false,
+  showCloseBtn: false,
+  onClose: function onClose() {},
+  extraClasses: '',
+  children: null,
+  size: 'medium'
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Alert);
 
 /***/ }),
 
@@ -1494,7 +1724,9 @@ var Dropdown = function Dropdown(_ref) {
       style: itemsListStyles,
       ref: containerItemsRef
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-      className: "ibexa-input-text-wrapper"
+      className: "ibexa-input-text-wrapper ibexa-input-text-wrapper--search"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "ibexa-input-text-wrapper__input-wrapper"
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
       type: "text",
       placeholder: searchPlaceholder,
@@ -1505,20 +1737,20 @@ var Dropdown = function Dropdown(_ref) {
       className: "ibexa-input-text-wrapper__actions"
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       type: "button",
-      className: "btn ibexa-input-text-wrapper__action-btn ibexa-input-text-wrapper__action-btn--clear",
+      className: "btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text ibexa-input-text-wrapper__action-btn ibexa-input-text-wrapper__action-btn--clear",
       tabIndex: "-1",
       onClick: resetInputValue
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_4__["default"], {
       name: "discard",
-      extraClasses: "ibexa-icon--small"
+      extraClasses: "ibexa-icon--tiny-small"
     })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       type: "button",
-      className: "btn ibexa-input-text-wrapper__action-btn ibexa-input-text-wrapper__action-btn--search",
+      className: "btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text ibexa-input-text-wrapper__action-btn ibexa-input-text-wrapper__action-btn--search",
       tabIndex: "-1"
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_4__["default"], {
       name: "search",
       extraClasses: "ibexa-icon--small"
-    })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("ul", {
+    }))))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("ul", {
       className: "ibexa-dropdown__items-list"
     }, options.map(renderItem)));
   };
@@ -1833,7 +2065,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
 /* harmony import */ var _helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
 /* harmony import */ var _urlIcon__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./urlIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/urlIcon.js");
-/* harmony import */ var _inculdedIcon__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./inculdedIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js");
+/* harmony import */ var _includedIcon__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./includedIcon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
@@ -1849,7 +2081,7 @@ var Icon = function Icon(props) {
     'ibexa-icon': true
   }, props.extraClasses, true));
   var isIconIncluded = props.useIncludedIcon || (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.isExternalInstance)();
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, isIconIncluded ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_inculdedIcon__WEBPACK_IMPORTED_MODULE_5__["default"], {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, isIconIncluded ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_includedIcon__WEBPACK_IMPORTED_MODULE_5__["default"], {
     cssClass: cssClass,
     name: props.name,
     defaultIconName: props.defaultIconName
@@ -1877,9 +2109,9 @@ Icon.defaultProps = {
 
 /***/ }),
 
-/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js":
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js":
 /*!*****************************************************************************************!*\
-  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/inculdedIcon.js ***!
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/includedIcon.js ***!
   \*****************************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -2033,7 +2265,7 @@ var iconsMap = {
   'upload-image': _ibexa_admin_ui_src_bundle_Resources_public_img_icons_upload_image_svg__WEBPACK_IMPORTED_MODULE_46__,
   warning: _ibexa_admin_ui_src_bundle_Resources_public_img_icons_warning_svg__WEBPACK_IMPORTED_MODULE_47__
 };
-var InculdedIcon = function InculdedIcon(props) {
+var IncludedIcon = function IncludedIcon(props) {
   var _iconsMap$name;
   var name = props.name,
     cssClass = props.cssClass,
@@ -2043,17 +2275,17 @@ var InculdedIcon = function InculdedIcon(props) {
     className: cssClass
   });
 };
-InculdedIcon.propTypes = {
+IncludedIcon.propTypes = {
   cssClass: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   name: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   defaultIconName: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string)
 };
-InculdedIcon.defaultProps = {
+IncludedIcon.defaultProps = {
   cssClass: '',
   name: 'about-info',
   defaultIconName: 'about-info'
 };
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (InculdedIcon);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (IncludedIcon);
 
 /***/ }),
 
@@ -2154,6 +2386,51 @@ Search.defaultProps = {
   extraClasses: ''
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Search);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/middle-ellipsis/middle.ellipsis.js":
+/*!*******************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/middle-ellipsis/middle.ellipsis.js ***!
+  \*******************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_middle_ellipsis__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/middle.ellipsis */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/middle.ellipsis.js");
+
+
+
+var MiddleEllipsis = function MiddleEllipsis(_ref) {
+  var name = _ref.name;
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "ibexa-middle-ellipsis",
+    title: name,
+    ref: function ref(node) {
+      return (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_middle_ellipsis__WEBPACK_IMPORTED_MODULE_2__.parse)(node);
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "ibexa-middle-ellipsis__name ibexa-middle-ellipsis__name--start"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "ibexa-middle-ellipsis__name-ellipsized"
+  }, name)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "ibexa-middle-ellipsis__separator"
+  }, "..."), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "ibexa-middle-ellipsis__name ibexa-middle-ellipsis__name--end"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "ibexa-middle-ellipsis__name-ellipsized"
+  }, name)));
+};
+MiddleEllipsis.propTypes = {
+  name: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (MiddleEllipsis);
 
 /***/ }),
 
@@ -2416,11 +2693,14 @@ var Popup = function Popup(_ref) {
     actionBtnsConfig = _ref.actionBtnsConfig,
     size = _ref.size,
     noHeader = _ref.noHeader,
+    noFooter = _ref.noFooter,
     noCloseBtn = _ref.noCloseBtn,
     extraClasses = _ref.extraClasses,
-    showTooltip = _ref.showTooltip;
+    showTooltip = _ref.showTooltip,
+    subheader = _ref.subheader;
   var rootDOMElement = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__.getRootDOMElement)();
   var modalRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var latestBootstrapModal = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
   var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__.getTranslator)();
   var bootstrap = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__.getBootstrap)();
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
@@ -2429,34 +2709,40 @@ var Popup = function Popup(_ref) {
     if (isVisible) {
       showPopup();
       modalRef.current.addEventListener('hidden.bs.modal', onClose);
+    } else {
+      if (latestBootstrapModal.current) {
+        latestBootstrapModal.current.hide();
+      }
     }
   }, [isVisible]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    return function () {
+      if (latestBootstrapModal.current) {
+        latestBootstrapModal.current.hide();
+      }
+    };
+  }, []);
   if (!isVisible) {
     return null;
   }
   var modalClasses = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__.createCssClassNames)(_defineProperty({
     'c-popup modal fade': true,
-    'c-popup--no-header': noHeader
+    'c-popup--no-header': noHeader,
+    'c-popup--has-subheader': !noHeader && subheader
   }, extraClasses, extraClasses));
   var closeBtnLabel = Translator.trans(/*@Desc("Close")*/'popup.close.label', {}, 'ibexa_universal_discovery_widget');
   var hidePopup = function hidePopup() {
-    modalRef.current.removeEventListener('hidden.bs.modal', onClose);
-    bootstrap.Modal.getOrCreateInstance(modalRef.current).hide();
+    latestBootstrapModal.current.hide();
     rootDOMElement.classList.remove(CLASS_MODAL_OPEN, CLASS_NON_SCROLLABLE);
   };
   var showPopup = function showPopup() {
-    var bootstrapModal = bootstrap.Modal.getOrCreateInstance(modalRef.current, _objectSpread(_objectSpread({}, MODAL_CONFIG), {}, {
-      keyboard: !noKeyboard,
-      focus: hasFocus
-    }));
-    var initializedBackdropRootElement = bootstrapModal._backdrop._config.rootElement;
+    var initializedBackdropRootElement = latestBootstrapModal.current._backdrop._config.rootElement;
     if (initializedBackdropRootElement !== rootDOMElement) {
-      bootstrapModal._backdrop._config.rootElement = rootDOMElement;
+      latestBootstrapModal.current._backdrop._config.rootElement = rootDOMElement;
     }
-    bootstrapModal.show();
+    latestBootstrapModal.current.show();
   };
   var handleOnClick = function handleOnClick(event, onClick, preventClose) {
-    modalRef.current.removeEventListener('hidden.bs.modal', onClose);
     if (!preventClose) {
       hidePopup();
     }
@@ -2478,7 +2764,15 @@ var Popup = function Popup(_ref) {
     }));
   };
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    ref: modalRef,
+    ref: function ref(_ref3) {
+      modalRef.current = _ref3;
+      if (_ref3) {
+        latestBootstrapModal.current = bootstrap.Modal.getOrCreateInstance(modalRef.current, _objectSpread(_objectSpread({}, MODAL_CONFIG), {}, {
+          keyboard: !noKeyboard,
+          focus: hasFocus
+        }));
+      }
+    },
     className: modalClasses,
     tabIndex: hasFocus ? -1 : undefined
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
@@ -2486,7 +2780,7 @@ var Popup = function Popup(_ref) {
     role: "dialog"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "modal-content c-popup__content"
-  }, noHeader ? renderCloseBtn() : title && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+  }, noHeader ? renderCloseBtn() : title && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "modal-header c-popup__header"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", {
     className: "modal-title c-popup__headline",
@@ -2495,9 +2789,11 @@ var Popup = function Popup(_ref) {
     className: "c-popup__title"
   }, title), subtitle && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
     className: "c-popup__subtitle"
-  }, subtitle)), renderCloseBtn()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+  }, subtitle)), renderCloseBtn()), subheader && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-popup__subheader"
+  }, subheader)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "modal-body c-popup__body"
-  }, children), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+  }, children), !noFooter && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "modal-footer c-popup__footer"
   }, actionBtnsConfig.map(function (_ref2) {
     var className = _ref2.className,
@@ -2535,10 +2831,12 @@ Popup.propTypes = {
   hasFocus: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
   size: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   noHeader: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  noFooter: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
   noCloseBtn: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
   noKeyboard: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
   extraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
-  showTooltip: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool)
+  showTooltip: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  subheader: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().node)
 };
 Popup.defaultProps = {
   hasFocus: true,
@@ -2546,11 +2844,13 @@ Popup.defaultProps = {
   onClose: null,
   size: 'large',
   noHeader: false,
+  noFooter: false,
   noCloseBtn: false,
   extraClasses: '',
   title: null,
   subtitle: null,
-  showTooltip: true
+  showTooltip: true,
+  subheader: null
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Popup);
 
@@ -2819,6 +3119,7 @@ SimpleDropdown.defaultProps = {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   COLOR_VARIANTS: () => (/* binding */ COLOR_VARIANTS),
 /* harmony export */   SIZES: () => (/* binding */ SIZES),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
@@ -2839,22 +3140,524 @@ var SIZES = {
   MEDIUM: 'medium',
   LARGE: 'large'
 };
+var COLOR_VARIANTS = {
+  PRIMARY: 'primary',
+  LIGHT: 'light'
+};
 var Spinner = function Spinner(_ref) {
-  var size = _ref.size;
-  var className = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty({
+  var size = _ref.size,
+    colorVariant = _ref.colorVariant;
+  var className = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty(_defineProperty({
     'c-spinner': true
-  }, "c-spinner--".concat(size), true));
+  }, "c-spinner--".concat(size), true), "c-spinner--".concat(colorVariant), true));
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: className
   });
 };
 Spinner.propTypes = {
-  size: prop_types__WEBPACK_IMPORTED_MODULE_1___default().oneOf(Object.values(SIZES))
+  size: prop_types__WEBPACK_IMPORTED_MODULE_1___default().oneOf(Object.values(SIZES)),
+  colorVariant: prop_types__WEBPACK_IMPORTED_MODULE_1___default().oneOf(Object.values(COLOR_VARIANTS))
 };
 Spinner.defaultProps = {
-  size: SIZES.MEDIUM
+  size: SIZES.MEDIUM,
+  colorVariant: COLOR_VARIANTS.PRIMARY
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Spinner);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/empty.table.body.row.js":
+/*!**************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/empty.table.body.row.js ***!
+  \**************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../../Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _table_body_row__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./table.body.row */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.row.js");
+
+
+
+
+var EmptyTableBodyRow = function EmptyTableBodyRow(_ref) {
+  var extraClasses = _ref.extraClasses,
+    customInfoText = _ref.infoText,
+    actionText = _ref.actionText,
+    extraActions = _ref.extraActions,
+    customEmptyTableImageSrc = _ref.emptyTableImageSrc,
+    colspan = _ref.colspan;
+  var Translator = (0,_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
+  var defaultEmptyTableInfoText = Translator.trans(/*@Desc("Table is empty")*/'table.empty_table_body_row.info_text.default', {}, 'ibexa_universal_discovery_widget');
+  var infoText = customInfoText !== null && customInfoText !== void 0 ? customInfoText : defaultEmptyTableInfoText;
+  var emptyTableImageSrc = customEmptyTableImageSrc !== null && customEmptyTableImageSrc !== void 0 ? customEmptyTableImageSrc : '/bundles/ibexaadminui/img/ibexa-empty-table.svg';
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_table_body_row__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    extraClasses: extraClasses
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("td", {
+    className: "ibexa-table__empty-table-cell",
+    colSpan: colspan
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", {
+    className: "ibexa-table__empty-table-image",
+    src: emptyTableImageSrc,
+    alt: infoText
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-table__empty-table-text"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-table__empty-table-info-text"
+  }, infoText), actionText && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-table__empty-table-action-text"
+  }, actionText), extraActions)));
+};
+EmptyTableBodyRow.propTypes = {
+  extraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  infoText: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  actionText: prop_types__WEBPACK_IMPORTED_MODULE_1___default().oneOfType([(prop_types__WEBPACK_IMPORTED_MODULE_1___default().string), (prop_types__WEBPACK_IMPORTED_MODULE_1___default().node)]),
+  extraActions: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().element),
+  emptyTableImageSrc: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  colspan: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().number)
+};
+EmptyTableBodyRow.defaultProps = {
+  extraClasses: '',
+  infoText: null,
+  actionText: null,
+  extraActions: null,
+  emptyTableImageSrc: null,
+  colspan: 9999
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (EmptyTableBodyRow);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.cell.js":
+/*!*********************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.cell.js ***!
+  \*********************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+
+
+var TableBodyCell = function TableBodyCell(_ref) {
+  var extraClasses = _ref.extraClasses,
+    children = _ref.children,
+    hasCheckbox = _ref.hasCheckbox,
+    hasActionBtns = _ref.hasActionBtns,
+    hasIcon = _ref.hasIcon,
+    isCloseLeft = _ref.isCloseLeft,
+    isCenterContent = _ref.isCenterContent;
+  var className = (0,_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty({
+    'ibexa-table__cell': true,
+    'ibexa-table__cell--has-checkbox': hasCheckbox,
+    'ibexa-table__cell--has-action-btns': hasActionBtns,
+    'ibexa-table__cell--has-icon': hasIcon,
+    'ibexa-table__cell--close-left': isCloseLeft,
+    'ibexa-table__cell--content-center': isCenterContent
+  }, extraClasses, true));
+  var wrapChildrenIfNeeded = function wrapChildrenIfNeeded(childrenToWrap) {
+    if (hasActionBtns) {
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+        className: "ibexa-table__cell-btns-wrapper"
+      }, childrenToWrap);
+    }
+    return childrenToWrap;
+  };
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("td", {
+    className: className
+  }, wrapChildrenIfNeeded(children));
+};
+TableBodyCell.propTypes = {
+  extraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  children: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().element),
+  hasCheckbox: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  hasActionBtns: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  hasIcon: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  isCloseLeft: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  isCenterContent: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool)
+};
+TableBodyCell.defaultProps = {
+  extraClasses: '',
+  children: null,
+  hasCheckbox: false,
+  hasActionBtns: false,
+  hasIcon: false,
+  isCloseLeft: false,
+  isCenterContent: false
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (TableBodyCell);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.js":
+/*!****************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.js ***!
+  \****************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+
+
+var TableBody = function TableBody(_ref) {
+  var extraClasses = _ref.extraClasses,
+    children = _ref.children;
+  var className = (0,_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty({
+    'ibexa-table__body': true
+  }, extraClasses, true));
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("tbody", {
+    className: className
+  }, children);
+};
+TableBody.propTypes = {
+  extraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  children: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().element)
+};
+TableBody.defaultProps = {
+  extraClasses: '',
+  children: null
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (TableBody);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.row.js":
+/*!********************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.row.js ***!
+  \********************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+
+
+var TableBodyRow = function TableBodyRow(_ref) {
+  var extraClasses = _ref.extraClasses,
+    children = _ref.children,
+    isSelectable = _ref.isSelectable,
+    isNotSelectable = _ref.isNotSelectable,
+    onClick = _ref.onClick;
+  var className = (0,_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty({
+    'ibexa-table__row': true,
+    'ibexa-table__row--selectable': isSelectable,
+    'ibexa-table__row--not-selectable': isNotSelectable
+  }, extraClasses, true));
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("tr", {
+    className: className,
+    onClick: onClick
+  }, children);
+};
+TableBodyRow.propTypes = {
+  extraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  children: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().element),
+  isSelectable: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  isNotSelectable: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  onClick: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func)
+};
+TableBodyRow.defaultProps = {
+  extraClasses: '',
+  children: null,
+  isSelectable: false,
+  isNotSelectable: false,
+  onClick: function onClick() {}
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (TableBodyRow);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.cell.js":
+/*!*********************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.cell.js ***!
+  \*********************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+
+
+var TableHeadCell = function TableHeadCell(_ref) {
+  var extraClasses = _ref.extraClasses,
+    wrapperExtraClasses = _ref.wrapperExtraClasses,
+    children = _ref.children,
+    sortColumnName = _ref.sortColumnName,
+    hasCheckbox = _ref.hasCheckbox,
+    hasIcon = _ref.hasIcon,
+    isCloseLeft = _ref.isCloseLeft,
+    isCenterContent = _ref.isCenterContent;
+  var className = (0,_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty({
+    'ibexa-table__header-cell': true,
+    'ibexa-table__header-cell--checkbox': hasCheckbox,
+    'ibexa-table__header-cell--has-icon': hasIcon,
+    'ibexa-table__header-cell--close-left': isCloseLeft,
+    'ibexa-table__header-cell--content-center': isCenterContent
+  }, extraClasses, true));
+  var cellTextWrapperClassName = (0,_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty(_defineProperty({
+    'ibexa-table__header-cell-text-wrapper': true
+  }, "ibexa-table__sort-column--".concat(sortColumnName), sortColumnName), wrapperExtraClasses, true));
+  var renderWrapper = function renderWrapper(content) {
+    if (hasCheckbox) {
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+        className: "ibexa-table__header-cell-checkbox-wrapper"
+      }, content);
+    }
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+      className: cellTextWrapperClassName
+    }, content);
+  };
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("th", {
+    className: className
+  }, renderWrapper(children));
+};
+TableHeadCell.propTypes = {
+  extraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  wrapperExtraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  children: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().element),
+  sortColumnName: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  hasCheckbox: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  hasIcon: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  isCloseLeft: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  isCenterContent: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool)
+};
+TableHeadCell.defaultProps = {
+  extraClasses: '',
+  wrapperExtraClasses: '',
+  children: null,
+  sortColumnName: null,
+  hasCheckbox: false,
+  hasIcon: false,
+  isCloseLeft: false,
+  isCenterContent: false
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (TableHeadCell);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.js":
+/*!****************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.js ***!
+  \****************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+
+
+var TableHead = function TableHead(_ref) {
+  var extraClasses = _ref.extraClasses,
+    children = _ref.children;
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("thead", {
+    className: extraClasses
+  }, children);
+};
+TableHead.propTypes = {
+  extraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  children: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().element)
+};
+TableHead.defaultProps = {
+  extraClasses: '',
+  children: null
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (TableHead);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.row.js":
+/*!********************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.row.js ***!
+  \********************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+
+
+var TableHeadRow = function TableHeadRow(_ref) {
+  var extraClasses = _ref.extraClasses,
+    children = _ref.children;
+  var className = (0,_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty({
+    'ibexa-table__head-row': true
+  }, extraClasses, true));
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("tr", {
+    className: className
+  }, children);
+};
+TableHeadRow.propTypes = {
+  extraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  children: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().element)
+};
+TableHeadRow.defaultProps = {
+  extraClasses: '',
+  children: null
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (TableHeadRow);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.js":
+/*!***********************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.js ***!
+  \***********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+var Table = function Table(_ref) {
+  var extraClasses = _ref.extraClasses,
+    children = _ref.children,
+    isLastColumnSticky = _ref.isLastColumnSticky;
+  var scrollableWrapperRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState2 = _slicedToArray(_useState, 2),
+    hasLastColumnShadow = _useState2[0],
+    setHasLastColumnShadow = _useState2[1];
+  var className = (0,_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty({
+    'ibexa-table table': true,
+    'ibexa-table--last-column-sticky': isLastColumnSticky,
+    'ibexa-table--last-column-shadow': isLastColumnSticky && hasLastColumnShadow
+  }, extraClasses, true));
+  var updateLastColumnShadowState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
+    var offsetRoundingCompensator = 0.5;
+    var shouldShowRightColumnShadow = scrollableWrapperRef.current.scrollLeft < scrollableWrapperRef.current.scrollWidth - scrollableWrapperRef.current.offsetWidth - 2 * offsetRoundingCompensator;
+    setHasLastColumnShadow(shouldShowRightColumnShadow);
+  }, [scrollableWrapperRef, setHasLastColumnShadow]);
+  var scrollableWrapperResizeObserver = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    return new ResizeObserver(function () {
+      updateLastColumnShadowState();
+    });
+  }, [updateLastColumnShadowState]);
+  var handleScrollableWrapperRef = function handleScrollableWrapperRef(ref) {
+    if (!ref || scrollableWrapperRef.current !== null && scrollableWrapperRef.current !== ref) {
+      scrollableWrapperResizeObserver.unobserve(scrollableWrapperRef.current);
+    }
+    scrollableWrapperRef.current = ref;
+    if (ref) {
+      scrollableWrapperResizeObserver.observe(ref);
+      if (isLastColumnSticky) {
+        updateLastColumnShadowState();
+        ref.addEventListener('scroll', updateLastColumnShadowState, false);
+      }
+    }
+  };
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (isLastColumnSticky) {
+      var _scrollableWrapperRef;
+      updateLastColumnShadowState();
+      (_scrollableWrapperRef = scrollableWrapperRef.current) === null || _scrollableWrapperRef === void 0 || _scrollableWrapperRef.addEventListener('scroll', updateLastColumnShadowState, false);
+      return function () {
+        var _scrollableWrapperRef2;
+        (_scrollableWrapperRef2 = scrollableWrapperRef.current) === null || _scrollableWrapperRef2 === void 0 || _scrollableWrapperRef2.removeEventListener('scroll', updateLastColumnShadowState, false);
+      };
+    }
+  }, [isLastColumnSticky, updateLastColumnShadowState]);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-scrollable-wrapper",
+    ref: handleScrollableWrapperRef
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("table", {
+    className: className
+  }, children));
+};
+Table.propTypes = {
+  extraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  children: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().element),
+  isLastColumnSticky: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool)
+};
+Table.defaultProps = {
+  extraClasses: '',
+  children: null,
+  isLastColumnSticky: false
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Table);
 
 /***/ }),
 
@@ -3353,7 +4156,7 @@ var ContentTree = /*#__PURE__*/function (_Component) {
           width: "".concat(width, "px")
         };
       }
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", containerAttrs, this.renderHeader(), this.renderList(), this.renderLoadingSpinner(), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", containerAttrs, this.renderHeader(), this.renderList(), this.renderLoadingSpinner(), resizable && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
         className: "m-tree__resize-handler",
         onMouseDown: this.addWidthChangeListener
       })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
@@ -3699,7 +4502,8 @@ var ListItem = /*#__PURE__*/function (_Component) {
         name = _this$props8.name,
         locationId = _this$props8.locationId,
         indent = _this$props8.indent,
-        onClick = _this$props8.onClick;
+        onClick = _this$props8.onClick,
+        isInvisible = _this$props8.isInvisible;
       if (locationId === _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_5__.SYSTEM_ROOT_LOCATION_ID) {
         return null;
       }
@@ -3729,7 +4533,10 @@ var ListItem = /*#__PURE__*/function (_Component) {
       }, this.renderIcon(), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
         className: "c-list-item__label-content",
         title: name
-      }, name)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      }, name, isInvisible && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+        name: "view-hide",
+        extraClasses: "ibexa-icon--small c-list-item__hidden-icon"
+      }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
         className: "c-list-item__actions"
       }, this.sortedActions.map(function (action) {
         var ActionComponent = action.component;
@@ -6323,11 +7130,18 @@ var findFileTypeMapping = function findFileTypeMapping(mappings, file) {
     });
   });
 };
+var checkIsFileWithinMimeTypes = function checkIsFileWithinMimeTypes(mimeTypes, file) {
+  return !!mimeTypes.find(function (type) {
+    return type === file.type;
+  });
+};
 var isMimeTypeAllowed = function isMimeTypeAllowed(mappings, file) {
   return !!findFileTypeMapping(mappings, file);
 };
-var checkFileTypeAllowed = function checkFileTypeAllowed(file, locationMapping) {
-  return !locationMapping ? true : isMimeTypeAllowed(locationMapping.mappings, file);
+var checkFileTypeAllowed = function checkFileTypeAllowed(file, locationMapping, config) {
+  return !locationMapping ? config.defaultMappings.some(function (mapping) {
+    return checkIsFileWithinMimeTypes(mapping.mimeTypes, file);
+  }) : isMimeTypeAllowed(locationMapping.mappings, file);
 };
 var detectContentTypeMapping = function detectContentTypeMapping(file, parentInfo, config) {
   var locationMapping = config.locationMappings.find(function (item) {
@@ -6535,9 +7349,9 @@ var checkCanUpload = function checkCanUpload(file, parentInfo, config, errorCall
   });
   var maxFileSize = getMaxFileSize(file, parentInfo, config);
   if (!canCreateContent(file, parentInfo, config)) {
-    errorMsgs.push(Translator.trans(/*@Desc("You do not have permission to create this Content item")*/'disallowed_content_type.message', {}, 'ibexa_multi_file_upload'));
+    errorMsgs.push(Translator.trans(/*@Desc("You don’t have permission to create this content item.")*/'disallowed_content_type.message', {}, 'ibexa_multi_file_upload'));
   }
-  if (!checkFileTypeAllowed(file, locationMapping)) {
+  if (!checkFileTypeAllowed(file, locationMapping, config)) {
     errorMsgs.push(Translator.trans(/*@Desc("File type is not allowed")*/'disallowed_type.message', {}, 'ibexa_multi_file_upload'));
   }
   if (file.size > maxFileSize) {
@@ -6843,14 +7657,24 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 var ActionsMenu = function ActionsMenu() {
   var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
   var onConfirm = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_1__.ConfirmContext);
+  var onItemsConfirm = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_1__.ConfirmItemsContext);
   var cancelUDW = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_1__.CancelContext);
   var allowConfirmation = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_1__.AllowConfirmationContext);
   var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_1__.SelectedLocationsContext),
     _useContext2 = _slicedToArray(_useContext, 1),
     selectedLocations = _useContext2[0];
+  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_1__.SelectedItemsContext),
+    selectedItems = _useContext3.selectedItems;
   var confirmLabel = Translator.trans(/*@Desc("Confirm")*/'actions_menu.confirm', {}, 'ibexa_universal_discovery_widget');
   var cancelLabel = Translator.trans(/*@Desc("Discard")*/'actions_menu.cancel', {}, 'ibexa_universal_discovery_widget');
-  var isConfirmDisabled = selectedLocations.length === 0;
+  var isConfirmDisabled = selectedLocations.length === 0 && selectedItems.length === 0;
+  var handleConfirmBtnClick = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
+    if (selectedLocations.length > 0) {
+      onConfirm();
+      return;
+    }
+    onItemsConfirm();
+  }, [onConfirm, selectedLocations, onItemsConfirm, selectedItems]);
   var renderActionsContent = function renderActionsContent() {
     if (!allowConfirmation) {
       return null;
@@ -6860,9 +7684,7 @@ var ActionsMenu = function ActionsMenu() {
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       className: "c-actions-menu__confirm-btn btn ibexa-btn ibexa-btn--primary",
       type: "button",
-      onClick: function onClick() {
-        return onConfirm();
-      },
+      onClick: handleConfirmBtnClick,
       disabled: isConfirmDisabled
     }, confirmLabel)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
       className: "c-actions-menu__cancel-btn-wrapper"
@@ -6895,12 +7717,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper.js");
-/* harmony import */ var _common_icon_icon__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
-/* harmony import */ var _common_spinner_spinner__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../common/spinner/spinner */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner.js");
-/* harmony import */ var _common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../../common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
-/* harmony import */ var _helpers_locations_helper__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../helpers/locations.helper */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/helpers/locations.helper.js");
-/* harmony import */ var _hooks_useLoadBookmarksFetch__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../hooks/useLoadBookmarksFetch */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useLoadBookmarksFetch.js");
-/* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _common_icon_icon__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _common_spinner_spinner__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../../common/spinner/spinner */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner.js");
+/* harmony import */ var _common_table_empty_table_body_row__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../../common/table/empty.table.body.row */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/empty.table.body.row.js");
+/* harmony import */ var _common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../../common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+/* harmony import */ var _helpers_locations_helper__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../helpers/locations.helper */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/helpers/locations.helper.js");
+/* harmony import */ var _hooks_useLoadBookmarksFetch__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../hooks/useLoadBookmarksFetch */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useLoadBookmarksFetch.js");
+/* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
@@ -6920,10 +7744,13 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
+
+
 var SCROLL_OFFSET = 200;
 var BookmarksList = function BookmarksList(_ref) {
   var setBookmarkedLocationMarked = _ref.setBookmarkedLocationMarked,
     itemsPerPage = _ref.itemsPerPage;
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__.getTranslator)();
   var refBookmarksList = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0),
     _useState2 = _slicedToArray(_useState, 2),
@@ -6933,31 +7760,38 @@ var BookmarksList = function BookmarksList(_ref) {
     _useState4 = _slicedToArray(_useState3, 2),
     bookmarks = _useState4[0],
     setBookmarks = _useState4[1];
-  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_8__.MarkedLocationIdContext),
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_10__.MarkedLocationIdContext),
     _useContext2 = _slicedToArray(_useContext, 2),
     markedLocationId = _useContext2[0],
     setMarkedLocationId = _useContext2[1];
-  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_8__.LoadedLocationsMapContext),
+  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_10__.LoadedLocationsMapContext),
     _useContext4 = _slicedToArray(_useContext3, 2),
     loadedLocationsMap = _useContext4[0],
     dispatchLoadedLocationsAction = _useContext4[1];
-  var _useContext5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_8__.SelectedLocationsContext),
+  var _useContext5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_10__.SelectedLocationsContext),
     _useContext6 = _slicedToArray(_useContext5, 2),
     dispatchSelectedLocationsAction = _useContext6[1];
-  var _useContext7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_8__.MultipleConfigContext),
+  var _useContext7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_10__.MultipleConfigContext),
     _useContext8 = _slicedToArray(_useContext7, 1),
     multiple = _useContext8[0];
-  var allowedContentTypes = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_8__.AllowedContentTypesContext);
-  var contentTypesMap = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_8__.ContentTypesMapContext);
-  var containersOnly = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_8__.ContainersOnlyContext);
+  var allowedContentTypes = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_10__.AllowedContentTypesContext);
+  var contentTypesMap = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_10__.ContentTypesMapContext);
+  var containersOnly = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_10__.ContainersOnlyContext);
   var markedLocationData = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
-    return (0,_helpers_locations_helper__WEBPACK_IMPORTED_MODULE_6__.findMarkedLocation)(loadedLocationsMap, markedLocationId);
+    return (0,_helpers_locations_helper__WEBPACK_IMPORTED_MODULE_8__.findMarkedLocation)(loadedLocationsMap, markedLocationId);
   }, [markedLocationId, loadedLocationsMap]);
-  var _useLoadBookmarksFetc = (0,_hooks_useLoadBookmarksFetch__WEBPACK_IMPORTED_MODULE_7__.useLoadBookmarksFetch)(itemsPerPage, offset),
+  var _useLoadBookmarksFetc = (0,_hooks_useLoadBookmarksFetch__WEBPACK_IMPORTED_MODULE_9__.useLoadBookmarksFetch)(itemsPerPage, offset),
     _useLoadBookmarksFetc2 = _slicedToArray(_useLoadBookmarksFetc, 3),
     data = _useLoadBookmarksFetc2[0],
     isLoading = _useLoadBookmarksFetc2[1],
     reloadBookmarks = _useLoadBookmarksFetc2[2];
+  var areSomeBookmarksAdded = bookmarks.length === 0;
+  var containerClassName = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_7__.createCssClassNames)({
+    'c-bookmarks-list': true,
+    'c-bookmarks-list--no-items': areSomeBookmarksAdded
+  });
+  var noBookmarksInfoText = Translator.trans(/*@Desc("You have no bookmarks yet")*/'bookmarks_tab.no_items.info_text', {}, 'ibexa_universal_discovery_widget');
+  var noBookmarksActionText = Translator.trans(/*@Desc("Your bookmarks will show up here.")*/'bookmarks_tab.no_items.action_text', {}, 'ibexa_universal_discovery_widget');
   var loadMore = function loadMore(_ref2) {
     var target = _ref2.target;
     var areAllItemsLoaded = bookmarks.length >= data.count;
@@ -6973,7 +7807,7 @@ var BookmarksList = function BookmarksList(_ref) {
     }
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
       className: "c-bookmarks-list__spinner-wrapper"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_4__["default"], null));
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_5__["default"], null));
   };
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     if (isLoading) {
@@ -7000,19 +7834,19 @@ var BookmarksList = function BookmarksList(_ref) {
       setBookmarks([]);
     }
   }, [markedLocationData.bookmarked]);
-  if (!bookmarks.length) {
-    return null;
-  }
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-bookmarks-list",
+    className: containerClassName,
     onScroll: loadMore,
     ref: refBookmarksList
-  }, bookmarks.map(function (bookmark) {
+  }, !isLoading && areSomeBookmarksAdded && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_table_empty_table_body_row__WEBPACK_IMPORTED_MODULE_6__["default"], {
+    infoText: noBookmarksInfoText,
+    actionText: noBookmarksActionText
+  }), bookmarks.map(function (bookmark) {
     var isMarked = bookmark.id === markedLocationId;
     var contentTypeInfo = contentTypesMap[bookmark.ContentInfo.Content.ContentType._href];
     var isContainer = contentTypeInfo.isContainer;
     var isNotSelectable = containersOnly && !isContainer || allowedContentTypes && !allowedContentTypes.includes(contentTypeInfo.identifier);
-    var className = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_5__.createCssClassNames)({
+    var className = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_7__.createCssClassNames)({
       'c-bookmarks-list__item': true,
       'c-bookmarks-list__item--marked': isMarked,
       'c-bookmarks-list__item--not-selectable': isNotSelectable
@@ -7041,7 +7875,7 @@ var BookmarksList = function BookmarksList(_ref) {
       key: bookmark.id,
       className: className,
       onClick: markLocation
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_4__["default"], {
       extraClasses: "ibexa-icon--small",
       customPath: contentTypeInfo.thumbnail
     }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
@@ -7294,8 +8128,8 @@ var Collapsible = function Collapsible(_ref) {
     isExpanded = _useState2[0],
     setIsExpanded = _useState2[1];
   var className = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)({
-    'c-filters__collapsible': true,
-    'c-filters__collapsible--hidden': !isExpanded
+    'c-collapsible': true,
+    'c-collapsible--hidden': !isExpanded
   });
   var toggleCollapsed = function toggleCollapsed() {
     return setIsExpanded(function (prevState) {
@@ -7309,12 +8143,12 @@ var Collapsible = function Collapsible(_ref) {
     className: className,
     ref: initTooltipsRef
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-filters__collapsible-title",
+    className: "c-collapsible__title",
     onClick: toggleCollapsed
   }, title), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-filters__collapsible-content"
+    className: "c-collapsible__content"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-filters__collapsible-content-wrapper"
+    className: "c-collapsible__content-wrapper"
   }, children)));
 };
 Collapsible.propTypes = {
@@ -7623,6 +8457,15 @@ var ContentCreateWidget = function ContentCreateWidget() {
     setSelectedLanguage(preselectedLanguage || firstLanguageCode);
   }, [preselectedLanguage, firstLanguageCode]);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (!createContentVisible) {
+      return;
+    }
+    setSelectedLanguage(preselectedLanguage !== null && preselectedLanguage !== void 0 ? preselectedLanguage : firstLanguageCode);
+    setSelectedContentType(preselectedContentType);
+    setIsSelectedSuggestion(false);
+    setFilterQuery('');
+  }, [createContentVisible]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_5__.parse)(refContentTree.current);
   }, []);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
@@ -7639,7 +8482,7 @@ var ContentCreateWidget = function ContentCreateWidget() {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, createContentLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "ibexa-extra-actions__header-subtitle"
   }, createUnderLabel)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "ibexa-extra-actions__content ibexa-extra-actions__content--create"
+    className: "ibexa-extra-actions__content"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", {
     className: "ibexa-label ibexa-extra-actions__section-header"
   }, selectLanguageLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
@@ -7658,6 +8501,7 @@ var ContentCreateWidget = function ContentCreateWidget() {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: instantFilterInputWrapperClassName
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
+    value: filterQuery,
     autoFocus: true,
     className: "ibexa-instant-filter__input ibexa-input ibexa-input--text form-control",
     type: "text",
@@ -7991,9 +8835,11 @@ var ContentTableItem = function ContentTableItem(_ref) {
   var contentTypeInfo = contentTypesMap[location.ContentInfo.Content.ContentType._href];
   var _useSelectedLocations = (0,_hooks_useSelectedLocationsHelpers__WEBPACK_IMPORTED_MODULE_7__.useSelectedLocationsHelpers)(),
     checkIsSelectable = _useSelectedLocations.checkIsSelectable,
-    checkIsSelectionBlocked = _useSelectedLocations.checkIsSelectionBlocked;
+    checkIsSelectionBlocked = _useSelectedLocations.checkIsSelectionBlocked,
+    checkIsDeselectionBlocked = _useSelectedLocations.checkIsDeselectionBlocked;
   var isNotSelectable = !checkIsSelectable(location);
   var isSelectionBlocked = checkIsSelectionBlocked(location);
+  var isDeselectionBlocked = checkIsDeselectionBlocked(location);
   var className = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_5__.createCssClassNames)({
     'ibexa-table__row c-content-table-item': true,
     'c-content-table-item--marked': markedLocationId === location.id,
@@ -8044,7 +8890,7 @@ var ContentTableItem = function ContentTableItem(_ref) {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_toggle_selection_toggle_selection__WEBPACK_IMPORTED_MODULE_2__["default"], {
       location: location,
       multiple: multiple,
-      isDisabled: isSelectionBlocked,
+      isDisabled: isSelectionBlocked || isDeselectionBlocked,
       isHidden: isNotSelectable
     });
   };
@@ -8237,7 +9083,7 @@ var ContentTypeSelector = function ContentTypeSelector() {
       key: contentTypeGroup,
       title: contentTypeGroup
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("ul", {
-      className: "c-filters__collapsible-list"
+      className: "c-content-type-selector-list"
     }, contentTypes.map(function (contentType) {
       var isHidden = allowedContentTypes && !allowedContentTypes.includes(contentType.identifier);
       if (isHidden) {
@@ -8245,7 +9091,7 @@ var ContentTypeSelector = function ContentTypeSelector() {
       }
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", {
         key: contentType.identifier,
-        className: "c-filters__collapsible-list-item"
+        className: "c-content-type-selector-list__item"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
         className: "form-check form-check-inline"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
@@ -8285,13 +9131,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_dom__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! prop-types */ "prop-types");
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _search_search__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../search/search */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/search/search.js");
-/* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
-/* harmony import */ var _common_dropdown_dropdown__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../../common/dropdown/dropdown */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/dropdown/dropdown.js");
-/* harmony import */ var _content_type_selector_content_type_selector__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../content-type-selector/content.type.selector */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/content-type-selector/content.type.selector.js");
-/* harmony import */ var _common_icon_icon__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../../common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
-/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_location_helper__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/location.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/location.helper.js");
-/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _filters_panel__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./filters.panel */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/filters/filters.panel.js");
+/* harmony import */ var _filters_row__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./filters.row */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/filters/filters.row.js");
+/* harmony import */ var _search_search__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../search/search */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/search/search.js");
+/* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _common_dropdown_dropdown__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../../common/dropdown/dropdown */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/dropdown/dropdown.js");
+/* harmony import */ var _content_type_selector_content_type_selector__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../content-type-selector/content.type.selector */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/content-type-selector/content.type.selector.js");
+/* harmony import */ var _common_icon_icon__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../../common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_location_helper__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/location.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/location.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
@@ -8314,32 +9162,34 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
+
+
 var Filters = function Filters(_ref) {
   var search = _ref.search;
-  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_9__.getTranslator)();
-  var adminUiConfig = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_9__.getAdminUiConfig)();
-  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_search_search__WEBPACK_IMPORTED_MODULE_3__.SelectedContentTypesContext),
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_11__.getTranslator)();
+  var adminUiConfig = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_11__.getAdminUiConfig)();
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_search_search__WEBPACK_IMPORTED_MODULE_5__.SelectedContentTypesContext),
     _useContext2 = _slicedToArray(_useContext, 2),
     selectedContentTypes = _useContext2[0],
     dispatchSelectedContentTypesAction = _useContext2[1];
-  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_search_search__WEBPACK_IMPORTED_MODULE_3__.SelectedSectionContext),
+  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_search_search__WEBPACK_IMPORTED_MODULE_5__.SelectedSectionContext),
     _useContext4 = _slicedToArray(_useContext3, 2),
     selectedSection = _useContext4[0],
     setSelectedSection = _useContext4[1];
-  var _useContext5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_search_search__WEBPACK_IMPORTED_MODULE_3__.SelectedSubtreeContext),
+  var _useContext5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_search_search__WEBPACK_IMPORTED_MODULE_5__.SelectedSubtreeContext),
     _useContext6 = _slicedToArray(_useContext5, 2),
     selectedSubtree = _useContext6[0],
     setSelectedSubtree = _useContext6[1];
-  var _useContext7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_search_search__WEBPACK_IMPORTED_MODULE_3__.SelectedLanguageContext),
+  var _useContext7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_search_search__WEBPACK_IMPORTED_MODULE_5__.SelectedLanguageContext),
     _useContext8 = _slicedToArray(_useContext7, 2),
     selectedLanguage = _useContext8[0],
     setSelectedLanguage = _useContext8[1];
-  var _useContext9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_search_search__WEBPACK_IMPORTED_MODULE_3__.SelectedSubtreeBreadcrumbsContext),
+  var _useContext9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_search_search__WEBPACK_IMPORTED_MODULE_5__.SelectedSubtreeBreadcrumbsContext),
     _useContext10 = _slicedToArray(_useContext9, 2),
     selectedSubtreeBreadcrumbs = _useContext10[0],
     setSelectedSubtreeBreadcrumbs = _useContext10[1];
   var prevSelectedLanguage = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(selectedLanguage);
-  var dropdownListRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.DropdownPortalRefContext);
+  var dropdownListRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__.DropdownPortalRefContext);
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
     _useState2 = _slicedToArray(_useState, 2),
     filtersCleared = _useState2[0],
@@ -8352,8 +9202,8 @@ var Filters = function Filters(_ref) {
   var handleNestedUdwConfirm = function handleNestedUdwConfirm(items) {
     var _items = _slicedToArray(items, 1),
       pathString = _items[0].pathString;
-    (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_location_helper__WEBPACK_IMPORTED_MODULE_8__.findLocationsByIds)((0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_location_helper__WEBPACK_IMPORTED_MODULE_8__.removeRootFromPathString)(pathString), function (locations) {
-      return setSelectedSubtreeBreadcrumbs((0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_location_helper__WEBPACK_IMPORTED_MODULE_8__.buildLocationsBreadcrumbs)(locations), pathString);
+    (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_location_helper__WEBPACK_IMPORTED_MODULE_10__.findLocationsByIds)((0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_location_helper__WEBPACK_IMPORTED_MODULE_10__.removeRootFromPathString)(pathString), function (locations) {
+      return setSelectedSubtreeBreadcrumbs((0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_location_helper__WEBPACK_IMPORTED_MODULE_10__.buildLocationsBreadcrumbs)(locations), pathString);
     });
     setSelectedSubtree(pathString);
     setIsNestedUdwOpened(false);
@@ -8387,7 +9237,7 @@ var Filters = function Filters(_ref) {
   };
   var makeSearch = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
     prevSelectedLanguage.current = selectedLanguage;
-    search(0);
+    search();
   }, [search, selectedLanguage]);
   var isApplyButtonEnabled = !!selectedContentTypes.length || !!selectedSection || !!selectedSubtree || prevSelectedLanguage.current !== selectedLanguage;
   var renderSubtreeBreadcrumbs = function renderSubtreeBreadcrumbs() {
@@ -8402,7 +9252,7 @@ var Filters = function Filters(_ref) {
       type: "button",
       className: "btn ibexa-tag-view-select__selected-item-tag-remove-btn",
       onClick: clearSelectedSubtree
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_7__["default"], {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_9__["default"], {
       name: "discard",
       extraClasses: "ibexa-icon--tiny"
     }))));
@@ -8411,19 +9261,16 @@ var Filters = function Filters(_ref) {
     var selectLabel = Translator.trans(/*@Desc("Select content")*/'filters.tag_view_select.select', {}, 'ibexa_universal_discovery_widget');
     var changeLabel = Translator.trans(/*@Desc("Change content")*/'filters.tag_view_change.select', {}, 'ibexa_universal_discovery_widget');
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
-      className: "ibexa-tag-view-select__btn-select-path btn ibexa-btn ibexa-btn--secondary",
+      className: "ibexa-tag-view-select__btn-select-path btn ibexa-btn ibexa-btn--secondary ibexa-btn--small",
       type: "button",
       onClick: function onClick() {
         return setIsNestedUdwOpened(true);
       }
     }, selectedSubtree ? changeLabel : selectLabel);
   };
-  var filtersLabel = Translator.trans(/*@Desc("Filters")*/'filters.title', {}, 'ibexa_universal_discovery_widget');
   var languageLabel = Translator.trans(/*@Desc("Language")*/'filters.language', {}, 'ibexa_universal_discovery_widget');
   var sectionLabel = Translator.trans(/*@Desc("Section")*/'filters.section', {}, 'ibexa_universal_discovery_widget');
   var subtreeLabel = Translator.trans(/*@Desc("Subtree")*/'filters.subtree', {}, 'ibexa_universal_discovery_widget');
-  var clearLabel = Translator.trans(/*@Desc("Clear")*/'filters.clear', {}, 'ibexa_universal_discovery_widget');
-  var applyLabel = Translator.trans(/*@Desc("Apply")*/'filters.apply', {}, 'ibexa_universal_discovery_widget');
   var languageOptions = Object.values(adminUiConfig.languages.mappings).filter(function (language) {
     return language.enabled;
   }).map(function (language) {
@@ -8453,50 +9300,32 @@ var Filters = function Filters(_ref) {
       nestedUdwContainer.current.remove();
     };
   });
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, isNestedUdwOpened && /*#__PURE__*/react_dom__WEBPACK_IMPORTED_MODULE_1___default().createPortal(/*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__["default"], nestedUdwConfig), nestedUdwContainer.current), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-filters"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-filters__header"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-filters__header-content"
-  }, filtersLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-filters__header-actions"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
-    className: "btn ibexa-btn ibexa-btn--ghost ibexa-btn--small",
-    type: "button",
-    onClick: clearFilters
-  }, clearLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
-    type: "submit",
-    className: "btn ibexa-btn ibexa-btn--secondary ibexa-btn--small ibexa-btn--apply",
-    onClick: makeSearch,
-    disabled: !isApplyButtonEnabled
-  }, applyLabel))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-filters__row c-filters__row--language"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-filters__row-title"
-  }, languageLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_dropdown_dropdown__WEBPACK_IMPORTED_MODULE_5__["default"], {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, isNestedUdwOpened && /*#__PURE__*/react_dom__WEBPACK_IMPORTED_MODULE_1___default().createPortal(/*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__["default"], nestedUdwConfig), nestedUdwContainer.current), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_filters_panel__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    isApplyButtonEnabled: isApplyButtonEnabled,
+    makeSearch: makeSearch,
+    clearFilters: clearFilters
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_filters_row__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    title: languageLabel,
+    extraClasses: "c-filters-row--language"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_dropdown_dropdown__WEBPACK_IMPORTED_MODULE_7__["default"], {
     dropdownListRef: dropdownListRef,
     single: true,
     onChange: updateSelectedLanguage,
     value: selectedLanguage,
     options: languageOptions,
-    extraClasses: "c-udw-dropdown"
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_content_type_selector_content_type_selector__WEBPACK_IMPORTED_MODULE_6__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-filters__row"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-filters__row-title"
-  }, sectionLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_dropdown_dropdown__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    extraClasses: "ibexa-dropdown--small c-udw-dropdown"
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_content_type_selector_content_type_selector__WEBPACK_IMPORTED_MODULE_8__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_filters_row__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    title: sectionLabel
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_dropdown_dropdown__WEBPACK_IMPORTED_MODULE_7__["default"], {
     dropdownListRef: dropdownListRef,
     single: true,
     onChange: updateSection,
     value: selectedSection,
     options: sectionOptions,
-    extraClasses: "c-udw-dropdown"
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-filters__row"
+    extraClasses: "ibexa-dropdown--small c-udw-dropdown"
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_filters_row__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    title: subtreeLabel
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-filters__row-title"
-  }, subtreeLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "ibexa-tag-view-select"
   }, renderSubtreeBreadcrumbs(), renderSelectContentButton()))));
 };
@@ -8504,6 +9333,112 @@ Filters.propTypes = {
   search: (prop_types__WEBPACK_IMPORTED_MODULE_2___default().func).isRequired
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Filters);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/filters/filters.panel.js":
+/*!*********************************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/filters/filters.panel.js ***!
+  \*********************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+
+
+
+var FiltersPanel = function FiltersPanel(_ref) {
+  var children = _ref.children,
+    isApplyButtonEnabled = _ref.isApplyButtonEnabled,
+    makeSearch = _ref.makeSearch,
+    clearFilters = _ref.clearFilters;
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
+  var filtersLabel = Translator.trans(/*@Desc("Filters")*/'filters.title', {}, 'ibexa_universal_discovery_widget');
+  var clearLabel = Translator.trans(/*@Desc("Clear")*/'filters.clear', {}, 'ibexa_universal_discovery_widget');
+  var applyLabel = Translator.trans(/*@Desc("Apply")*/'filters.apply', {}, 'ibexa_universal_discovery_widget');
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-filters-panel"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-filters-panel__header"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-filters-panel__header-content"
+  }, filtersLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-filters-panel__header-actions"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    className: "btn ibexa-btn ibexa-btn--ghost ibexa-btn--small",
+    type: "button",
+    onClick: clearFilters
+  }, clearLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    type: "button",
+    className: "btn ibexa-btn ibexa-btn--secondary ibexa-btn--small ibexa-btn--apply",
+    onClick: makeSearch,
+    disabled: !isApplyButtonEnabled
+  }, applyLabel))), children);
+};
+FiltersPanel.propTypes = {
+  children: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().node),
+  isApplyButtonEnabled: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool).isRequired,
+  makeSearch: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func).isRequired,
+  clearFilters: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func).isRequired
+};
+FiltersPanel.defaultProps = {
+  children: null
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (FiltersPanel);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/filters/filters.row.js":
+/*!*******************************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/filters/filters.row.js ***!
+  \*******************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+
+
+var FiltersRow = function FiltersRow(_ref) {
+  var children = _ref.children,
+    title = _ref.title,
+    extraClasses = _ref.extraClasses;
+  var className = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty({
+    'c-filters-row': true
+  }, extraClasses, true));
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: className
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-filters-row__title"
+  }, title), children);
+};
+FiltersRow.propTypes = {
+  children: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().node).isRequired,
+  title: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string).isRequired,
+  extraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string)
+};
+FiltersRow.defaultProps = {
+  extraClasses: ''
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (FiltersRow);
 
 /***/ }),
 
@@ -8853,10 +9788,12 @@ var FinderLeaf = function FinderLeaf(_ref) {
   var _useSelectedLocations = (0,_hooks_useSelectedLocationsHelpers__WEBPACK_IMPORTED_MODULE_6__.useSelectedLocationsHelpers)(),
     checkIsSelectable = _useSelectedLocations.checkIsSelectable,
     checkIsSelected = _useSelectedLocations.checkIsSelected,
-    checkIsSelectionBlocked = _useSelectedLocations.checkIsSelectionBlocked;
+    checkIsSelectionBlocked = _useSelectedLocations.checkIsSelectionBlocked,
+    checkIsDeselectionBlocked = _useSelectedLocations.checkIsDeselectionBlocked;
   var isSelected = checkIsSelected(location);
   var isNotSelectable = !checkIsSelectable(location);
   var isSelectionBlocked = checkIsSelectionBlocked(location);
+  var isDeselectionBlocked = checkIsDeselectionBlocked(location);
   var markLocation = function markLocation(_ref2) {
     var nativeEvent = _ref2.nativeEvent;
     var isSelectionButtonClicked = nativeEvent.target.closest('.c-udw-toggle-selection');
@@ -8892,7 +9829,7 @@ var FinderLeaf = function FinderLeaf(_ref) {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_toggle_selection_toggle_selection__WEBPACK_IMPORTED_MODULE_3__["default"], {
       location: location,
       multiple: multiple,
-      isDisabled: isSelectionBlocked,
+      isDisabled: isSelectionBlocked || isDeselectionBlocked,
       isHidden: isNotSelectable
     });
   };
@@ -8903,7 +9840,8 @@ var FinderLeaf = function FinderLeaf(_ref) {
     }),
     'c-finder-leaf--has-children': !!location.childCount,
     'c-finder-leaf--not-selectable': isNotSelectable,
-    'c-finder-leaf--selected': isSelected && !multiple
+    'c-finder-leaf--selected': isSelected && !multiple,
+    'c-finder-leaf--hidden': location.hidden
   });
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_2__.parse)(document.querySelector('.c-udw-tab'));
@@ -8921,7 +9859,10 @@ var FinderLeaf = function FinderLeaf(_ref) {
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
     title: location.ContentInfo.Content.TranslatedName,
     "data-tooltip-container-selector": ".c-udw-tab"
-  }, location.ContentInfo.Content.TranslatedName)));
+  }, location.ContentInfo.Content.TranslatedName), location.hidden && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    name: "view-hide",
+    extraClasses: "ibexa-icon--small c-finder-leaf__hidden-icon"
+  })));
 };
 FinderLeaf.propTypes = {
   location: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object).isRequired
@@ -8946,9 +9887,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _toggle_selection_toggle_selection__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../toggle-selection/toggle.selection */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/toggle-selection/toggle.selection.js");
 /* harmony import */ var _common_thumbnail_thumbnail__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../common/thumbnail/thumbnail */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/thumbnail/thumbnail.js");
-/* harmony import */ var _common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
-/* harmony import */ var _hooks_useSelectedLocationsHelpers__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../hooks/useSelectedLocationsHelpers */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedLocationsHelpers.js");
-/* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _common_icon_icon__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../../common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+/* harmony import */ var _hooks_useSelectedLocationsHelpers__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../hooks/useSelectedLocationsHelpers */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedLocationsHelpers.js");
+/* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -8962,44 +9904,48 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
+
 var isSelectionButtonClicked = function isSelectionButtonClicked(event) {
   return event.target.closest('.c-udw-toggle-selection');
 };
 var GridViewItem = function GridViewItem(_ref) {
   var location = _ref.location,
     version = _ref.version;
-  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__.GridActiveLocationIdContext),
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_7__.GridActiveLocationIdContext),
     _useContext2 = _slicedToArray(_useContext, 2),
     setGridActiveLocationId = _useContext2[1];
-  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__.MarkedLocationIdContext),
+  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_7__.MarkedLocationIdContext),
     _useContext4 = _slicedToArray(_useContext3, 2),
     markedLocationId = _useContext4[0],
     setMarkedLocationId = _useContext4[1];
-  var _useContext5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__.LoadedLocationsMapContext),
+  var _useContext5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_7__.LoadedLocationsMapContext),
     _useContext6 = _slicedToArray(_useContext5, 2),
     dispatchLoadedLocationsAction = _useContext6[1];
-  var contentTypesMap = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__.ContentTypesMapContext);
-  var _useContext7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__.SelectedLocationsContext),
+  var contentTypesMap = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_7__.ContentTypesMapContext);
+  var _useContext7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_7__.SelectedLocationsContext),
     _useContext8 = _slicedToArray(_useContext7, 2),
     dispatchSelectedLocationsAction = _useContext8[1];
-  var _useContext9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__.MultipleConfigContext),
+  var _useContext9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_7__.MultipleConfigContext),
     _useContext10 = _slicedToArray(_useContext9, 1),
     multiple = _useContext10[0];
-  var containersOnly = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__.ContainersOnlyContext);
+  var containersOnly = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_7__.ContainersOnlyContext);
   var contentTypeInfo = contentTypesMap[location.ContentInfo.Content.ContentType._href];
   var isContainer = contentTypeInfo.isContainer;
-  var _useSelectedLocations = (0,_hooks_useSelectedLocationsHelpers__WEBPACK_IMPORTED_MODULE_5__.useSelectedLocationsHelpers)(),
+  var _useSelectedLocations = (0,_hooks_useSelectedLocationsHelpers__WEBPACK_IMPORTED_MODULE_6__.useSelectedLocationsHelpers)(),
     checkIsSelectable = _useSelectedLocations.checkIsSelectable,
     checkIsSelected = _useSelectedLocations.checkIsSelected,
-    checkIsSelectionBlocked = _useSelectedLocations.checkIsSelectionBlocked;
+    checkIsSelectionBlocked = _useSelectedLocations.checkIsSelectionBlocked,
+    checkIsDeselectionBlocked = _useSelectedLocations.checkIsDeselectionBlocked;
   var isSelected = checkIsSelected(location);
   var isNotSelectable = !checkIsSelectable(location);
   var isSelectionBlocked = checkIsSelectionBlocked(location);
-  var className = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_4__.createCssClassNames)({
+  var isDeselectionBlocked = checkIsDeselectionBlocked(location);
+  var className = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_5__.createCssClassNames)({
     'ibexa-grid-view-item': true,
     'ibexa-grid-view-item--marked': markedLocationId === location.id,
     'ibexa-grid-view-item--not-selectable': isNotSelectable,
-    'ibexa-grid-view-item--selected': isSelected && !multiple
+    'ibexa-grid-view-item--selected': isSelected && !multiple,
+    'ibexa-grid-view-item--hidden': location.hidden
   });
   var markLocation = function markLocation(_ref2) {
     var nativeEvent = _ref2.nativeEvent;
@@ -9050,7 +9996,7 @@ var GridViewItem = function GridViewItem(_ref) {
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_toggle_selection_toggle_selection__WEBPACK_IMPORTED_MODULE_2__["default"], {
       location: location,
       multiple: multiple,
-      isDisabled: isSelectionBlocked,
+      isDisabled: isSelectionBlocked || isDeselectionBlocked,
       isHidden: isNotSelectable
     }));
   };
@@ -9069,7 +10015,10 @@ var GridViewItem = function GridViewItem(_ref) {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "ibexa-grid-view-item__title",
     title: location.ContentInfo.Content.TranslatedName
-  }, location.ContentInfo.Content.TranslatedName)), renderToggleSelection());
+  }, location.ContentInfo.Content.TranslatedName, location.hidden && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    name: "view-hide",
+    extraClasses: "ibexa-icon--small ibexa-grid-view-item__hidden-icon"
+  }))), renderToggleSelection());
 };
 GridViewItem.propTypes = {
   location: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object).isRequired,
@@ -9227,15 +10176,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _common_icon_icon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
-/* harmony import */ var _common_spinner_spinner__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../common/spinner/spinner */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner.js");
-/* harmony import */ var _content_table_content_table__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../content-table/content.table */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/content-table/content.table.js");
-/* harmony import */ var _filters_filters__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../filters/filters */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/filters/filters.js");
+/* harmony import */ var _common_spinner_spinner__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../common/spinner/spinner */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner.js");
+/* harmony import */ var _content_table_content_table__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../content-table/content.table */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/content-table/content.table.js");
+/* harmony import */ var _filters_filters__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../filters/filters */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/filters/filters.js");
+/* harmony import */ var _content_meta_preview_module__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../content.meta.preview.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/content.meta.preview.module.js");
 /* harmony import */ var _search_tags__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./search.tags */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/search/search.tags.js");
 /* harmony import */ var _hooks_useSearchByQueryFetch__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../hooks/useSearchByQueryFetch */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSearchByQueryFetch.js");
 /* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
 /* harmony import */ var _common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../../common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _search_no_results__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./search.no.results */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/search/search.no.results.js");
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
@@ -9253,6 +10203,7 @@ var SelectedContentTypesContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE
 var SelectedSectionContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var SelectedSubtreeContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var SelectedSubtreeBreadcrumbsContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+
 
 
 
@@ -9373,7 +10324,7 @@ var Search = function Search(_ref) {
   };
   var renderSearchResults = function renderSearchResults() {
     if (data.count) {
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_content_table_content_table__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_content_table_content_table__WEBPACK_IMPORTED_MODULE_3__["default"], {
         count: data.count,
         items: data.items,
         itemsPerPage: itemsPerPage,
@@ -9382,32 +10333,9 @@ var Search = function Search(_ref) {
         renderCustomHeader: renderCustomTableHeader
       });
     } else if (!!data.items) {
-      var noResultsLabel = Translator.trans(/*@Desc("No results found for %query%")*/'search.no_results', {
-        query: searchText
-      }, 'ibexa_universal_discovery_widget');
-      var noResultsHints = [Translator.trans(/*@Desc("Check the spelling of keywords.")*/'search.no_results.hint.check_spelling', {}, 'ibexa_universal_discovery_widget'), Translator.trans(/*@Desc("Try more general keywords.")*/'search.no_results.hint.more_general', {}, 'ibexa_universal_discovery_widget'), Translator.trans(/*@Desc("Try different keywords.")*/'search.no_results.hint.different_kewords', {}, 'ibexa_universal_discovery_widget'), Translator.trans(/*@Desc("Try fewer keywords. Reducing keywords results in more matches.")*/'search.no_results.hint.fewer_keywords', {}, 'ibexa_universal_discovery_widget')];
-      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, renderCustomTableHeader(), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-        className: "c-search__no-results"
-      }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", {
-        src: "/bundles/ibexaadminui/img/no-results.svg"
-      }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h2", {
-        className: "c-search__no-results-title"
-      }, noResultsLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-        className: "c-search__no-results-subtitle"
-      }, noResultsHints.map(function (hint, key) {
-        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-          key: key // eslint-disable-line react/no-array-index-key
-          ,
-          className: "c-search__no-results-hint"
-        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-          className: "c-search__no-results-hint-icon-wrapper"
-        }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
-          name: "approved",
-          extraClasses: "ibexa-icon--small-medium"
-        })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-          className: "c-search__no-results-hint-text"
-        }, hint));
-      }))));
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, renderCustomTableHeader(), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_search_no_results__WEBPACK_IMPORTED_MODULE_11__["default"], {
+        searchText: searchText
+      }));
     }
   };
   var spinnerWrapperClassName = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_9__.createCssClassNames)({
@@ -9430,15 +10358,17 @@ var Search = function Search(_ref) {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "c-search__main"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-search__sidebar"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_filters_filters__WEBPACK_IMPORTED_MODULE_5__["default"], {
-    isCollapsed: false,
-    search: search
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "c-search__content"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: spinnerWrapperClassName
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_3__["default"], null)), renderSearchResults()))))))));
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_2__["default"], null)), renderSearchResults()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-search__content-meta-preview"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_content_meta_preview_module__WEBPACK_IMPORTED_MODULE_5__["default"], null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-search__filters"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_filters_filters__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    isCollapsed: false,
+    search: search
+  })))))))));
 };
 Search.propTypes = {
   itemsPerPage: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().number)
@@ -9447,6 +10377,81 @@ Search.defaultProps = {
   itemsPerPage: 50
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Search);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/search/search.no.results.js":
+/*!************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/search/search.no.results.js ***!
+  \************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _common_icon_icon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+
+
+
+
+var SearchNoResults = function SearchNoResults(_ref) {
+  var searchText = _ref.searchText,
+    noResultsHintsCustom = _ref.noResultsHints,
+    extraClasses = _ref.extraClasses;
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__.getTranslator)();
+  var className = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_4__.createCssClassNames)(_defineProperty({
+    'c-search-no-results': true
+  }, extraClasses, true));
+  var noResultsLabel = searchText ? Translator.trans(/*@Desc("No results found for %query%")*/'search.no_results', {
+    query: searchText
+  }, 'ibexa_universal_discovery_widget') : Translator.trans(/*@Desc("No results found")*/'search.no_results_without_query', {}, 'ibexa_universal_discovery_widget');
+  var noResultsHints = noResultsHintsCustom ? noResultsHintsCustom : [Translator.trans(/*@Desc("Check the spelling of keywords.")*/'search.no_results.hint.check_spelling', {}, 'ibexa_universal_discovery_widget'), Translator.trans(/*@Desc("Try more general keywords.")*/'search.no_results.hint.more_general', {}, 'ibexa_universal_discovery_widget'), Translator.trans(/*@Desc("Try different keywords.")*/'search.no_results.hint.different_kewords', {}, 'ibexa_universal_discovery_widget'), Translator.trans(/*@Desc("Try fewer keywords. Reducing keywords results in more matches.")*/'search.no_results.hint.fewer_keywords', {}, 'ibexa_universal_discovery_widget')];
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: className
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", {
+    src: "/bundles/ibexaadminui/img/no-results.svg"
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h2", {
+    className: "c-search-no-results__no-results-title"
+  }, noResultsLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-search-no-results__no-results-subtitle"
+  }, noResultsHints.map(function (hint, key) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      key: key // eslint-disable-line react/no-array-index-key
+      ,
+      className: "c-search-no-results__no-results-hint"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "c-search-no-results__no-results-hint-icon-wrapper"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+      name: "approved",
+      extraClasses: "ibexa-icon--small-medium"
+    })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "c-search-no-results__no-results-hint-text"
+    }, hint));
+  })));
+};
+SearchNoResults.propTypes = {
+  extraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  searchText: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
+  noResultsHints: prop_types__WEBPACK_IMPORTED_MODULE_1___default().arrayOf((prop_types__WEBPACK_IMPORTED_MODULE_1___default().string))
+};
+SearchNoResults.defaultProps = {
+  extraClasses: '',
+  searchText: null,
+  noResultsHints: null
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SearchNoResults);
 
 /***/ }),
 
@@ -9545,6 +10550,269 @@ SearchTags.propTypes = {};
 
 /***/ }),
 
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/selected-items/selected.items.panel.item.js":
+/*!****************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/selected-items/selected.items.panel.item.js ***!
+  \****************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _common_icon_icon__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _common_thumbnail_thumbnail__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../common/thumbnail/thumbnail */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/thumbnail/thumbnail.js");
+/* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../hooks/useSelectedItemsReducer */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer.js");
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+
+
+
+
+
+
+var SelectedItemsPanelItem = function SelectedItemsPanelItem(_ref) {
+  var item = _ref.item,
+    thumbnailData = _ref.thumbnailData,
+    name = _ref.name,
+    description = _ref.description,
+    extraContent = _ref.extraContent;
+  var adminUiConfig = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getAdminUiConfig)();
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
+  var refSelectedLocationsItem = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__.SelectedItemsContext),
+    dispatchSelectedItemsAction = _useContext.dispatchSelectedItemsAction;
+  var removeItemLabel = Translator.trans(/*@Desc("Clear selection")*/'selected_items_panel.item.remove_item', {}, 'ibexa_universal_discovery_widget');
+  var removeFromSelection = function removeFromSelection() {
+    (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_1__.hideAll)(refSelectedLocationsItem.current);
+    dispatchSelectedItemsAction({
+      type: _hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_6__.REMOVE_SELECTED_ITEMS,
+      itemsIdsWithTypes: [{
+        id: item.id,
+        type: item.type
+      }]
+    });
+  };
+  var sortedActions = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    var universalSelectItemActions = adminUiConfig.universalDiscoveryWidget.universalSelectItemActions;
+    var actions = universalSelectItemActions ? _toConsumableArray(universalSelectItemActions) : [];
+    return actions.sort(function (actionA, actionB) {
+      return actionB.priority - actionA.priority;
+    });
+  }, []);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-selected-items-panel-item",
+    ref: function ref(node) {
+      refSelectedLocationsItem.current = node;
+      (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_1__.parse)(node);
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-selected-items-panel-item__main-content"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-selected-items-panel-item__image-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_thumbnail_thumbnail__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    thumbnailData: thumbnailData,
+    iconExtraClasses: "ibexa-icon--small"
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-selected-items-panel-item__info"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "c-selected-items-panel-item__info-name"
+  }, name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "c-selected-items-panel-item__info-description"
+  }, description)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-selected-items-panel-item__actions-wrapper"
+  }, sortedActions.map(function (action) {
+    var Component = action.component;
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Component, {
+      key: action.id,
+      item: item
+    });
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    type: "button",
+    className: "c-selected-items-panel-item__remove-button btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text",
+    onClick: removeFromSelection,
+    title: removeItemLabel,
+    "data-tooltip-container-selector": ".c-udw-tab"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    name: "discard",
+    extraClasses: "ibexa-icon--tiny-small"
+  })))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-selected-items-panel-item__extra-content"
+  }, extraContent));
+};
+SelectedItemsPanelItem.propTypes = {
+  item: PropTypes.object.isRequired,
+  thumbnailData: PropTypes.shape({
+    mimeType: PropTypes.string.isRequired,
+    resource: PropTypes.string.isRequired
+  }).isRequired,
+  name: PropTypes.string.isRequired,
+  description: PropTypes.node.isRequired,
+  extraContent: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.node), PropTypes.node])
+};
+SelectedItemsPanelItem.defaultProps = {
+  extraContent: null
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SelectedItemsPanelItem);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/selected-items/selected.items.panel.js":
+/*!***********************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/selected-items/selected.items.panel.js ***!
+  \***********************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _common_icon_icon__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+/* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../hooks/useSelectedItemsReducer */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+
+
+
+
+
+
+var SelectedItemsPanel = function SelectedItemsPanel() {
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
+  var adminUiConfig = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getAdminUiConfig)();
+  var itemsComponentsMap = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    var universalSelectItemsComponentsConfigs = adminUiConfig.universalDiscoveryWidget.universalSelectItemsComponentsConfigs;
+    var configsArray = universalSelectItemsComponentsConfigs ? _toConsumableArray(universalSelectItemsComponentsConfigs) : [];
+    return configsArray.reduce(function (configsMap, config) {
+      configsMap[config.itemType] = config;
+      return configsMap;
+    }, {});
+  }, [adminUiConfig]);
+  var refSelectedLocations = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__.SelectedItemsContext),
+    selectedItems = _useContext.selectedItems,
+    dispatchSelectedItemsAction = _useContext.dispatchSelectedItemsAction;
+  var allowConfirmation = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__.AllowConfirmationContext);
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState2 = _slicedToArray(_useState, 2),
+    isExpanded = _useState2[0],
+    setIsExpanded = _useState2[1];
+  var className = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_4__.createCssClassNames)({
+    'c-selected-items-panel': true,
+    'c-selected-items-panel--expanded': isExpanded
+  });
+  var expandLabel = Translator.trans(/*@Desc("Expand sidebar")*/'selected_items.expand.sidebar', {}, 'ibexa_universal_discovery_widget');
+  var collapseLabel = Translator.trans(/*@Desc("Collapse sidebar")*/'selected_items.collapse.sidebar', {}, 'ibexa_universal_discovery_widget');
+  var togglerLabel = isExpanded ? collapseLabel : expandLabel;
+  var clearSelection = function clearSelection() {
+    (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_1__.hideAll)(refSelectedLocations.current);
+    dispatchSelectedItemsAction({
+      type: _hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_6__.CLEAR_SELECTED_ITEMS
+    });
+  };
+  var toggleExpanded = function toggleExpanded() {
+    setIsExpanded(!isExpanded);
+  };
+  var renderSelectionCounter = function renderSelectionCounter() {
+    var selectedLabel = Translator.transChoice(/*@Desc("{1}%count% selected item|[2,Inf]%count% selected items")*/'selected_items.selection_info', selectedItems.length, {
+      count: selectedItems.length
+    }, 'ibexa_universal_discovery_widget');
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "c-selected-items-panel__selection-counter"
+    }, selectedLabel);
+  };
+  var renderToggleBtn = function renderToggleBtn() {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      type: "button",
+      className: "c-selected-items-panel__toggle-button btn ibexa-btn ibexa-btn--tertiary ibexa-btn--small ibexa-btn--no-text",
+      onClick: toggleExpanded,
+      title: togglerLabel,
+      "data-tooltip-container-selector": ".c-udw-tab"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      name: "expand-left",
+      extraClasses: "c-selected-items-panel__toggle-button-icon ibexa-icon--tiny-small"
+    }));
+  };
+  var renderActionBtns = function renderActionBtns() {
+    var removeLabel = Translator.transChoice(/*@Desc("{1}Deselect|[2,Inf]Deselect all")*/'selected_items.deselect_all', selectedItems.length, {}, 'ibexa_universal_discovery_widget');
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "c-selected-items-panel__actions"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      type: "button",
+      className: "c-selected-items-panel__clear-selection-button btn ibexa-btn ibexa-btn--small ibexa-btn--secondary",
+      onClick: clearSelection
+    }, removeLabel));
+  };
+  var renderLocationsList = function renderLocationsList() {
+    if (!isExpanded) {
+      return null;
+    }
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "c-selected-items-panel__items-wrapper"
+    }, renderActionBtns(), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "c-selected-items-panel__items-list"
+    }, selectedItems.map(function (selectedItem) {
+      var ItemComponent = itemsComponentsMap[selectedItem.type].component;
+      if (!ItemComponent) {
+        throw new Error("SelectedItemsPanel: component for ".concat(selectedItem.type, " not provided in configuration."));
+      }
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(ItemComponent, {
+        key: "".concat(selectedItem.type, "-").concat(selectedItem.id),
+        item: selectedItem
+      });
+    })));
+  };
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (!allowConfirmation) {
+      return;
+    }
+    (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_1__.parse)(refSelectedLocations.current);
+    (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_1__.hideAll)();
+    var bootstrap = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getBootstrap)();
+    var toggleBtnTooltip = bootstrap.Tooltip.getOrCreateInstance('.c-selected-items-panel__toggle-button');
+    toggleBtnTooltip.setContent({
+      '.tooltip-inner': togglerLabel
+    });
+  }, [isExpanded]);
+  if (!allowConfirmation) {
+    return null;
+  }
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: className,
+    ref: refSelectedLocations
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-selected-items-panel__header"
+  }, renderToggleBtn(), renderSelectionCounter()), renderLocationsList());
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SelectedItemsPanel);
+
+/***/ }),
+
 /***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/selected-locations/selected.locations.item.js":
 /*!******************************************************************************************************************************************!*\
   !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/selected-locations/selected.locations.item.js ***!
@@ -9564,6 +10832,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _common_thumbnail_thumbnail__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../common/thumbnail/thumbnail */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/thumbnail/thumbnail.js");
 /* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _hooks_useSelectedLocationsHelpers__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../hooks/useSelectedLocationsHelpers */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedLocationsHelpers.js");
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
@@ -9581,6 +10850,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
+
 var SelectedLocationsItem = function SelectedLocationsItem(_ref) {
   var location = _ref.location,
     permissions = _ref.permissions;
@@ -9590,6 +10860,9 @@ var SelectedLocationsItem = function SelectedLocationsItem(_ref) {
   var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__.SelectedLocationsContext),
     _useContext2 = _slicedToArray(_useContext, 2),
     dispatchSelectedLocationsAction = _useContext2[1];
+  var _useSelectedLocations = (0,_hooks_useSelectedLocationsHelpers__WEBPACK_IMPORTED_MODULE_7__.useSelectedLocationsHelpers)(),
+    checkIsDeselectionBlocked = _useSelectedLocations.checkIsDeselectionBlocked;
+  var isDeselectionBlocked = checkIsDeselectionBlocked(location);
   var contentTypesMap = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__.ContentTypesMapContext);
   var clearLabel = Translator.trans(/*@Desc("Clear selection")*/'selected_locations.clear_selection', {}, 'ibexa_universal_discovery_widget');
   var removeFromSelection = function removeFromSelection() {
@@ -9608,12 +10881,12 @@ var SelectedLocationsItem = function SelectedLocationsItem(_ref) {
   }, []);
   var version = location.ContentInfo.Content.CurrentVersion.Version;
   var thumbnailData = version ? version.Thumbnail : {};
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_2__.parse)(refSelectedLocationsItem.current);
-  }, []);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "c-selected-locations-item",
-    ref: refSelectedLocationsItem
+    ref: function ref(node) {
+      refSelectedLocationsItem.current = node;
+      (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_2__.parse)(node);
+    }
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "c-selected-locations-item__image-wrapper"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_thumbnail_thumbnail__WEBPACK_IMPORTED_MODULE_4__["default"], {
@@ -9639,7 +10912,8 @@ var SelectedLocationsItem = function SelectedLocationsItem(_ref) {
     className: "c-selected-locations-item__remove-button btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text",
     onClick: removeFromSelection,
     title: clearLabel,
-    "data-tooltip-container-selector": ".c-udw-tab"
+    "data-tooltip-container-selector": ".c-udw-tab",
+    disabled: isDeselectionBlocked
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_3__["default"], {
     name: "discard",
     extraClasses: "ibexa-icon--tiny-small"
@@ -9687,16 +10961,30 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 var SelectedLocations = function SelectedLocations() {
   var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
   var refSelectedLocations = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
-  var refTogglerButton = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
-  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__.SelectedLocationsContext),
-    _useContext2 = _slicedToArray(_useContext, 2),
-    selectedLocations = _useContext2[0],
-    dispatchSelectedLocationsAction = _useContext2[1];
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__.SelectionConfigContext),
+    isInitLocationsDeselectionBlocked = _useContext.isInitLocationsDeselectionBlocked,
+    initSelectedLocationsIds = _useContext.initSelectedLocationsIds;
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__.SelectedLocationsContext),
+    _useContext3 = _slicedToArray(_useContext2, 2),
+    selectedLocations = _useContext3[0],
+    dispatchSelectedLocationsAction = _useContext3[1];
   var allowConfirmation = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__.AllowConfirmationContext);
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true),
     _useState2 = _slicedToArray(_useState, 2),
-    isExpanded = _useState2[0],
-    setIsExpanded = _useState2[1];
+    isComponentHidden = _useState2[0],
+    setIsComponentHidden = _useState2[1];
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
+    _useState4 = _slicedToArray(_useState3, 2),
+    initSelectedLocations = _useState4[0],
+    setInitSelectedLocations = _useState4[1];
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
+    _useState6 = _slicedToArray(_useState5, 2),
+    selectedLocationsWithoutInit = _useState6[0],
+    setSelectedLocationsWithoutInit = _useState6[1];
+  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState8 = _slicedToArray(_useState7, 2),
+    isExpanded = _useState8[0],
+    setIsExpanded = _useState8[1];
   var className = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_5__.createCssClassNames)({
     'c-selected-locations': true,
     'c-selected-locations--expanded': isExpanded
@@ -9706,6 +10994,13 @@ var SelectedLocations = function SelectedLocations() {
   var togglerLabel = isExpanded ? collapseLabel : expandLabel;
   var clearSelection = function clearSelection() {
     (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_1__.hideAll)(refSelectedLocations.current);
+    if (isInitLocationsDeselectionBlocked) {
+      dispatchSelectedLocationsAction({
+        type: 'REPLACE_SELECTED_LOCATIONS',
+        locations: initSelectedLocations
+      });
+      return;
+    }
     dispatchSelectedLocationsAction({
       type: 'CLEAR_SELECTED_LOCATIONS'
     });
@@ -9714,25 +11009,24 @@ var SelectedLocations = function SelectedLocations() {
     setIsExpanded(!isExpanded);
   };
   var renderSelectionCounter = function renderSelectionCounter() {
+    var selectedLocationsCount = isInitLocationsDeselectionBlocked ? selectedLocationsWithoutInit.length : selectedLocations.length;
     var selectedLabel = Translator.transChoice(/*@Desc("{1}%count% selected item|[2,Inf]%count% selected items")*/'selected_locations.selected_items', selectedLocations.length, {
-      count: selectedLocations.length
+      count: selectedLocationsCount
     }, 'ibexa_universal_discovery_widget');
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
       className: "c-selected-locations__selection-counter"
     }, selectedLabel);
   };
   var renderToggleButton = function renderToggleButton() {
-    var iconName = isExpanded ? 'caret-double-next' : 'caret-double-back';
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
-      ref: refTogglerButton,
       type: "button",
-      className: "c-selected-locations__toggle-button btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text",
+      className: "c-selected-locations__toggle-button btn ibexa-btn ibexa-btn--tertiary ibexa-btn--small ibexa-btn--no-text",
       onClick: toggleExpanded,
       title: togglerLabel,
       "data-tooltip-container-selector": ".c-udw-tab"
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_3__["default"], {
-      name: iconName,
-      extraClasses: "ibexa-icon--small"
+      name: "expand-left",
+      extraClasses: "c-selected-locations__toggle-button-icon ibexa-icon--tiny-small"
     }));
   };
   var renderActionButtons = function renderActionButtons() {
@@ -9749,11 +11043,12 @@ var SelectedLocations = function SelectedLocations() {
     if (!isExpanded) {
       return null;
     }
+    var selectedLocationsToIterate = isInitLocationsDeselectionBlocked ? selectedLocationsWithoutInit : selectedLocations;
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
       className: "c-selected-locations__items-wrapper"
     }, renderActionButtons(), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
       className: "c-selected-locations__items-list"
-    }, selectedLocations.map(function (selectedLocation) {
+    }, selectedLocationsToIterate.map(function (selectedLocation) {
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_selected_locations_item__WEBPACK_IMPORTED_MODULE_4__["default"], {
         key: selectedLocation.location.id,
         location: selectedLocation.location,
@@ -9762,7 +11057,7 @@ var SelectedLocations = function SelectedLocations() {
     })));
   };
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    if (!allowConfirmation) {
+    if (isComponentHidden) {
       return;
     }
     (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_1__.parse)(refSelectedLocations.current);
@@ -9773,7 +11068,24 @@ var SelectedLocations = function SelectedLocations() {
       '.tooltip-inner': togglerLabel
     });
   }, [isExpanded]);
-  if (!allowConfirmation) {
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (isInitLocationsDeselectionBlocked) {
+      var initSelectedLocationsTemp = [];
+      var selectedLocationsWithoutInitTemp = [];
+      selectedLocations.forEach(function (selectedLocation) {
+        if (initSelectedLocationsIds.includes(selectedLocation.location.id)) {
+          initSelectedLocationsTemp.push(selectedLocation);
+        } else {
+          selectedLocationsWithoutInitTemp.push(selectedLocation);
+        }
+      });
+      setInitSelectedLocations(initSelectedLocationsTemp);
+      setSelectedLocationsWithoutInit(selectedLocationsWithoutInitTemp);
+    }
+    var onlyInitSelectedLocationsAreSelected = initSelectedLocationsIds.length === selectedLocations.length;
+    setIsComponentHidden(!allowConfirmation || onlyInitSelectedLocationsAreSelected && isInitLocationsDeselectionBlocked);
+  }, [selectedLocations, isInitLocationsDeselectionBlocked, allowConfirmation]);
+  if (isComponentHidden) {
     return null;
   }
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
@@ -9781,7 +11093,7 @@ var SelectedLocations = function SelectedLocations() {
     ref: refSelectedLocations
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "c-selected-locations__header"
-  }, renderSelectionCounter(), renderToggleButton()), renderLocationsList());
+  }, renderToggleButton(), renderSelectionCounter()), renderLocationsList());
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SelectedLocations);
 
@@ -9802,8 +11114,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _common_simple_dropdown_simple_dropdown__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../common/simple-dropdown/simple.dropdown */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/simple-dropdown/simple.dropdown.js");
-/* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper.js");
+/* harmony import */ var _common_simple_dropdown_simple_dropdown__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../common/simple-dropdown/simple.dropdown */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/simple-dropdown/simple.dropdown.js");
+/* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -9814,27 +11128,37 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
+
 var SortSwitcher = function SortSwitcher(_ref) {
-  var isDisabled = _ref.isDisabled;
-  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SortingContext),
+  var isDisabled = _ref.isDisabled,
+    disabledConfig = _ref.disabledConfig;
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SortingContext),
     _useContext2 = _slicedToArray(_useContext, 2),
     sorting = _useContext2[0],
     setSorting = _useContext2[1];
-  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SortOrderContext),
+  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SortOrderContext),
     _useContext4 = _slicedToArray(_useContext3, 2),
     sortOrder = _useContext4[0],
     setSortOrder = _useContext4[1];
-  var selectedOption = _universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SORTING_OPTIONS.find(function (option) {
+  var selectedOption = _universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SORTING_OPTIONS.find(function (option) {
     return option.sortClause === sorting && option.sortOrder === sortOrder;
   });
   var onOptionClick = function onOptionClick(option) {
     setSorting(option.sortClause);
     setSortOrder(option.sortOrder);
   };
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-sort-switcher"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_simple_dropdown_simple_dropdown__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    options: _universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SORTING_OPTIONS,
+  var disabledParams = {};
+  if (isDisabled && disabledConfig) {
+    disabledParams.title = disabledConfig.disabledInfoTooltipLabel;
+  }
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", _extends({
+    ref: function ref(node) {
+      return (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_2__.parse)(node);
+    },
+    className: "c-sort-switcher",
+    "data-tooltip-container-selector": ".c-udw-tab"
+  }, disabledParams), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_simple_dropdown_simple_dropdown__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    options: _universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SORTING_OPTIONS,
     selectedOption: selectedOption,
     onOptionClick: onOptionClick,
     isDisabled: isDisabled,
@@ -9842,10 +11166,12 @@ var SortSwitcher = function SortSwitcher(_ref) {
   }));
 };
 SortSwitcher.propTypes = {
-  isDisabled: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool)
+  isDisabled: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  disabledConfig: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object)
 };
 SortSwitcher.defaultProps = {
-  isDisabled: false
+  isDisabled: false,
+  disabledConfig: null
 };
 var SortSwitcherMenuButton = {
   id: 'sort-switcher',
@@ -9945,7 +11271,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _selected_locations_selected_locations__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../selected-locations/selected.locations */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/selected-locations/selected.locations.js");
 /* harmony import */ var _content_create_widget_content_create_widget__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../content-create-widget/content.create.widget */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/content-create-widget/content.create.widget.js");
 /* harmony import */ var _content_meta_preview_module__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../content.meta.preview.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/content.meta.preview.module.js");
-/* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _common_alert_alert__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../../common/alert/alert */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/alert/alert.js");
+/* harmony import */ var _common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../../common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+/* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _selected_items_selected_items_panel__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../selected-items/selected.items.panel */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/selected-items/selected.items.panel.js");
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -9961,22 +11290,47 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
+
+
+
 var Tab = function Tab(_ref) {
   var children = _ref.children,
-    actionsDisabledMap = _ref.actionsDisabledMap;
+    actionsDisabledMap = _ref.actionsDisabledMap,
+    isRightSidebarHidden = _ref.isRightSidebarHidden;
   var topBarRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)();
   var bottomBarRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)();
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('100%'),
     _useState2 = _slicedToArray(_useState, 2),
     contentHeight = _useState2[0],
     setContentHeight = _useState2[1];
-  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_8__.SelectedLocationsContext),
-    _useContext2 = _slicedToArray(_useContext, 1),
-    selectedLocations = _useContext2[0];
-  var dropdownPortalRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_8__.DropdownPortalRefContext);
-  var selectedLocationsComponent = !!selectedLocations.length ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_selected_locations_selected_locations__WEBPACK_IMPORTED_MODULE_5__["default"], null) : null;
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_10__.SelectionConfigContext),
+    isInitLocationsDeselectionBlocked = _useContext.isInitLocationsDeselectionBlocked,
+    initSelectedLocationsIds = _useContext.initSelectedLocationsIds,
+    deselectAlertTitle = _useContext.deselectAlertTitle;
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_10__.SelectedLocationsContext),
+    _useContext3 = _slicedToArray(_useContext2, 1),
+    selectedLocations = _useContext3[0];
+  var _useContext4 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_10__.SelectedItemsContext),
+    selectedItems = _useContext4.selectedItems;
+  var dropdownPortalRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_10__.DropdownPortalRefContext);
   var contentStyles = {
     height: contentHeight
+  };
+  var showInitLocationsDeselectAlert = isInitLocationsDeselectionBlocked && initSelectedLocationsIds.length;
+  var udwTabMainClassName = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_9__.createCssClassNames)({
+    'c-udw-tab__main': true,
+    'c-udw-tab__main--init-locations-alert-visible': showInitLocationsDeselectAlert
+  });
+  var renderInitLocationsAlert = function renderInitLocationsAlert() {
+    if (!showInitLocationsDeselectAlert) {
+      return null;
+    }
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "c-udw-tab__init-locations-alert-container"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_alert_alert__WEBPACK_IMPORTED_MODULE_8__["default"], {
+      type: "warning",
+      title: deselectAlertTitle
+    }));
   };
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect)(function () {
     if (topBarRef.current && bottomBarRef.current) {
@@ -9997,29 +11351,115 @@ var Tab = function Tab(_ref) {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "c-udw-tab__left-sidebar"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_content_create_widget_content_create_widget__WEBPACK_IMPORTED_MODULE_6__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_tab_selector_tab_selector__WEBPACK_IMPORTED_MODULE_4__["default"], null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-udw-tab__main"
-  }, children), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: udwTabMainClassName
+  }, renderInitLocationsAlert(), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-udw-tab__main-children"
+  }, children)), !isRightSidebarHidden && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "c-udw-tab__right-sidebar"
-  }, _content_meta_preview_module__WEBPACK_IMPORTED_MODULE_7__["default"] && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_content_meta_preview_module__WEBPACK_IMPORTED_MODULE_7__["default"], null), selectedLocationsComponent)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_content_meta_preview_module__WEBPACK_IMPORTED_MODULE_7__["default"], null))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "c-udw-tab__bottom-bar",
     ref: bottomBarRef
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_actions_menu_actions_menu__WEBPACK_IMPORTED_MODULE_3__["default"], null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+  }, !!selectedLocations.length && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_selected_locations_selected_locations__WEBPACK_IMPORTED_MODULE_5__["default"], null), !!selectedItems.length && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_selected_items_selected_items_panel__WEBPACK_IMPORTED_MODULE_11__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_actions_menu_actions_menu__WEBPACK_IMPORTED_MODULE_3__["default"], null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "c-udw-tab__dropdown-portal",
     ref: dropdownPortalRef
   }));
 };
 Tab.propTypes = {
   children: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().any).isRequired,
-  actionsDisabledMap: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object)
+  actionsDisabledMap: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object),
+  isRightSidebarHidden: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool)
 };
 Tab.defaultProps = {
   actionsDisabledMap: {
     'content-create-button': false,
     'sort-switcher': false,
     'view-switcher': false
-  }
+  },
+  isRightSidebarHidden: false
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Tab);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/toggle-selection/toggle.item.selection.js":
+/*!**************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/toggle-selection/toggle.item.selection.js ***!
+  \**************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+/* harmony import */ var _universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+var ToggleItemSelection = function ToggleItemSelection(_ref) {
+  var item = _ref.item,
+    isDisabled = _ref.isDisabled,
+    isPreselected = _ref.isPreselected,
+    isHidden = _ref.isHidden,
+    isIndeterminate = _ref.isIndeterminate;
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SelectedItemsContext),
+    selectedItems = _useContext.selectedItems;
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.MultipleConfigContext),
+    _useContext3 = _slicedToArray(_useContext2, 2),
+    multiple = _useContext3[0],
+    multipleItemsLimit = _useContext3[1];
+  var inputRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var isSelected = selectedItems.some(function (selectedItem) {
+    return selectedItem.type === item.type && selectedItem.id === item.id;
+  });
+  var isSelectionBlocked = multipleItemsLimit !== 0 && selectedItems.length >= multipleItemsLimit && !isSelected;
+  var className = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)({
+    'c-udw-toggle-selection ibexa-input': true,
+    'ibexa-input--checkbox': multiple,
+    'ibexa-input--radio': !multiple,
+    'c-udw-toggle-selection--hidden': isHidden
+  });
+  var inputType = multiple ? 'checkbox' : 'radio';
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (!inputRef.current) {
+      return;
+    }
+    inputRef.current.indeterminate = isIndeterminate;
+  }, [isIndeterminate]);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
+    ref: inputRef,
+    type: inputType,
+    className: className,
+    checked: isPreselected || isSelected,
+    disabled: isSelectionBlocked || isDisabled || isHidden,
+    readOnly: true
+  });
+};
+ToggleItemSelection.propTypes = {
+  item: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object).isRequired,
+  isHidden: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  isDisabled: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  isPreselected: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  isIndeterminate: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool)
+};
+ToggleItemSelection.defaultProps = {
+  isHidden: false,
+  isDisabled: false,
+  isPreselected: false,
+  isIndeterminate: false
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ToggleItemSelection);
 
 /***/ }),
 
@@ -10165,9 +11605,12 @@ var TopMenu = function TopMenu(_ref) {
     className: "c-top-menu__actions-wrapper"
   }, sortedActions.map(function (action) {
     var Component = action.component;
+    var disabledData = actionsDisabledMap[action.id];
+    var hasDisabledConfig = disabledData instanceof Object;
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Component, {
       key: action.id,
-      isDisabled: actionsDisabledMap[action.id]
+      isDisabled: !!disabledData,
+      disabledConfig: hasDisabledConfig ? disabledData : null
     });
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_top_menu_search_input__WEBPACK_IMPORTED_MODULE_2__["default"], {
     isSearchOpened: isSearchOpened,
@@ -10228,18 +11671,13 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 var ENTER_CHAR_CODE = 13;
-var SEARCH_TAB_ID = 'search';
 var TopMenuSearchInput = function TopMenuSearchInput(_ref) {
   var isSearchOpened = _ref.isSearchOpened,
     setIsSearchOpened = _ref.setIsSearchOpened;
-  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.ActiveTabContext),
-    _useContext2 = _slicedToArray(_useContext, 2),
-    activeTab = _useContext2[0],
-    setActiveTab = _useContext2[1];
-  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SearchTextContext),
-    _useContext4 = _slicedToArray(_useContext3, 2),
-    searchText = _useContext4[0],
-    setSearchText = _useContext4[1];
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SearchTextContext),
+    _useContext2 = _slicedToArray(_useContext, 3),
+    searchText = _useContext2[0],
+    makeSearch = _useContext2[2];
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(searchText),
     _useState2 = _slicedToArray(_useState, 2),
     inputValue = _useState2[0],
@@ -10258,15 +11696,9 @@ var TopMenuSearchInput = function TopMenuSearchInput(_ref) {
     var value = _ref2.target.value;
     return setInputValue(value);
   };
-  var search = function search(value) {
-    if (activeTab !== SEARCH_TAB_ID) {
-      setActiveTab('search');
-    }
-    setSearchText(value);
-  };
   var handleSearchBtnClick = function handleSearchBtnClick() {
     if (isSearchOpened) {
-      search(inputValue);
+      makeSearch(inputValue);
       setIsSearchOpened(false);
     } else {
       setIsSearchOpened(true);
@@ -10275,7 +11707,7 @@ var TopMenuSearchInput = function TopMenuSearchInput(_ref) {
   var handleKeyPressed = function handleKeyPressed(_ref3) {
     var charCode = _ref3.charCode;
     if (charCode === ENTER_CHAR_CODE) {
-      search(inputValue);
+      makeSearch(inputValue);
     }
   };
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
@@ -10337,49 +11769,129 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
-/* harmony import */ var _common_icon_icon__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
-/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
-var _this = undefined;
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
 
-
+var MIN_ITEMS_WITH_SEARCH = 10;
 var TranslationSelectorButton = function TranslationSelectorButton(_ref) {
   var hideTranslationSelector = _ref.hideTranslationSelector,
     selectTranslation = _ref.selectTranslation,
     version = _ref.version,
     isOpen = _ref.isOpen;
-  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__.getTranslator)();
-  var adminUiConfig = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__.getAdminUiConfig)();
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__.getTranslator)();
+  var adminUiConfig = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__.getAdminUiConfig)();
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+    _useState2 = _slicedToArray(_useState, 2),
+    filterQuery = _useState2[0],
+    setFilterQuery = _useState2[1];
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+    _useState4 = _slicedToArray(_useState3, 2),
+    activeLanguage = _useState4[0],
+    setActiveLanguage = _useState4[1];
   var languageCodes = version ? version.VersionInfo.languageCodes.split(',') : [];
+  var isSearchEnabled = languageCodes.length >= MIN_ITEMS_WITH_SEARCH;
   var editTranslationLabel = Translator.trans(/*@Desc("Select translation")*/'meta_preview.edit_translation', {}, 'ibexa_universal_discovery_widget');
-  var className = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)({
+  var resetLanguageSelector = function resetLanguageSelector() {
+    setFilterQuery('');
+    setActiveLanguage('');
+  };
+  var getLanguageName = function getLanguageName(languageCode) {
+    var lowerCase = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+    var language = window.ibexa.adminUiConfig.languages.mappings[languageCode];
+    if (!language) {
+      return null;
+    }
+    return lowerCase ? language.name.toLowerCase() : language.name;
+  };
+  var filteredLanguageCodes = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    if (!filterQuery) {
+      return languageCodes;
+    }
+    var filterQueryLowerCase = filterQuery.toLowerCase();
+    return languageCodes.filter(function (languageCode) {
+      var languageNameLowerCase = getLanguageName(languageCode);
+      return languageNameLowerCase.includes(filterQueryLowerCase);
+    });
+  }, [filterQuery]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (!isOpen) {
+      resetLanguageSelector();
+    }
+  }, [isOpen]);
+  var containerClassName = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)({
     'c-translation-selector': true,
-    'c-translation-selector--hidden': !isOpen
+    'ibexa-extra-actions': true,
+    'ibexa-extra-actions--edit': true,
+    'ibexa-extra-actions--full-height': true,
+    'ibexa-extra-actions--hidden': !isOpen,
+    'ibexa-extra-actions--has-search': isSearchEnabled
   });
+  var searchInputWrapperClassName = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)({
+    'ibexa-instant-filter__input-wrapper': true,
+    'ibexa-instant-filter__input-wrapper--hidden': !isSearchEnabled
+  });
+  var renderLanguages = function renderLanguages() {
+    return filteredLanguageCodes.map(function (languageCode) {
+      var languageNodeClassName = (0,_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)({
+        'ibexa-instant-filter__item': true,
+        'ibexa-instant-filter__item--active': activeLanguage === languageCode
+      });
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+        type: "button",
+        key: languageCode,
+        className: languageNodeClassName,
+        onClick: function onClick() {
+          return setActiveLanguage(languageCode);
+        }
+      }, adminUiConfig.languages.mappings[languageCode].name);
+    });
+  };
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: className
+    className: containerClassName
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-translation-selector__header"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", {
-    className: "c-translation-selector__title"
-  }, "".concat(editTranslationLabel, " (").concat(languageCodes.length, ")")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
-    className: "c-translation-selector__close-button btn",
+    className: "ibexa-extra-actions__header"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h2", {
+    className: "ibexa-extra-actions__header-content"
+  }, editTranslationLabel)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-extra-actions__content"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-instant-filter"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: searchInputWrapperClassName
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
+    type: "text",
+    className: "ibexa-instant-filter__input ibexa-input ibexa-input--text form-control",
+    placeholder: Translator.trans(/*@Desc("Search...")*/'instant.filter.languages.placeholder', {}, 'ibexa_universal_discovery_widget'),
+    value: filterQuery,
+    onChange: function onChange(event) {
+      return setFilterQuery(event.target.value);
+    }
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-instant-filter__desc"
+  }, Translator.trans(/*@Desc("Languages")*/'meta_preview.instant.filter.languages.select_language.desc', {}, 'ibexa_universal_discovery_widget')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-instant-filter__items"
+  }, renderLanguages()))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-extra-actions__confirm-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    type: "submit",
+    className: "btn ibexa-extra-actions__confirm-btn ibexa-btn ibexa-btn--primary",
+    disabled: !activeLanguage,
+    onClick: function onClick() {
+      return selectTranslation(activeLanguage);
+    }
+  }, Translator.trans(/*@Desc("Edit")*/'meta_preview.edit.languages.edit', {}, 'ibexa_universal_discovery_widget')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
     type: "button",
+    className: "btn ibexa-btn--close ibexa-btn ibexa-btn--secondary",
     onClick: hideTranslationSelector
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_icon_icon__WEBPACK_IMPORTED_MODULE_3__["default"], {
-    name: "discard",
-    extraClasses: "ibexa-icon--small"
-  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "c-translation-selector__languages-wrapper"
-  }, languageCodes.map(function (languageCode) {
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-      key: languageCode,
-      className: "c-translation-selector__language",
-      onClick: selectTranslation.bind(_this, languageCode)
-    }, adminUiConfig.languages.mappings[languageCode].name);
-  })));
+  }, Translator.trans(/*@Desc("Discard")*/'meta_preview.edit.languages.discard', {}, 'ibexa_universal_discovery_widget'))));
 };
 TranslationSelectorButton.propTypes = {
   hideTranslationSelector: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func).isRequired,
@@ -10441,14 +11953,17 @@ var TreeItemToggleSelection = function TreeItemToggleSelection(_ref) {
   if (!isUDW) {
     return null;
   }
-  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SelectedLocationsContext),
-    _useContext2 = _slicedToArray(_useContext, 2),
-    selectedLocations = _useContext2[0],
-    dispatchSelectedLocationsAction = _useContext2[1];
-  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.MultipleConfigContext),
-    _useContext4 = _slicedToArray(_useContext3, 2),
-    multiple = _useContext4[0],
-    multipleItemsLimit = _useContext4[1];
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SelectionConfigContext),
+    isInitLocationsDeselectionBlocked = _useContext.isInitLocationsDeselectionBlocked,
+    initSelectedLocationsIds = _useContext.initSelectedLocationsIds;
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SelectedLocationsContext),
+    _useContext3 = _slicedToArray(_useContext2, 2),
+    selectedLocations = _useContext3[0],
+    dispatchSelectedLocationsAction = _useContext3[1];
+  var _useContext4 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.MultipleConfigContext),
+    _useContext5 = _slicedToArray(_useContext4, 2),
+    multiple = _useContext5[0],
+    multipleItemsLimit = _useContext5[1];
   var containersOnly = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.ContainersOnlyContext);
   var allowedContentTypes = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.AllowedContentTypesContext);
   var restInfo = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.RestInfoContext);
@@ -10457,6 +11972,8 @@ var TreeItemToggleSelection = function TreeItemToggleSelection(_ref) {
   });
   var isNotSelectable = containersOnly && !isContainer || allowedContentTypes && !allowedContentTypes.includes(contentTypeIdentifier);
   var isSelectionBlocked = multipleItemsLimit !== 0 && !isSelected && selectedLocations.length >= multipleItemsLimit;
+  var isInitSelectedLocation = initSelectedLocationsIds.includes(locationId);
+  var isDeselectionBlocked = isSelected && isInitSelectedLocation && isInitLocationsDeselectionBlocked;
   var location = {
     id: locationId
   };
@@ -10480,7 +11997,7 @@ var TreeItemToggleSelection = function TreeItemToggleSelection(_ref) {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_toggle_selection_toggle_selection__WEBPACK_IMPORTED_MODULE_5__["default"], {
     location: location,
     multiple: multiple,
-    isDisabled: isSelectionBlocked,
+    isDisabled: isSelectionBlocked || isDeselectionBlocked,
     isHidden: isNotSelectable
   }), isNotSelectable && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "c-list-item__prefix-actions-item-empty"
@@ -10707,7 +12224,9 @@ var ViewSwitcher = function ViewSwitcher(_ref) {
     _useContext2 = _slicedToArray(_useContext, 2),
     currentView = _useContext2[0],
     setCurrentView = _useContext2[1];
-  var selectedOption = _universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.VIEWS.find(function (option) {
+  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.ViewContext),
+    views = _useContext3.views;
+  var selectedOption = views.find(function (option) {
     return option.value === currentView;
   });
   var onOptionClick = function onOptionClick(_ref2) {
@@ -10717,7 +12236,7 @@ var ViewSwitcher = function ViewSwitcher(_ref) {
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "c-udw-view-switcher"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_simple_dropdown_simple_dropdown__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    options: _universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.VIEWS,
+    options: views,
     selectedOption: selectedOption,
     onOptionClick: onOptionClick,
     isDisabled: isDisabled,
@@ -11687,6 +13206,106 @@ var useLoadedLocationsReducer = function useLoadedLocationsReducer() {
 
 /***/ }),
 
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/usePaginableFetch.js":
+/*!************************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/usePaginableFetch.js ***!
+  \************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   usePaginableFetch: () => (/* binding */ usePaginableFetch)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+var fetchInitialState = {
+  isLoading: false,
+  data: null,
+  pageIndex: 0
+};
+var FETCH_START = 'FETCH_START';
+var FETCH_END = 'FETCH_END';
+var CHANGE_PAGE = 'CHANGE_PAGE';
+var fetchReducer = function fetchReducer(state, action) {
+  switch (action.type) {
+    case FETCH_START:
+      return _objectSpread(_objectSpread({}, state), {}, {
+        data: null,
+        isLoading: true
+      });
+    case FETCH_END:
+      return _objectSpread(_objectSpread({}, state), {}, {
+        data: action.data,
+        isLoading: false
+      });
+    case CHANGE_PAGE:
+      {
+        var isCurrentPageIndex = action.pageIndex === state.pageIndex;
+        if (isCurrentPageIndex) {
+          return state;
+        }
+        return _objectSpread(_objectSpread({}, state), {}, {
+          data: null,
+          pageIndex: action.pageIndex
+        });
+      }
+    default:
+      throw new Error();
+  }
+};
+var usePaginableFetch = function usePaginableFetch(_ref, fetchFunction) {
+  var restInfo = _ref.restInfo,
+    itemsPerPage = _ref.itemsPerPage,
+    extraFetchParams = _ref.extraFetchParams;
+  var _useReducer = (0,react__WEBPACK_IMPORTED_MODULE_0__.useReducer)(fetchReducer, fetchInitialState),
+    _useReducer2 = _slicedToArray(_useReducer, 2),
+    state = _useReducer2[0],
+    dispatch = _useReducer2[1];
+  var changePage = function changePage(pageIndex) {
+    return dispatch({
+      type: CHANGE_PAGE,
+      pageIndex: pageIndex
+    });
+  };
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    dispatch({
+      type: FETCH_START
+    });
+    var offset = state.pageIndex * itemsPerPage;
+    var _fetchFunction = fetchFunction(_objectSpread(_objectSpread({}, restInfo), {}, {
+        limit: itemsPerPage,
+        offset: offset
+      }, extraFetchParams), function (data) {
+        return dispatch({
+          type: FETCH_END,
+          data: data
+        });
+      }),
+      abortController = _fetchFunction.abortController;
+    return function () {
+      if (abortController) {
+        abortController.abort();
+      }
+    };
+  }, [state.pageIndex, restInfo, itemsPerPage, extraFetchParams]);
+  return [state.data, state.isLoading, state.pageIndex, changePage];
+};
+
+/***/ }),
+
 /***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSearchByQueryFetch.js":
 /*!****************************************************************************************************************!*\
   !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSearchByQueryFetch.js ***!
@@ -11786,7 +13405,7 @@ var useSearchByQueryFetch = function useSearchByQueryFetch() {
     };
     var query = {};
     if (searchText) {
-      query.FullTextCriterion = "".concat(searchText, "*");
+      query.FullTextCriterion = "".concat(searchText);
     }
     if (fullTextCriterion) {
       query.FullTextCriterion = fullTextCriterion;
@@ -11845,6 +13464,157 @@ var useSearchByQueryFetch = function useSearchByQueryFetch() {
 
 /***/ }),
 
+/***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer.js":
+/*!******************************************************************************************************************!*\
+  !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer.js ***!
+  \******************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ADD_SELECTED_ITEMS: () => (/* binding */ ADD_SELECTED_ITEMS),
+/* harmony export */   CHANGE_MULTIPLE_SETTING: () => (/* binding */ CHANGE_MULTIPLE_SETTING),
+/* harmony export */   CLEAR_SELECTED_ITEMS: () => (/* binding */ CLEAR_SELECTED_ITEMS),
+/* harmony export */   REMOVE_SELECTED_ITEMS: () => (/* binding */ REMOVE_SELECTED_ITEMS),
+/* harmony export */   TOGGLE_SELECTED_ITEMS: () => (/* binding */ TOGGLE_SELECTED_ITEMS),
+/* harmony export */   UPDATE_SELECTED_ITEMS: () => (/* binding */ UPDATE_SELECTED_ITEMS),
+/* harmony export */   useSelectedItemsReducer: () => (/* binding */ useSelectedItemsReducer)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+var ADD_SELECTED_ITEMS = 'ADD_SELECTED_ITEMS';
+var UPDATE_SELECTED_ITEMS = 'UPDATE_SELECTED_ITEMS';
+var REMOVE_SELECTED_ITEMS = 'REMOVE_SELECTED_ITEMS';
+var TOGGLE_SELECTED_ITEMS = 'TOGGLE_SELECTED_ITEMS';
+var CLEAR_SELECTED_ITEMS = 'CLEAR_SELECTED_ITEMS';
+var CHANGE_MULTIPLE_SETTING = 'CHANGE_MULTIPLE_SETTING';
+var checkIsItemSelected = function checkIsItemSelected(selectedItems, item) {
+  return selectedItems.some(function (selectedItem) {
+    return selectedItem.type === item.type && selectedItem.id === item.id;
+  });
+};
+var filterOutSelectedItems = function filterOutSelectedItems(selectedItems, items) {
+  return items.filter(function (item) {
+    return !checkIsItemSelected(selectedItems, item);
+  });
+};
+var checkIsValidSelection = function checkIsValidSelection(items, isMultiple, multipleItemsLimit) {
+  return !isMultiple && items.length > 1 || isMultiple && multipleItemsLimit !== 0 && items.length > multipleItemsLimit;
+};
+var selectedItemsReducer = function selectedItemsReducer(state, action) {
+  var items = state.items,
+    isMultiple = state.isMultiple,
+    multipleItemsLimit = state.multipleItemsLimit;
+  switch (action.type) {
+    case ADD_SELECTED_ITEMS:
+      {
+        var oldItemsWithoutNewItems = filterOutSelectedItems(action.items, items);
+        var newItems = [].concat(_toConsumableArray(oldItemsWithoutNewItems), _toConsumableArray(action.items));
+        if (checkIsValidSelection(newItems, isMultiple, multipleItemsLimit)) {
+          throw new Error('useSelectedItemsReducer ADD_SELECTED_ITEMS: cannot select more than one item with single select.');
+        }
+        return _objectSpread(_objectSpread({}, state), {}, {
+          items: newItems
+        });
+      }
+    case UPDATE_SELECTED_ITEMS:
+      {
+        var updatedSelectedItems = _toConsumableArray(items);
+        var _iterator = _createForOfIteratorHelper(action.items),
+          _step;
+        try {
+          var _loop = function _loop() {
+            var updatedItem = _step.value;
+            var updatedItemIndex = updatedSelectedItems.findIndex(function (selectedItem) {
+              return selectedItem.type === updatedItem.type && selectedItem.id === updatedItem.id;
+            });
+            if (updatedItemIndex > -1) {
+              updatedSelectedItems[updatedItemIndex] = updatedItem;
+            }
+          };
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            _loop();
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+        return _objectSpread(_objectSpread({}, state), {}, {
+          items: updatedSelectedItems
+        });
+      }
+    case REMOVE_SELECTED_ITEMS:
+      return _objectSpread(_objectSpread({}, state), {}, {
+        items: filterOutSelectedItems(action.itemsIdsWithTypes, items)
+      });
+    case TOGGLE_SELECTED_ITEMS:
+      {
+        var oldItemsWithoutDeselectedItems = filterOutSelectedItems(action.items, items);
+        var newItemsWithoutDeselectedItems = filterOutSelectedItems(items, action.items);
+        var _newItems = [].concat(_toConsumableArray(oldItemsWithoutDeselectedItems), _toConsumableArray(newItemsWithoutDeselectedItems));
+        if (checkIsValidSelection(_newItems, isMultiple, multipleItemsLimit)) {
+          throw new Error('useSelectedItemsReducer ADD_SELECTED_ITEMS: cannot select more than one item with single select.');
+        }
+        return _objectSpread(_objectSpread({}, state), {}, {
+          items: _newItems
+        });
+      }
+    case CLEAR_SELECTED_ITEMS:
+      return _objectSpread(_objectSpread({}, state), {}, {
+        items: []
+      });
+    case CHANGE_MULTIPLE_SETTING:
+      if (!action.isMultiple && items.length > 1) {
+        throw new Error('useSelectedItemsReducer CHANGE_MULTIPLE_SETTING: cannot set to single select when multiple items are selected.');
+      }
+      return _objectSpread(_objectSpread({}, state), {}, {
+        isMultiple: action.isMultiple
+      });
+    default:
+      throw new Error();
+  }
+};
+var useSelectedItemsReducer = function useSelectedItemsReducer(_ref) {
+  var _ref$items = _ref.items,
+    items = _ref$items === void 0 ? [] : _ref$items,
+    isMultiple = _ref.isMultiple,
+    multipleItemsLimit = _ref.multipleItemsLimit;
+  var initialState = {
+    isMultiple: isMultiple,
+    multipleItemsLimit: multipleItemsLimit,
+    items: items
+  };
+  var _useReducer = (0,react__WEBPACK_IMPORTED_MODULE_0__.useReducer)(selectedItemsReducer, initialState),
+    _useReducer2 = _slicedToArray(_useReducer, 2),
+    selectedItems = _useReducer2[0].items,
+    dispatchSelectedItemsAction = _useReducer2[1];
+  return {
+    selectedItems: selectedItems,
+    dispatchSelectedItemsAction: dispatchSelectedItemsAction
+  };
+};
+
+/***/ }),
+
 /***/ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedLocationsHelpers.js":
 /*!**********************************************************************************************************************!*\
   !*** ./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedLocationsHelpers.js ***!
@@ -11876,6 +13646,9 @@ var useSelectedLocationsHelpers = function useSelectedLocationsHelpers() {
   var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.SelectedLocationsContext),
     _useContext4 = _slicedToArray(_useContext3, 1),
     selectedLocations = _useContext4[0];
+  var _useContext5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.SelectionConfigContext),
+    isInitLocationsDeselectionBlocked = _useContext5.isInitLocationsDeselectionBlocked,
+    initSelectedLocationsIds = _useContext5.initSelectedLocationsIds;
   var containersOnly = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.ContainersOnlyContext);
   var allowedContentTypes = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.AllowedContentTypesContext);
   var checkIsSelectableWrapped = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function (location) {
@@ -11899,10 +13672,19 @@ var useSelectedLocationsHelpers = function useSelectedLocationsHelpers() {
       multipleItemsLimit: multipleItemsLimit
     });
   }, [selectedLocations, multipleItemsLimit]);
+  var checkIsDeselectionBlockedWrapped = function checkIsDeselectionBlockedWrapped(location) {
+    var isLocationSelected = (0,_helpers_selected_locations_helper__WEBPACK_IMPORTED_MODULE_1__.checkIsSelected)({
+      location: location,
+      selectedLocations: selectedLocations
+    });
+    var isInitSelectedLocation = initSelectedLocationsIds.includes(location.id);
+    return isLocationSelected && isInitSelectedLocation && isInitLocationsDeselectionBlocked;
+  };
   return {
     checkIsSelectable: checkIsSelectableWrapped,
     checkIsSelected: checkIsSelectedWrapped,
-    checkIsSelectionBlocked: checkIsSelectionBlockedWrapped
+    checkIsSelectionBlocked: checkIsSelectionBlockedWrapped,
+    checkIsDeselectionBlocked: checkIsDeselectionBlockedWrapped
   };
 };
 
@@ -11977,7 +13759,7 @@ var useSelectedLocationsReducer = function useSelectedLocationsReducer() {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   SearchTab: () => (/* binding */ SearchTab),
-/* harmony export */   ValueTypeDefault: () => (/* binding */ SearchTabModule)
+/* harmony export */   "default": () => (/* binding */ SearchTabModule)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
@@ -12037,7 +13819,8 @@ var SearchTabModule = function SearchTabModule() {
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "m-search-tab"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_tab_tab__WEBPACK_IMPORTED_MODULE_1__["default"], {
-    actionsDisabledMap: actionsDisabledMap
+    actionsDisabledMap: actionsDisabledMap,
+    isRightSidebarHidden: true
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_search_search__WEBPACK_IMPORTED_MODULE_2__["default"], {
     itemsPerPage: tabsConfig.search.itemsPerPage
   })));
@@ -12287,7 +14070,7 @@ var findLocationsBySearchQuery = function findLocationsBySearchQuery(_ref5, call
     useAlwaysAvailable = _ref5$useAlwaysAvaila === void 0 ? true : _ref5$useAlwaysAvaila;
   var body = {
     ViewInput: {
-      identifier: "udw-locations-by-search-query-".concat(query.FullTextCriterion),
+      identifier: "udw-locations-by-search-query-".concat(encodeURIComponent(query.FullTextCriterion)),
       "public": false,
       useAlwaysAvailable: useAlwaysAvailable,
       LocationQuery: {
@@ -12341,6 +14124,10 @@ var findLocationsById = function findLocationsById(_ref7, callback) {
     siteaccess = _ref7.siteaccess,
     accessToken = _ref7.accessToken,
     id = _ref7.id,
+    _ref7$noLanguageCode = _ref7.noLanguageCode,
+    noLanguageCode = _ref7$noLanguageCode === void 0 ? false : _ref7$noLanguageCode,
+    _ref7$useAlwaysAvaila = _ref7.useAlwaysAvailable,
+    useAlwaysAvailable = _ref7$useAlwaysAvaila === void 0 ? undefined : _ref7$useAlwaysAvaila,
     _ref7$limit = _ref7.limit,
     limit = _ref7$limit === void 0 ? QUERY_LIMIT : _ref7$limit,
     _ref7$offset = _ref7.offset,
@@ -12361,10 +14148,16 @@ var findLocationsById = function findLocationsById(_ref7, callback) {
         },
         limit: limit,
         offset: offset
-      }
+      },
+      useAlwaysAvailable: useAlwaysAvailable
     }
   };
-  addLanguageCodeToCreateViewEndpoint(body);
+  if (useAlwaysAvailable !== undefined) {
+    body.ViewInput.useAlwaysAvailable = useAlwaysAvailable;
+  }
+  if (!noLanguageCode) {
+    addLanguageCodeToCreateViewEndpoint(body);
+  }
   var request = new Request("".concat(instanceUrl).concat(ENDPOINT_CREATE_VIEW), {
     method: 'POST',
     headers: (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_request_helper_js__WEBPACK_IMPORTED_MODULE_0__.getRequestHeaders)({
@@ -12547,6 +14340,10 @@ var loadContentInfo = function loadContentInfo(_ref13, callback) {
     siteaccess = _ref13.siteaccess,
     accessToken = _ref13.accessToken,
     contentId = _ref13.contentId,
+    _ref13$noLanguageCode = _ref13.noLanguageCode,
+    noLanguageCode = _ref13$noLanguageCode === void 0 ? false : _ref13$noLanguageCode,
+    _ref13$useAlwaysAvail = _ref13.useAlwaysAvailable,
+    useAlwaysAvailable = _ref13$useAlwaysAvail === void 0 ? undefined : _ref13$useAlwaysAvail,
     _ref13$limit = _ref13.limit,
     limit = _ref13$limit === void 0 ? QUERY_LIMIT : _ref13$limit,
     _ref13$offset = _ref13.offset,
@@ -12566,10 +14363,16 @@ var loadContentInfo = function loadContentInfo(_ref13, callback) {
         },
         limit: limit,
         offset: offset
-      }
+      },
+      useAlwaysAvailable: useAlwaysAvailable
     }
   };
-  addLanguageCodeToCreateViewEndpoint(body);
+  if (useAlwaysAvailable !== undefined) {
+    body.ViewInput.useAlwaysAvailable = useAlwaysAvailable;
+  }
+  if (!noLanguageCode) {
+    addLanguageCodeToCreateViewEndpoint(body);
+  }
   var request = new Request("".concat(instanceUrl).concat(ENDPOINT_CREATE_VIEW), {
     method: 'POST',
     headers: (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_request_helper_js__WEBPACK_IMPORTED_MODULE_0__.getRequestHeaders)({
@@ -12723,6 +14526,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   BlockFetchLocationHookContext: () => (/* binding */ BlockFetchLocationHookContext),
 /* harmony export */   CancelContext: () => (/* binding */ CancelContext),
 /* harmony export */   ConfirmContext: () => (/* binding */ ConfirmContext),
+/* harmony export */   ConfirmItemsContext: () => (/* binding */ ConfirmItemsContext),
 /* harmony export */   ContainersOnlyContext: () => (/* binding */ ContainersOnlyContext),
 /* harmony export */   ContentOnTheFlyConfigContext: () => (/* binding */ ContentOnTheFlyConfigContext),
 /* harmony export */   ContentOnTheFlyDataContext: () => (/* binding */ ContentOnTheFlyDataContext),
@@ -12741,7 +14545,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   SNACKBAR_ACTIONS: () => (/* binding */ SNACKBAR_ACTIONS),
 /* harmony export */   SORTING_OPTIONS: () => (/* binding */ SORTING_OPTIONS),
 /* harmony export */   SearchTextContext: () => (/* binding */ SearchTextContext),
+/* harmony export */   SelectedItemsContext: () => (/* binding */ SelectedItemsContext),
 /* harmony export */   SelectedLocationsContext: () => (/* binding */ SelectedLocationsContext),
+/* harmony export */   SelectionConfigContext: () => (/* binding */ SelectionConfigContext),
 /* harmony export */   SnackbarActionsContext: () => (/* binding */ SnackbarActionsContext),
 /* harmony export */   SortOrderContext: () => (/* binding */ SortOrderContext),
 /* harmony export */   SortingContext: () => (/* binding */ SortingContext),
@@ -12752,6 +14558,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   TitleContext: () => (/* binding */ TitleContext),
 /* harmony export */   UDWContext: () => (/* binding */ UDWContext),
 /* harmony export */   VIEWS: () => (/* binding */ VIEWS),
+/* harmony export */   ViewContext: () => (/* binding */ ViewContext),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
@@ -12766,6 +14573,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _services_universal_discovery_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./services/universal.discovery.service */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/services/universal.discovery.service.js");
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper.js");
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./hooks/useSelectedItemsReducer */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 var _document$querySelect, _document$querySelect2;
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
@@ -12789,9 +14597,11 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
+
 var _window = window,
   document = _window.document;
 var CLASS_SCROLL_DISABLED = 'ibexa-scroll-disabled';
+var SEARCH_TAB_ID = 'search';
 var defaultRestInfo = {
   accsessToken: null,
   instanceUrl: window.location.origin,
@@ -12912,6 +14722,7 @@ var TabsContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createConte
 var TitleContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var CancelContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var ConfirmContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var ConfirmItemsContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var SortingContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var SortOrderContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var CurrentViewContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
@@ -12920,6 +14731,8 @@ var StartingLocationIdContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0
 var LoadedLocationsMapContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var RootLocationIdContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var SelectedLocationsContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var SelectionConfigContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var SelectedItemsContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var CreateContentWidgetContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var ContentOnTheFlyDataContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var ContentOnTheFlyConfigContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
@@ -12930,7 +14743,9 @@ var DropdownPortalRefContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0_
 var SuggestionsStorageContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var GridActiveLocationIdContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var SnackbarActionsContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var ViewContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
 var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_9__.getTranslator)();
   var restInfo = props.restInfo;
   var adminUiConfig = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_9__.getAdminUiConfig)();
   var tabs = adminUiConfig.universalDiscoveryWidget.tabs;
@@ -13014,6 +14829,12 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
     _useSelectedLocations2 = _slicedToArray(_useSelectedLocations, 2),
     selectedLocations = _useSelectedLocations2[0],
     dispatchSelectedLocationsAction = _useSelectedLocations2[1];
+  var _useSelectedItemsRedu = (0,_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_10__.useSelectedItemsReducer)({
+      isMultiple: props.multiple,
+      multipleItemsLimit: props.multipleItemsLimit
+    }),
+    selectedItems = _useSelectedItemsRedu.selectedItems,
+    dispatchSelectedItemsAction = _useSelectedItemsRedu.dispatchSelectedItemsAction;
   var activeTabConfig = tabs.find(function (tab) {
     return tab.id === activeTab;
   });
@@ -13022,6 +14843,16 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
     'm-ud': true,
     'm-ud--locations-selected': !!selectedLocations.length && props.allowConfirmation
   });
+  var selectionConfigValue = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    var _props$deselectAlertT;
+    var deselectAlertTitle = (_props$deselectAlertT = props.deselectAlertTitle) !== null && _props$deselectAlertT !== void 0 ? _props$deselectAlertT : Translator.trans(/*@Desc("Items already added to the list are marked as selected and unable to deselect.")*/'init_selected_locations.alert.title', {}, 'ibexa_universal_discovery_widget');
+    return {
+      isInitLocationsDeselectionBlocked: props.isInitLocationsDeselectionBlocked,
+      initSelectedLocationsIds: props.selectedLocations,
+      initSelectedItems: props.initSelectedItems,
+      deselectAlertTitle: deselectAlertTitle
+    };
+  }, []);
   var loadPermissions = function loadPermissions() {
     var locationIds = selectedLocations.filter(function (item) {
       return !item.permissions;
@@ -13029,7 +14860,7 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
       return item.location.id;
     }).join(',');
     if (!locationIds) {
-      return Promise.resolve([]);
+      return Promise.resolve(null);
     }
     return new Promise(function (resolve) {
       (0,_services_universal_discovery_service__WEBPACK_IMPORTED_MODULE_7__.loadLocationsWithPermissions)(_objectSpread(_objectSpread({}, restInfo), {}, {
@@ -13048,12 +14879,14 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
     if (!locationsWithoutVersion.length) {
       return Promise.resolve([]);
     }
-    var contentId = locationsWithoutVersion.map(function (item) {
+    var contentIds = locationsWithoutVersion.map(function (item) {
       return item.location.ContentInfo.Content._id;
     }).join(',');
     return new Promise(function (resolve) {
       (0,_services_universal_discovery_service__WEBPACK_IMPORTED_MODULE_7__.loadContentInfo)(_objectSpread(_objectSpread({}, restInfo), {}, {
-        contentId: contentId,
+        noLanguageCode: true,
+        useAlwaysAvailable: true,
+        contentId: contentIds,
         signal: signal
       }), function (response) {
         return resolve(response);
@@ -13069,9 +14902,9 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
     }, {});
   }, [adminUiConfig.contentTypes]);
   var onConfirm = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
-    var selectedItems = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : selectedLocations;
+    var selection = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : selectedLocations;
     loadVersions().then(function (locationsWithVersions) {
-      var clonedSelectedLocation = (0,_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_3__["default"])(selectedItems);
+      var clonedSelectedLocation = (0,_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_3__["default"])(selection);
       if (Array.isArray(locationsWithVersions)) {
         locationsWithVersions.forEach(function (content) {
           var clonedLocation = clonedSelectedLocation.find(function (clonedItem) {
@@ -13090,7 +14923,17 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
       });
       props.onConfirm(updatedLocations);
     });
-  }, [selectedLocations, contentTypesInfoMap]);
+  }, [selectedLocations, contentTypesInfoMap, props.onConfirm]);
+  var onItemsConfirm = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
+    var selection = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : selectedItems;
+    return props.onItemsConfirm(selection);
+  }, [selectedItems, props.onItemsConfirm]);
+  var makeSearch = function makeSearch(value) {
+    if (activeTab !== SEARCH_TAB_ID) {
+      setActiveTab('search');
+    }
+    setSearchText(value);
+  };
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     var _adminUiConfig$univer;
     var addContentTypesInfo = function addContentTypesInfo(contentTypes) {
@@ -13121,6 +14964,8 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
       return;
     }
     (0,_services_universal_discovery_service__WEBPACK_IMPORTED_MODULE_7__.findLocationsById)(_objectSpread(_objectSpread({}, restInfo), {}, {
+      noLanguageCode: true,
+      useAlwaysAvailable: true,
       id: props.selectedLocations.join(','),
       limit: props.selectedLocations.length
     }), function (locations) {
@@ -13147,7 +14992,7 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
       var _response = _slicedToArray(response, 2),
         locationsWithPermissions = _response[0],
         locationsWithVersions = _response[1];
-      if (!locationsWithPermissions.length && !locationsWithVersions.length) {
+      if (!(locationsWithPermissions !== null && locationsWithPermissions !== void 0 && locationsWithPermissions.LocationList.locations.length) && !locationsWithVersions.length) {
         return;
       }
       var clonedSelectedLocation = (0,_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_3__["default"])(selectedLocations);
@@ -13274,12 +15119,18 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
     value: props.onCancel
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(ConfirmContext.Provider, {
     value: onConfirm
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(ConfirmItemsContext.Provider, {
+    value: onItemsConfirm
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SortingContext.Provider, {
     value: [sorting, setSorting]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SortOrderContext.Provider, {
     value: [sortOrder, setSortOrder]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(CurrentViewContext.Provider, {
     value: [currentView, setCurrentView]
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(ViewContext.Provider, {
+    value: {
+      views: VIEWS
+    }
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(MarkedLocationIdContext.Provider, {
     value: [markedLocationId, setMarkedLocationId]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(StartingLocationIdContext.Provider, {
@@ -13290,6 +15141,13 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
     value: [loadedLocationsMap, dispatchLoadedLocationsAction]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(RootLocationIdContext.Provider, {
     value: props.rootLocationId
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SelectionConfigContext.Provider, {
+    value: selectionConfigValue
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SelectedItemsContext.Provider, {
+    value: {
+      selectedItems: selectedItems,
+      dispatchSelectedItemsAction: dispatchSelectedItemsAction
+    }
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SelectedLocationsContext.Provider, {
     value: [selectedLocations, dispatchSelectedLocationsAction]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(CreateContentWidgetContext.Provider, {
@@ -13303,14 +15161,15 @@ var UniversalDiscoveryModule = function UniversalDiscoveryModule(props) {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(EditOnTheFlyDataContext.Provider, {
     value: [editOnTheFlyData, setEditOnTheFlyData]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SearchTextContext.Provider, {
-    value: [searchText, setSearchText]
+    value: [searchText, setSearchText, makeSearch]
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(DropdownPortalRefContext.Provider, {
     value: dropdownPortalRef
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Tab, null)))))))))))))))))))))))))))))))))));
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(Tab, null)))))))))))))))))))))))))))))))))))))));
   /* eslint-enable max-len */
 };
 UniversalDiscoveryModule.propTypes = {
   onConfirm: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func).isRequired,
+  onItemsConfirm: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func),
   onCancel: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func),
   title: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string).isRequired,
   activeTab: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
@@ -13337,6 +15196,9 @@ UniversalDiscoveryModule.propTypes = {
     hidden: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool).isRequired
   })).isRequired,
   selectedLocations: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().array),
+  initSelectedItems: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().array),
+  isInitLocationsDeselectionBlocked: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  deselectAlertTitle: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   allowRedirects: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool).isRequired,
   allowConfirmation: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool).isRequired,
   restInfo: prop_types__WEBPACK_IMPORTED_MODULE_1___default().shape({
@@ -13348,6 +15210,7 @@ UniversalDiscoveryModule.propTypes = {
   snackbarEnabledActions: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().array)
 };
 UniversalDiscoveryModule.defaultProps = {
+  onItemsConfirm: function onItemsConfirm() {},
   onCancel: null,
   activeTab: 'browse',
   rootLocationId: 1,
@@ -13359,6 +15222,9 @@ UniversalDiscoveryModule.defaultProps = {
   activeSortOrder: 'ascending',
   activeView: 'finder',
   selectedLocations: [],
+  initSelectedItems: [],
+  isInitLocationsDeselectionBlocked: false,
+  deselectAlertTitle: null,
   restInfo: defaultRestInfo,
   snackbarEnabledActions: Object.values(SNACKBAR_ACTIONS)
 };
@@ -14761,6 +16627,8 @@ var DatePicker = function DatePicker(_ref) {
     ref: pickerContainerRef
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "c-pb-date-picker__input-wrapper ibexa-date-time-picker ibexa-input-text-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-input-text-wrapper__input-wrapper"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
     type: "text",
     className: inputClassName,
@@ -14782,7 +16650,7 @@ var DatePicker = function DatePicker(_ref) {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
     name: "date",
     extraClasses: "ibexa-icon--small"
-  })))));
+  }))))));
 };
 DatePicker.propTypes = {
   onDateChange: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func).isRequired,
@@ -16073,7 +17941,7 @@ var ItemsView = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.forwardRef)(f
       setOffset(0);
       return;
     }
-    var subtreePathString = selectedLocationData.path;
+    var subtreePathString = !!isBookmarksView ? null : selectedLocationData.path;
     var languageCode = (_appliedFilters$FILTE = appliedFilters[_hooks_useFilters__WEBPACK_IMPORTED_MODULE_17__.FILTERS_DATA_LANGUAGES]) !== null && _appliedFilters$FILTE !== void 0 ? _appliedFilters$FILTE : null;
     var useAlwaysAvailable = languageCode ? false : true;
     var imageCriterionData = getImageCriterionDataFromFilters(appliedFilters);
@@ -16698,19 +18566,17 @@ var SnackbarActionDelete = function SnackbarActionDelete(_ref) {
   var confirmationPopupMsg = confirmationMsg !== null && confirmationMsg !== void 0 ? confirmationMsg : Translator.trans(/*@Desc("Are you sure you want do send this Content item to Trash?")*/'snackbar.actions.move_to_trash.popup.confirmation_msg', {}, 'ibexa_image_picker');
   var confirmationPopupConfirmBtnLable = confirmBtnLabel !== null && confirmBtnLabel !== void 0 ? confirmBtnLabel : Translator.trans(/*@Desc("Confirm")*/'snackbar.actions.delete.popup.confirmation_label', {}, 'ibexa_image_picker');
   var confirmationPopupCancelBtnLable = cancelBtnLabel !== null && cancelBtnLabel !== void 0 ? cancelBtnLabel : Translator.trans(/*@Desc("Cancel")*/'snackbar.actions.delete.popup.cancel_label', {}, 'ibexa_image_picker');
-  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_6__.PermissionsContext),
-    selectedLocationPermissions = _useContext.selectedLocationPermissions;
-  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_6__.ProcessingContext),
-    setIsProcessingState = _useContext2.setIsProcessingState;
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_6__.ProcessingContext),
+    setIsProcessingState = _useContext.setIsProcessingState;
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
     _useState2 = _slicedToArray(_useState, 2),
     isPopupVisible = _useState2[0],
     setIsPopupVisible = _useState2[1];
   var snackbarEnabledActions = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SnackbarActionsContext);
-  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SelectedLocationsContext),
-    _useContext4 = _slicedToArray(_useContext3, 2),
-    selectedLocations = _useContext4[0],
-    dispatchSelectedLocationsAction = _useContext4[1];
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SelectedLocationsContext),
+    _useContext3 = _slicedToArray(_useContext2, 2),
+    selectedLocations = _useContext3[0],
+    dispatchSelectedLocationsAction = _useContext3[1];
   var deleteContents = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
       var actionErrorMsg, locationsToDelete;
@@ -16744,7 +18610,7 @@ var SnackbarActionDelete = function SnackbarActionDelete(_ref) {
       return _ref2.apply(this, arguments);
     };
   }();
-  if (!snackbarEnabledActions.includes(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SNACKBAR_ACTIONS.DELETE) || !selectedLocationPermissions.edit.hasAccess) {
+  if (!snackbarEnabledActions.includes(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SNACKBAR_ACTIONS.DELETE)) {
     return null;
   }
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_snackbar_action__WEBPACK_IMPORTED_MODULE_7__["default"], {
@@ -16808,9 +18674,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_text_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/text.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/text.helper.js");
 /* harmony import */ var _ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui-modules/universal-discovery/universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_notification_helper__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/notification.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/notification.helper.js");
-/* harmony import */ var _image_picker_tab_module__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../image.picker.tab.module */ "./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/image.picker.tab.module.js");
-/* harmony import */ var _services_image_picker_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../services/image.picker.service */ "./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/services/image.picker.service.js");
-/* harmony import */ var _snackbar_action__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./snackbar.action */ "./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/components/snackbar-action/snackbar.action.js");
+/* harmony import */ var _services_image_picker_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../services/image.picker.service */ "./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/services/image.picker.service.js");
+/* harmony import */ var _snackbar_action__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./snackbar.action */ "./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/components/snackbar-action/snackbar.action.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
@@ -16829,7 +18694,6 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
-
 var SnackbarActionDownload = function SnackbarActionDownload(_ref) {
   var disabled = _ref.disabled,
     label = _ref.label,
@@ -16840,8 +18704,6 @@ var SnackbarActionDownload = function SnackbarActionDownload(_ref) {
   var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SelectedLocationsContext),
     _useContext2 = _slicedToArray(_useContext, 1),
     selectedLocations = _useContext2[0];
-  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_6__.PermissionsContext),
-    selectedLocationPermissions = _useContext3.selectedLocationPermissions;
   var downloadItems = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
       var rootDOMElement, multiFilesDownloadName, actionErrorMsg, downloadName, contentIdsToDownload, blob, url, hyperlinkElement;
@@ -16856,7 +18718,7 @@ var SnackbarActionDownload = function SnackbarActionDownload(_ref) {
               return selectedLocation.location.ContentInfo.Content._id;
             });
             _context.next = 7;
-            return (0,_services_image_picker_service__WEBPACK_IMPORTED_MODULE_7__.downloadFiles)({
+            return (0,_services_image_picker_service__WEBPACK_IMPORTED_MODULE_6__.downloadFiles)({
               contentIds: contentIdsToDownload
             }, function () {
               return (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_notification_helper__WEBPACK_IMPORTED_MODULE_5__.showErrorNotification)(actionErrorMsg);
@@ -16881,13 +18743,14 @@ var SnackbarActionDownload = function SnackbarActionDownload(_ref) {
       return _ref2.apply(this, arguments);
     };
   }();
-  if (!snackbarEnabledActions.includes(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SNACKBAR_ACTIONS.DOWNLOAD) || !selectedLocationPermissions.edit.hasAccess) {
+  if (!snackbarEnabledActions.includes(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SNACKBAR_ACTIONS.DOWNLOAD)) {
     return null;
   }
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_snackbar_action__WEBPACK_IMPORTED_MODULE_8__["default"], {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_snackbar_action__WEBPACK_IMPORTED_MODULE_7__["default"], {
     label: btnLabel,
     iconName: icon,
     disabled: disabled,
+    isPublicAction: true,
     onClickCallback: downloadItems,
     btnExtraClasses: "c-ip-snackbar-action__btn--download"
   });
@@ -16956,16 +18819,14 @@ var SnackbarActionDuplicate = function SnackbarActionDuplicate(_ref) {
   var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
   var btnLabel = label !== null && label !== void 0 ? label : Translator.trans(/*@Desc("Duplicate")*/'snackbar.actions.duplicate.label', {}, 'ibexa_image_picker');
   var snackbarEnabledActions = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SnackbarActionsContext);
-  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_7__.PermissionsContext),
-    selectedLocationPermissions = _useContext.selectedLocationPermissions;
-  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_7__.FiltersContext),
-    selectedLocationData = _useContext2.selectedLocationData;
-  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SelectedLocationsContext),
-    _useContext4 = _slicedToArray(_useContext3, 2),
-    selectedLocations = _useContext4[0],
-    dispatchSelectedLocationsAction = _useContext4[1];
-  var _useContext5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_7__.ProcessingContext),
-    setIsProcessingState = _useContext5.setIsProcessingState;
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_7__.FiltersContext),
+    selectedLocationData = _useContext.selectedLocationData;
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SelectedLocationsContext),
+    _useContext3 = _slicedToArray(_useContext2, 2),
+    selectedLocations = _useContext3[0],
+    dispatchSelectedLocationsAction = _useContext3[1];
+  var _useContext4 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_7__.ProcessingContext),
+    setIsProcessingState = _useContext4.setIsProcessingState;
   var locationData = selectedLocations[0].location;
   var duplicateContent = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
@@ -17001,7 +18862,7 @@ var SnackbarActionDuplicate = function SnackbarActionDuplicate(_ref) {
       return _ref2.apply(this, arguments);
     };
   }();
-  if (!snackbarEnabledActions.includes(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SNACKBAR_ACTIONS.DUPLICATE) || !selectedLocationPermissions.edit.hasAccess) {
+  if (!snackbarEnabledActions.includes(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.SNACKBAR_ACTIONS.DUPLICATE)) {
     return null;
   }
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_snackbar_action__WEBPACK_IMPORTED_MODULE_5__["default"], {
@@ -17050,8 +18911,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui-modules/universal-discovery/universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
 /* harmony import */ var _ibexa_admin_ui_modules_universal_discovery_components_translation_selector_translation_selector__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui-modules/universal-discovery/components/translation-selector/translation.selector */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/translation-selector/translation.selector.js");
 /* harmony import */ var _services_image_picker_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../services/image.picker.service */ "./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/services/image.picker.service.js");
-/* harmony import */ var _image_picker_tab_module__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../image.picker.tab.module */ "./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/image.picker.tab.module.js");
-/* harmony import */ var _snackbar_action__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./snackbar.action */ "./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/components/snackbar-action/snackbar.action.js");
+/* harmony import */ var _snackbar_action__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./snackbar.action */ "./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/components/snackbar-action/snackbar.action.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
@@ -17062,7 +18922,6 @@ function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) 
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-
 
 
 
@@ -17086,8 +18945,6 @@ var SnackbarActionEdit = function SnackbarActionEdit(_ref) {
   var _useContext5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.ActiveTabContext),
     _useContext6 = _slicedToArray(_useContext5, 2),
     setActiveTab = _useContext6[1];
-  var _useContext7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_6__.PermissionsContext),
-    selectedLocationPermissions = _useContext7.selectedLocationPermissions;
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
     _useState2 = _slicedToArray(_useState, 2),
     isTranslationSelectorVisible = _useState2[0],
@@ -17138,10 +18995,10 @@ var SnackbarActionEdit = function SnackbarActionEdit(_ref) {
     }
     setIsTranslationSelectorVisible(true);
   };
-  if (!snackbarEnabledActions.includes(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SNACKBAR_ACTIONS.EDIT) || !selectedLocationPermissions.edit.hasAccess) {
+  if (!snackbarEnabledActions.includes(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SNACKBAR_ACTIONS.EDIT)) {
     return null;
   }
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_snackbar_action__WEBPACK_IMPORTED_MODULE_7__["default"], {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_snackbar_action__WEBPACK_IMPORTED_MODULE_6__["default"], {
     label: btnLabel,
     iconName: icon,
     disabled: disabled,
@@ -17212,6 +19069,7 @@ var SnackbarActionInsert = function SnackbarActionInsert(_ref) {
     label: btnLabel,
     iconName: icon,
     disabled: disabled,
+    isPublicAction: true,
     onClickCallback: function onClickCallback() {
       return onConfirm();
     },
@@ -17250,12 +19108,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
-/* harmony import */ var _ibexa_admin_ui_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui-modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui-modules/universal-discovery/universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+/* harmony import */ var _ibexa_admin_ui_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui-modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
 
 
 
@@ -17264,15 +19132,30 @@ var SnackbarAction = function SnackbarAction(_ref) {
   var label = _ref.label,
     iconName = _ref.iconName,
     disabled = _ref.disabled,
+    isPublicAction = _ref.isPublicAction,
     extraClasses = _ref.extraClasses,
     btnExtraClasses = _ref.btnExtraClasses,
     onClickCallback = _ref.onClickCallback,
     children = _ref.children;
-  var containerClassName = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty({
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.SelectedLocationsContext),
+    _useContext2 = _slicedToArray(_useContext, 1),
+    selectedLocations = _useContext2[0];
+  var allSelectedLocationsHaveEditPermissions = selectedLocations.every(function (_ref2) {
+    var permissions = _ref2.permissions;
+    return permissions === null || permissions === void 0 ? void 0 : permissions.edit.hasAccess;
+  });
+  var arePermissionsLoading = selectedLocations.some(function (_ref3) {
+    var permissions = _ref3.permissions;
+    return !permissions;
+  });
+  var isDisabled = disabled || !allSelectedLocationsHaveEditPermissions && !isPublicAction;
+  var isLoading = !disabled && !isPublicAction && arePermissionsLoading;
+  var containerClassName = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__.createCssClassNames)(_defineProperty({
     'c-ip-snackbar-action': true
   }, extraClasses, true));
-  var btnClassName = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)(_defineProperty({
-    'c-ip-snackbar-action__btn btn ibexa-btn ibexa-btn--small ibexa-btn--dark': true
+  var btnClassName = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__.createCssClassNames)(_defineProperty({
+    'c-ip-snackbar-action__btn btn ibexa-btn ibexa-btn--small ibexa-btn--dark': true,
+    'c-ip-snackbar-action__btn--is-loading': isLoading
   }, btnExtraClasses, true));
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: containerClassName
@@ -17280,8 +19163,11 @@ var SnackbarAction = function SnackbarAction(_ref) {
     className: btnClassName,
     type: "button",
     onClick: onClickCallback,
-    disabled: disabled
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    disabled: isDisabled
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    size: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_5__.SIZES.SMALL,
+    colorVariant: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_5__.COLOR_VARIANTS.LIGHT
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_4__["default"], {
     name: iconName,
     extraClasses: "ibexa-icon--small"
   }), label), children && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
@@ -17292,6 +19178,7 @@ SnackbarAction.propTypes = {
   label: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string).isRequired,
   iconName: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   disabled: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
+  isPublicAction: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool),
   extraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   btnExtraClasses: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string),
   onClickCallback: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func),
@@ -17300,6 +19187,7 @@ SnackbarAction.propTypes = {
 SnackbarAction.defaultProps = {
   iconName: 'info',
   disabled: false,
+  isPublicAction: false,
   extraClasses: '',
   btnExtraClasses: '',
   onClickCallback: function onClickCallback() {},
@@ -17397,6 +19285,7 @@ var SnackbarActionToggleSelection = function SnackbarActionToggleSelection(_ref)
     extraClasses: "c-ip-snackbar-action--select-all",
     iconName: icon,
     disabled: disabled || !isMultipleItemsLimitReached,
+    isPublicAction: true,
     onClickCallback: toggleSelection,
     btnExtraClasses: "c-ip-snackbar-action__btn--toggle-selection-all"
   });
@@ -17464,8 +19353,6 @@ var Snackbar = function Snackbar() {
     multiple = _useContext4[0];
   var _useContext5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_4__.FiltersContext),
     loadedItems = _useContext5.loadedItems;
-  var _useContext6 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_4__.PermissionsContext),
-    selectedLocationPermissions = _useContext6.selectedLocationPermissions;
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
     _useState2 = _slicedToArray(_useState, 2),
     isExpandedMultiItems = _useState2[0],
@@ -17473,7 +19360,7 @@ var Snackbar = function Snackbar() {
   var selectedLocationsCount = selectedLocations.length;
   var areMultipleLocationsSelected = selectedLocationsCount > 1;
   var isOnlyInsertActionEnabled = snackbarEnabledActions.length === 1 && snackbarEnabledActions.includes(_ibexa_admin_ui_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_3__.SNACKBAR_ACTIONS.INSERT);
-  var isSimpleSnackbar = !multiple && (isOnlyInsertActionEnabled || !(selectedLocationPermissions !== null && selectedLocationPermissions !== void 0 && selectedLocationPermissions.edit.hasAccess));
+  var isSimpleSnackbar = !multiple && isOnlyInsertActionEnabled;
   var selectedLabel = Translator.trans(/*@Desc("Selected")*/'snackbar.selected.label', {}, 'ibexa_image_picker');
   var multiSelecteHint = Translator.trans(/*@Desc("Some options aren’t available for multi-select")*/'snackbar.selected.multi_select_hint', {}, 'ibexa_image_picker');
   var selectionInfoClassName = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)({
@@ -17489,7 +19376,7 @@ var Snackbar = function Snackbar() {
     var ActionMenuComponent = actionMenuItem.component;
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(ActionMenuComponent, extraProps);
   };
-  if (!selectedLocationsCount || !(loadedItems !== null && loadedItems !== void 0 && loadedItems.length) || !selectedLocationPermissions) {
+  if (!selectedLocationsCount || !(loadedItems !== null && loadedItems !== void 0 && loadedItems.length)) {
     return null;
   }
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
@@ -17743,6 +19630,8 @@ var TabHeader = function TabHeader() {
     }
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
       className: "ibexa-input-text-wrapper ibexa-input-text-wrapper--search ibexa-input-text-wrapper--type-text"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "ibexa-input-text-wrapper__input-wrapper"
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_modules_common_input_filter_search__WEBPACK_IMPORTED_MODULE_2__["default"], {
       onChange: handleSearchTextChange,
       value: searchText
@@ -17763,7 +19652,7 @@ var TabHeader = function TabHeader() {
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_1__["default"], {
       name: "search",
       extraClasses: "ibexa-icon--small"
-    }))));
+    })))));
   };
   var renderHeaderCancelBtn = function renderHeaderCancelBtn() {
     if (!cancelUDW) {
@@ -17905,9 +19794,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
 /* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_services_universal_discovery_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/services/universal.discovery.service */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/services/universal.discovery.service.js");
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
-/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_content_type_helper__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/content.type.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/content.type.helper.js");
-/* harmony import */ var _hooks_useFilters__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../hooks/useFilters */ "./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/hooks/useFilters.js");
-/* harmony import */ var _image_picker_tab_module__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../image.picker.tab.module */ "./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/image.picker.tab.module.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_content_type_helper__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/content.type.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/content.type.helper.js");
+/* harmony import */ var _hooks_useFilters__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../hooks/useFilters */ "./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/hooks/useFilters.js");
+/* harmony import */ var _image_picker_tab_module__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../image.picker.tab.module */ "./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/image.picker.tab.module.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
@@ -17928,6 +19818,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
+
 var TAB_IDS = {
   IMAGE_PICKER: 'image_picker',
   IMAGE_PICKER_BOOKMARKS: 'image_picker_bookmarks'
@@ -17940,12 +19831,17 @@ var SYSTEM_ROOT_LOCATION_FAKE_CONTENT_TYPE_IDENTIFIER = 'folder';
 var TabsWrapper = function TabsWrapper(_ref) {
   var itemsViewRef = _ref.itemsViewRef,
     children = _ref.children;
-  var abortControllerRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)();
+  var selectedLocationDataAbortControllerRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)();
+  var selectedLocationAbortControllerRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)();
   var rootLocationId = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.RootLocationIdContext);
   var startingLocationId = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.StartingLocationIdContext);
   var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.MarkedLocationIdContext),
     _useContext2 = _slicedToArray(_useContext, 1),
     markedLocationId = _useContext2[0];
+  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.SelectedLocationsContext),
+    _useContext4 = _slicedToArray(_useContext3, 2),
+    selectedLocations = _useContext4[0],
+    dispatchSelectedLocationsAction = _useContext4[1];
   var restInfo = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.RestInfoContext);
   var isSystemRootLocation = rootLocationId === _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__.SYSTEM_ROOT_LOCATION_ID;
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(isSystemRootLocation ? _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__.SYSTEM_ROOT_LOCATION : null),
@@ -17984,7 +19880,7 @@ var TabsWrapper = function TabsWrapper(_ref) {
     _useState18 = _slicedToArray(_useState17, 2),
     selectedLocationPermissions = _useState18[0],
     setSelectedLocationPermissions = _useState18[1];
-  var _useFilters = (0,_hooks_useFilters__WEBPACK_IMPORTED_MODULE_6__.useFilters)(),
+  var _useFilters = (0,_hooks_useFilters__WEBPACK_IMPORTED_MODULE_7__.useFilters)(),
     filters = _useFilters.filters,
     filtersErrors = _useFilters.filtersErrors,
     dispatchFiltersAction = _useFilters.dispatchFiltersAction;
@@ -18025,7 +19921,7 @@ var TabsWrapper = function TabsWrapper(_ref) {
     }), function (_ref4) {
       var _ref5 = _slicedToArray(_ref4, 1),
         markedLocationData = _ref5[0];
-      var contentTypeData = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_content_type_helper__WEBPACK_IMPORTED_MODULE_5__.getContentTypeDataByHref)(markedLocationData.ContentInfo.Content.ContentType._href);
+      var contentTypeData = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_content_type_helper__WEBPACK_IMPORTED_MODULE_6__.getContentTypeDataByHref)(markedLocationData.ContentInfo.Content.ContentType._href);
       setSelectedLocationData({
         path: markedLocationData.pathString,
         locationId: searchLocationId,
@@ -18035,26 +19931,69 @@ var TabsWrapper = function TabsWrapper(_ref) {
     });
   }, [rootLocationId, markedLocationId]);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    var _abortControllerRef$c, _itemsViewRef$current2;
+    var _selectedLocationData, _itemsViewRef$current2;
     var locationId = selectedLocationData.locationId;
     if (!locationId || !itemsViewRef) {
       return;
     }
-    (_abortControllerRef$c = abortControllerRef.current) === null || _abortControllerRef$c === void 0 || _abortControllerRef$c.abort();
-    abortControllerRef.current = new AbortController();
+    (_selectedLocationData = selectedLocationDataAbortControllerRef.current) === null || _selectedLocationData === void 0 || _selectedLocationData.abort();
+    selectedLocationDataAbortControllerRef.current = new AbortController();
     (_itemsViewRef$current2 = itemsViewRef.current) === null || _itemsViewRef$current2 === void 0 || _itemsViewRef$current2.resetOffset();
     (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_services_universal_discovery_service__WEBPACK_IMPORTED_MODULE_3__.loadLocationsWithPermissions)(_objectSpread(_objectSpread({}, restInfo), {}, {
       locationIds: locationId,
-      signal: abortControllerRef.current.signal
+      signal: selectedLocationDataAbortControllerRef.current.signal
     }), function (response) {
       var _response$LocationLis, _response$LocationLis2;
-      var permissions = (_response$LocationLis = response === null || response === void 0 || (_response$LocationLis2 = response.LocationList) === null || _response$LocationLis2 === void 0 || (_response$LocationLis2 = _response$LocationLis2.locations) === null || _response$LocationLis2 === void 0 ? void 0 : _response$LocationLis2[0].permissions) !== null && _response$LocationLis !== void 0 ? _response$LocationLis : null;
+      var permissions = (_response$LocationLis = response === null || response === void 0 || (_response$LocationLis2 = response.LocationList) === null || _response$LocationLis2 === void 0 || (_response$LocationLis2 = _response$LocationLis2.locations) === null || _response$LocationLis2 === void 0 || (_response$LocationLis2 = _response$LocationLis2[0]) === null || _response$LocationLis2 === void 0 ? void 0 : _response$LocationLis2.permissions) !== null && _response$LocationLis !== void 0 ? _response$LocationLis : null;
       if (locationId === rootLocationId) {
         setRootLocationPermissions(permissions);
       }
       setSelectedLocationPermissions(permissions);
     });
+    return function () {
+      var _selectedLocationData2;
+      (_selectedLocationData2 = selectedLocationDataAbortControllerRef.current) === null || _selectedLocationData2 === void 0 || _selectedLocationData2.abort();
+    };
   }, [selectedLocationData]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    var _selectedLocationAbor;
+    if (!itemsViewRef) {
+      return;
+    }
+    (_selectedLocationAbor = selectedLocationAbortControllerRef.current) === null || _selectedLocationAbor === void 0 || _selectedLocationAbor.abort();
+    selectedLocationAbortControllerRef.current = new AbortController();
+    var locationIds = selectedLocations.filter(function (item) {
+      return !item.permissions;
+    }).map(function (item) {
+      return item.location.id;
+    }).join(',');
+    if (!locationIds) {
+      return;
+    }
+    (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_services_universal_discovery_service__WEBPACK_IMPORTED_MODULE_3__.loadLocationsWithPermissions)(_objectSpread(_objectSpread({}, restInfo), {}, {
+      locationIds: locationIds,
+      signal: selectedLocationAbortControllerRef.current.signal
+    }), function (response) {
+      var locationsWithPermissions = response.LocationList;
+      var clonedSelectedLocations = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_5__["default"])(selectedLocations);
+      locationsWithPermissions.locations.forEach(function (item) {
+        var locationWithoutPermissions = clonedSelectedLocations.find(function (selectedItem) {
+          return selectedItem.location.id === item.location.Location.id;
+        });
+        if (locationWithoutPermissions) {
+          locationWithoutPermissions.permissions = item.permissions;
+        }
+      });
+      dispatchSelectedLocationsAction({
+        type: 'REPLACE_SELECTED_LOCATIONS',
+        locations: clonedSelectedLocations
+      });
+    });
+    return function () {
+      var _selectedLocationAbor2;
+      (_selectedLocationAbor2 = selectedLocationAbortControllerRef.current) === null || _selectedLocationAbor2 === void 0 || _selectedLocationAbor2.abort();
+    };
+  }, [selectedLocations]);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     var searchStartingLocationId = startingLocationId !== null && startingLocationId !== void 0 ? startingLocationId : rootLocationId;
     (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_services_universal_discovery_service__WEBPACK_IMPORTED_MODULE_3__.findLocationsById)(_objectSpread(_objectSpread({}, restInfo), {}, {
@@ -18066,24 +20005,24 @@ var TabsWrapper = function TabsWrapper(_ref) {
       setStartingLocation(startingLocationData);
     });
   }, [startingLocationId]);
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_7__.ProcessingContext.Provider, {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_8__.ProcessingContext.Provider, {
     value: {
       isProcessingState: isProcessingState,
       setIsProcessingState: setIsProcessingState
     }
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_7__.RootLocationContext.Provider, {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_8__.RootLocationContext.Provider, {
     value: {
       rootLocation: rootLocation,
       setRootLocation: setRootLocation
     }
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_7__.StartingLocationContext.Provider, {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_8__.StartingLocationContext.Provider, {
     value: startingLocation
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_7__.PermissionsContext.Provider, {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_8__.PermissionsContext.Provider, {
     value: {
       rootLocationPermissions: rootLocationPermissions,
       selectedLocationPermissions: selectedLocationPermissions
     }
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_7__.FiltersContext.Provider, {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_8__.FiltersContext.Provider, {
     value: {
       performSearch: performSearch,
       filters: filters,
@@ -18096,7 +20035,7 @@ var TabsWrapper = function TabsWrapper(_ref) {
       loadedItems: loadedItems,
       setLoadedItems: setLoadedItems
     }
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_7__.SearchAggregationsContext.Provider, {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_image_picker_tab_module__WEBPACK_IMPORTED_MODULE_8__.SearchAggregationsContext.Provider, {
     value: {
       searchAggregations: searchAggregations,
       setSearchAggregations: setSearchAggregations
@@ -20140,6 +22079,4249 @@ var downloadFiles = /*#__PURE__*/function () {
 
 /***/ }),
 
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/common/hooks/useHeightPreservation.js":
+/*!**********************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/common/hooks/useHeightPreservation.js ***!
+  \**********************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   useHeightPreservation: () => (/* binding */ useHeightPreservation)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+
+var useHeightPreservation = function useHeightPreservation(_ref) {
+  var minHeight = _ref.minHeight,
+    shouldApply = _ref.shouldApply;
+  var previousHeight = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var elementRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var shouldApplyStored = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(shouldApply);
+  var resizeObserver = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    return new ResizeObserver(function (entries) {
+      if (!shouldApplyStored.current) {
+        previousHeight.current = entries[0].target.offsetHeight;
+      }
+    });
+  }, [previousHeight, shouldApplyStored]);
+  var onElementRefChange = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function (newRef) {
+    if (elementRef.current) {
+      resizeObserver.unobserve(elementRef.current);
+    }
+    elementRef.current = newRef;
+    if (elementRef.current) {
+      resizeObserver.observe(elementRef.current);
+      if (!shouldApplyStored.current) {
+        var _elementRef$current$o, _elementRef$current;
+        previousHeight.current = (_elementRef$current$o = (_elementRef$current = elementRef.current) === null || _elementRef$current === void 0 ? void 0 : _elementRef$current.offsetHeight) !== null && _elementRef$current$o !== void 0 ? _elementRef$current$o : null;
+      }
+    }
+  }, [elementRef, resizeObserver, previousHeight, shouldApplyStored]);
+  shouldApplyStored.current = shouldApply;
+  var style = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    var styleData = {};
+    if (shouldApply) {
+      var _previousHeight$curre;
+      styleData.height = Math.max((_previousHeight$curre = previousHeight.current) !== null && _previousHeight$curre !== void 0 ? _previousHeight$curre : 0, minHeight);
+    }
+    return styleData;
+  }, [shouldApply, minHeight, previousHeight]);
+  return {
+    style: style,
+    onElementRefChange: onElementRefChange
+  };
+};
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/common/services/product.service.js":
+/*!*******************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/common/services/product.service.js ***!
+  \*******************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   QUERY_LIMIT: () => (/* binding */ QUERY_LIMIT),
+/* harmony export */   findProductVariantsBySearchQuery: () => (/* binding */ findProductVariantsBySearchQuery),
+/* harmony export */   findProductsBySearchQuery: () => (/* binding */ findProductsBySearchQuery)
+/* harmony export */ });
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_request_helper_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/request.helper.js */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/request.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_request_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/request.helper */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/request.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_services_notification_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/services/notification.service */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/services/notification.service.js");
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+
+
+var DEFAULT_INSTANCE_URL = window.location.origin;
+var ENDPOINT_PRODUCTS_VIEW = '/product-selector/products/{offset}/{limit}';
+var ENDPOINT_PRODUCT_VARIANTS_VIEW = '/product-selector/product/{code}/variants/{offset}/{limit}';
+var QUERY_LIMIT = 50;
+var showErrorNotificationAbortWrapper = function showErrorNotificationAbortWrapper(error) {
+  if ((error === null || error === void 0 ? void 0 : error.name) === 'AbortError') {
+    return;
+  }
+  return (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_services_notification_service__WEBPACK_IMPORTED_MODULE_2__.showErrorNotification)(error);
+};
+var generateUrlQueryForArray = function generateUrlQueryForArray(paramsData) {
+  var searchParams = new URLSearchParams();
+  var _iterator = _createForOfIteratorHelper(paramsData),
+    _step;
+  try {
+    var _loop = function _loop() {
+        var _step$value = _step.value,
+          paramName = _step$value.name,
+          paramData = _step$value.data;
+        if (paramData instanceof Array) {
+          if (!(paramData !== null && paramData !== void 0 && paramData.length)) {
+            return 0; // continue
+          }
+          paramData.forEach(function (data) {
+            return searchParams.append("".concat(paramName, "[]"), data);
+          });
+        } else {
+          if (!paramData) {
+            return 0; // continue
+          }
+          searchParams.append(paramName, paramData);
+        }
+      },
+      _ret;
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      _ret = _loop();
+      if (_ret === 0) continue;
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+  return searchParams.toString();
+};
+var findProductsBySearchQuery = function findProductsBySearchQuery(_ref, callback) {
+  var token = _ref.token,
+    siteaccess = _ref.siteaccess,
+    accessToken = _ref.accessToken,
+    _ref$productNameSearc = _ref.productNameSearchText,
+    productNameSearchText = _ref$productNameSearc === void 0 ? null : _ref$productNameSearc,
+    _ref$productsTypes = _ref.productsTypes,
+    productsTypes = _ref$productsTypes === void 0 ? null : _ref$productsTypes,
+    _ref$productsCodes = _ref.productsCodes,
+    productsCodes = _ref$productsCodes === void 0 ? null : _ref$productsCodes,
+    _ref$productsCategori = _ref.productsCategories,
+    productsCategories = _ref$productsCategori === void 0 ? null : _ref$productsCategori,
+    _ref$limit = _ref.limit,
+    limit = _ref$limit === void 0 ? QUERY_LIMIT : _ref$limit,
+    _ref$offset = _ref.offset,
+    offset = _ref$offset === void 0 ? 0 : _ref$offset,
+    _ref$instanceUrl = _ref.instanceUrl,
+    instanceUrl = _ref$instanceUrl === void 0 ? DEFAULT_INSTANCE_URL : _ref$instanceUrl;
+  var endpoint = ENDPOINT_PRODUCTS_VIEW.replace('{offset}', offset).replace('{limit}', limit);
+  var abortController = new AbortController();
+  var productsQuery = generateUrlQueryForArray([{
+    name: 'name',
+    data: productNameSearchText
+  }, {
+    name: 'product_type',
+    data: productsTypes
+  }, {
+    name: 'code',
+    data: productsCodes
+  }, {
+    name: 'product_category',
+    data: productsCategories
+  }]);
+  var query = productsQuery ? "?".concat(productsQuery) : '';
+  var request = new Request("".concat(instanceUrl).concat(endpoint).concat(query), {
+    method: 'GET',
+    headers: (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_request_helper_js__WEBPACK_IMPORTED_MODULE_0__.getRequestHeaders)({
+      token: token,
+      siteaccess: siteaccess,
+      accessToken: accessToken,
+      extraHeaders: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      }
+    }),
+    mode: (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_request_helper_js__WEBPACK_IMPORTED_MODULE_0__.getRequestMode)({
+      instanceUrl: instanceUrl
+    }),
+    credentials: 'same-origin',
+    signal: abortController.signal
+  });
+  fetch(request).then(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_request_helper__WEBPACK_IMPORTED_MODULE_1__.handleRequestResponse).then(function (response) {
+    var count = response.count,
+      items = response.items;
+    callback({
+      items: items,
+      count: count
+    });
+  })["catch"](showErrorNotificationAbortWrapper);
+  return {
+    abortController: abortController
+  };
+};
+var findProductVariantsBySearchQuery = function findProductVariantsBySearchQuery(_ref2, callback) {
+  var token = _ref2.token,
+    siteaccess = _ref2.siteaccess,
+    accessToken = _ref2.accessToken,
+    _ref2$limit = _ref2.limit,
+    limit = _ref2$limit === void 0 ? QUERY_LIMIT : _ref2$limit,
+    _ref2$offset = _ref2.offset,
+    offset = _ref2$offset === void 0 ? 0 : _ref2$offset,
+    baseProductCode = _ref2.baseProductCode,
+    _ref2$variantsCodes = _ref2.variantsCodes,
+    variantsCodes = _ref2$variantsCodes === void 0 ? null : _ref2$variantsCodes,
+    _ref2$instanceUrl = _ref2.instanceUrl,
+    instanceUrl = _ref2$instanceUrl === void 0 ? DEFAULT_INSTANCE_URL : _ref2$instanceUrl,
+    _ref2$attributesFilte = _ref2.attributesFilters,
+    attributesFilters = _ref2$attributesFilte === void 0 ? {} : _ref2$attributesFilte;
+  var endpoint = ENDPOINT_PRODUCT_VARIANTS_VIEW.replace('{code}', baseProductCode).replace('{offset}', offset).replace('{limit}', limit);
+  var urlQuery = generateUrlQueryForArray([{
+    name: 'code',
+    data: variantsCodes
+  }, {
+    name: 'attributesFilters',
+    data: JSON.stringify(attributesFilters)
+  }]);
+  var abortController = new AbortController();
+  var query = urlQuery ? "?".concat(urlQuery) : '';
+  var request = new Request("".concat(instanceUrl).concat(endpoint).concat(query), {
+    method: 'GET',
+    headers: (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_request_helper_js__WEBPACK_IMPORTED_MODULE_0__.getRequestHeaders)({
+      token: token,
+      siteaccess: siteaccess,
+      accessToken: accessToken,
+      extraHeaders: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      }
+    }),
+    mode: (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_request_helper_js__WEBPACK_IMPORTED_MODULE_0__.getRequestMode)({
+      instanceUrl: instanceUrl
+    }),
+    credentials: 'same-origin',
+    signal: abortController.signal
+  });
+  fetch(request).then(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_request_helper__WEBPACK_IMPORTED_MODULE_1__.handleRequestResponse).then(function (response) {
+    callback(response);
+  })["catch"](showErrorNotificationAbortWrapper);
+  return {
+    abortController: abortController
+  };
+};
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.availability.status.js":
+/*!*****************************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.availability.status.js ***!
+  \*****************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+
+
+
+
+var ProductAvailabilityStatus = function ProductAvailabilityStatus(_ref) {
+  var isAvailable = _ref.isAvailable;
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__.getTranslator)();
+  var availableLabel = Translator.trans(/*@Desc("Available")*/'product_availability_status.available', {}, 'ibexa_universal_discovery_widget');
+  var notAvailableLabel = Translator.trans(/*@Desc("Not available")*/'product_availability_status.not_available', {}, 'ibexa_universal_discovery_widget');
+  var label = isAvailable ? availableLabel : notAvailableLabel;
+  var className = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_2__.createCssClassNames)({
+    'ibexa-badge ibexa-badge--status': true,
+    'ibexa-badge--success': isAvailable
+  });
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: className
+  }, label);
+};
+ProductAvailabilityStatus.propTypes = {
+  isAvailable: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().bool).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductAvailabilityStatus);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.table.item.js":
+/*!********************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.table.item.js ***!
+  \********************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_toggle_selection_toggle_item_selection__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/toggle-selection/toggle.item.selection */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/toggle-selection/toggle.item.selection.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.cell */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.cell.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_row__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.row */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.row.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer.js");
+/* harmony import */ var _product_availability_status__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./product.availability.status */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.availability.status.js");
+/* harmony import */ var _product_table_thumbnail__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./product.table.thumbnail */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.table.thumbnail.js");
+/* harmony import */ var _product_discovery_widget_module__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../product.discovery.widget.module */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/product.discovery.widget.module.js");
+/* harmony import */ var _selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../selected-items/selected.items.product.item */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/selected-items/selected.items.product.item.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+var ProductTableItem = function ProductTableItem(_ref) {
+  var _productSelectionItem, _preselectedItem$prod, _preselectedItem$prod2;
+  var product = _ref.product;
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_7__.SelectionConfigContext),
+    initSelectedItems = _useContext.initSelectedItems,
+    isInitLocationsDeselectionBlocked = _useContext.isInitLocationsDeselectionBlocked;
+  var preselectedItem = !isInitLocationsDeselectionBlocked ? null : initSelectedItems.find(function (selectedItem) {
+    return selectedItem.type === _selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_12__.PRODUCT_ITEM_TYPE && selectedItem.productCode === product.code;
+  });
+  var isPreselected = !!preselectedItem;
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_7__.SelectedItemsContext),
+    selectedItems = _useContext2.selectedItems,
+    dispatchSelectedItemsAction = _useContext2.dispatchSelectedItemsAction;
+  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_7__.MultipleConfigContext),
+    _useContext4 = _slicedToArray(_useContext3, 2),
+    multiple = _useContext4[0],
+    multipleItemsLimit = _useContext4[1];
+  var _useContext5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_product_discovery_widget_module__WEBPACK_IMPORTED_MODULE_11__.MarkedBaseProductContext),
+    setMarkedBaseProduct = _useContext5.setMarkedBaseProduct;
+  var productSelectionItem = selectedItems.find(function (selectedItem) {
+    return selectedItem.type === _selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_12__.PRODUCT_ITEM_TYPE && selectedItem.id === product.code;
+  });
+  var productVariantsCodes = product.variants ? product.variants_codes : [];
+  var totalVariantsCount = product.variants;
+  var selectedVariantCodesData = (_productSelectionItem = productSelectionItem === null || productSelectionItem === void 0 ? void 0 : productSelectionItem.data.productVariants) !== null && _productSelectionItem !== void 0 ? _productSelectionItem : [];
+  var selectedVariantsCount = selectedVariantCodesData === true ? productVariantsCodes.length : selectedVariantCodesData.length;
+  var preselectedVariantsCount = (_preselectedItem$prod = preselectedItem === null || preselectedItem === void 0 || (_preselectedItem$prod2 = preselectedItem.productVariants) === null || _preselectedItem$prod2 === void 0 ? void 0 : _preselectedItem$prod2.length) !== null && _preselectedItem$prod !== void 0 ? _preselectedItem$prod : 0;
+  var totalSelectedVariantsCount = selectedVariantsCount + preselectedVariantsCount;
+  var selectionItem = {
+    id: product.code,
+    type: _selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_12__.PRODUCT_ITEM_TYPE,
+    data: {
+      baseProduct: product,
+      productVariants: product.variants ? true : null
+    }
+  };
+  var variantsBtnLabel = Translator.trans(/*@Desc("%variantsNo% variants")*/'products_discovery_widget.product_table.variants_btn.label', {
+    variantsNo: product.variants
+  }, 'ibexa_universal_discovery_widget');
+  var isSelectable = true;
+  var isSelected = selectedItems.some(function (selectedItem) {
+    return selectedItem.type === selectionItem.type && selectedItem.id === selectionItem.id;
+  });
+  var isSelectionBlocked = multipleItemsLimit !== 0 && selectedItems.length >= multipleItemsLimit && !isSelected;
+  var isSelectionDisabled = isSelectionBlocked || !isSelectable || isPreselected;
+  var renderToggleSelection = function renderToggleSelection() {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_toggle_selection_toggle_item_selection__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      item: selectionItem,
+      multiple: multiple,
+      isHidden: false,
+      isDisabled: isSelectionDisabled,
+      isPreselected: isPreselected,
+      isIndeterminate: totalSelectedVariantsCount !== 0 && totalSelectedVariantsCount < totalVariantsCount
+    });
+  };
+  var handleItemSelect = function handleItemSelect() {
+    if (isSelectionDisabled) {
+      return;
+    }
+    if (!multiple) {
+      dispatchSelectedItemsAction({
+        type: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_8__.CLEAR_SELECTED_ITEMS
+      });
+    }
+    dispatchSelectedItemsAction({
+      type: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_8__.TOGGLE_SELECTED_ITEMS,
+      items: [selectionItem]
+    });
+  };
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_row__WEBPACK_IMPORTED_MODULE_6__["default"], {
+    extraClasses: "c-product-table-item",
+    isSelectable: !isSelectionDisabled,
+    isNotSelectable: isSelectionDisabled,
+    onClick: handleItemSelect
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    hasCheckbox: true
+  }, renderToggleSelection()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    isCloseLeft: true
+  }, product.name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-pc-data-grid__image-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_product_table_thumbnail__WEBPACK_IMPORTED_MODULE_10__["default"], {
+    thumbnailData: product.thumbnail
+  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-badge ibexa-badge--info"
+  }, product.code)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], null, product.type), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], null, product.variants === 0 ? '–' : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    type: "button",
+    className: "c-product-table-item__show-variants-btn btn ibexa-btn ibexa-btn--ghost ibexa-btn--small",
+    onClick: function onClick(event) {
+      event.stopPropagation();
+      event.preventDefault();
+      setMarkedBaseProduct(product);
+    },
+    title: variantsBtnLabel,
+    "data-tooltip-container-selector": ".c-udw-tab"
+  }, variantsBtnLabel, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    name: "caret-next",
+    extraClasses: "c-product-table-item__show-variants-btn-icon ibexa-icon--tiny-small"
+  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_product_availability_status__WEBPACK_IMPORTED_MODULE_9__["default"], {
+    isAvailable: product.is_available
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], null, product.stock), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], null, product.base_price));
+};
+ProductTableItem.propTypes = {
+  product: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductTableItem);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.table.js":
+/*!***************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.table.js ***!
+  \***************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.cell */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.cell.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_row__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.row */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.row.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_empty_table_body_row__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/empty.table.body.row */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/empty.table.body.row.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_search_search_no_results__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/search/search.no.results */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/search/search.no.results.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_alert_alert__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/alert/alert */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/alert/alert.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer.js");
+/* harmony import */ var _product_table_item__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./product.table.item */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.table.item.js");
+/* harmony import */ var _selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../selected-items/selected.items.product.item */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/selected-items/selected.items.product.item.js");
+/* harmony import */ var _products_view_products_view__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ../products-view/products.view */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.view.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var ProductTable = function ProductTable(_ref) {
+  var items = _ref.items,
+    totalCount = _ref.totalCount;
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
+  var Routing = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getRouting)();
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_products_view_products_view__WEBPACK_IMPORTED_MODULE_17__.SearchParamsContext),
+    searchParams = _useContext.searchParams;
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_13__.SelectionConfigContext),
+    isInitLocationsDeselectionBlocked = _useContext2.isInitLocationsDeselectionBlocked,
+    initSelectedItems = _useContext2.initSelectedItems,
+    deselectAlertTitle = _useContext2.deselectAlertTitle;
+  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_13__.SelectedItemsContext),
+    selectedItems = _useContext3.selectedItems,
+    dispatchSelectedItemsAction = _useContext3.dispatchSelectedItemsAction;
+  var _useContext4 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_13__.MultipleConfigContext),
+    _useContext5 = _slicedToArray(_useContext4, 2),
+    multiple = _useContext5[0],
+    multipleItemsLimit = _useContext5[1];
+  var _useContext6 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_13__.SearchTextContext),
+    _useContext7 = _slicedToArray(_useContext6, 2),
+    searchText = _useContext7[0],
+    setSearchText = _useContext7[1];
+  var productsCodesFromTable = items.map(function (product) {
+    return product.code;
+  });
+  var preselectedItemsFromTable = initSelectedItems.filter(function (preselectedItem) {
+    return productsCodesFromTable.includes(preselectedItem.productCode);
+  });
+  var preselectedItemsCodesFromTable = preselectedItemsFromTable.map(function (preselectedItem) {
+    return preselectedItem.productCode;
+  });
+  var selectedItemsFromTable = selectedItems.filter(function (selectedItem) {
+    return productsCodesFromTable.includes(selectedItem.data.baseProduct.code);
+  });
+  var selectedItemsCodesFromTable = selectedItemsFromTable.map(function (selectedItem) {
+    return selectedItem.data.baseProduct.code;
+  });
+  var notSelectedItemsFromTable = items.filter(function (product) {
+    return !preselectedItemsCodesFromTable.includes(product.code) && !selectedItemsCodesFromTable.includes(product.code);
+  });
+  var checkboxRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var isAnySelected = selectedItemsFromTable.length > 0;
+  var isCheckboxIndeterminate = isAnySelected && items.length - preselectedItemsFromTable.length - selectedItemsFromTable.length > 0;
+  var areAllItemsPreselected = preselectedItemsFromTable.length === items.length;
+  var showInitSelectedItemsDeselectAlert = isInitLocationsDeselectionBlocked && initSelectedItems.length > 0;
+  var isEmpty = items.length === 0;
+  var isSearchResult = searchParams.productNameSearchText !== '' || searchParams.productsCategories.length > 0 || searchParams.productsTypes.length > 0 || searchParams.productsCodes.length > 0;
+  var nameLabel = Translator.trans(/*@Desc("Name")*/'products_discovery_widget.product_table.header.name', {}, 'ibexa_universal_discovery_widget');
+  var imageLabel = Translator.trans(/*@Desc("Image")*/'products_discovery_widget.product_table.header.image', {}, 'ibexa_universal_discovery_widget');
+  var codeLabel = Translator.trans(/*@Desc("Code")*/'products_discovery_widget.product_table.header.code', {}, 'ibexa_universal_discovery_widget');
+  var typeLabel = Translator.trans(/*@Desc("Type")*/'products_discovery_widget.product_table.header.type', {}, 'ibexa_universal_discovery_widget');
+  var variantsLabel = Translator.trans(/*@Desc("Variants")*/'products_discovery_widget.product_table.header.variants', {}, 'ibexa_universal_discovery_widget');
+  var availabilityLabel = Translator.trans(/*@Desc("Availability")*/'products_discovery_widget.product_table.header.availability', {}, 'ibexa_universal_discovery_widget');
+  var stockLabel = Translator.trans(/*@Desc("Stock")*/'products_discovery_widget.product_table.header.stock', {}, 'ibexa_universal_discovery_widget');
+  var basePriceLabel = Translator.trans(/*@Desc("Base price")*/'products_discovery_widget.product_table.header.base_price', {}, 'ibexa_universal_discovery_widget');
+  var emptyTableInfoText = Translator.trans(/*@Desc("No products yet")*/'products_discovery_widget.product_table.empty_table.info_text', {}, 'ibexa_universal_discovery_widget');
+  var emptyTableActionText = Translator.trans(/*@Desc("Go to <a target='_blank' rel='noopener noreferrer' href='%product_catalog_href%'>product catalog</a> and add products.")*/'products_discovery_widget.product_table.empty_table.action_text', {
+    product_catalog_href: Routing.generate('ibexa.product_catalog.product.list')
+  }, 'ibexa_universal_discovery_widget');
+  var emptyTableActionTextElement = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    dangerouslySetInnerHTML: {
+      __html: emptyTableActionText
+    }
+  });
+  var tableHeadline = Translator.trans(/*@Desc("Products (%totalCount%)")*/'products_discovery_widget.product_table.headline', {
+    totalCount: totalCount
+  }, 'ibexa_universal_discovery_widget');
+  var searchResultsTitle = Translator.trans(/*@Desc("Results for “%searchPhrase%” (%total%)")*/'products_discovery_widget.product_table.search.search_results', {
+    searchPhrase: searchText,
+    total: totalCount
+  }, 'ibexa_universal_discovery_widget');
+  var searchResultsClearBtnLabel = Translator.trans(/*@Desc("Clear results")*/'search.search_results.clear_btn.label', {}, 'ibexa_universal_discovery_widget');
+  var className = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_4__.createCssClassNames)({
+    'c-product-table': true,
+    'c-product-table--empty': totalCount === 0
+  });
+  var handleResultsClear = function handleResultsClear() {
+    return setSearchText('');
+  };
+  var renderTableContent = function renderTableContent() {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head__WEBPACK_IMPORTED_MODULE_7__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_row__WEBPACK_IMPORTED_MODULE_9__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_8__["default"], {
+      hasCheckbox: true
+    }, multiple && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
+      ref: checkboxRef,
+      type: "checkbox",
+      className: "ibexa-input ibexa-input--checkbox ibexa-table__header-cell-checkbox",
+      checked: isAnySelected,
+      readOnly: true,
+      onClick: handleAllItemsToggle,
+      disabled: areAllItemsPreselected
+    })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_8__["default"], {
+      isCloseLeft: true
+    }, nameLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_8__["default"], null, imageLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_8__["default"], null, codeLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_8__["default"], null, typeLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_8__["default"], null, variantsLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_8__["default"], null, availabilityLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_8__["default"], null, stockLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_8__["default"], null, basePriceLabel))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body__WEBPACK_IMPORTED_MODULE_6__["default"], null, items.map(function (product) {
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_product_table_item__WEBPACK_IMPORTED_MODULE_15__["default"], {
+        key: product.code,
+        product: product
+      });
+    })));
+  };
+  var renderEmptyTableContent = function renderEmptyTableContent() {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body__WEBPACK_IMPORTED_MODULE_6__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_empty_table_body_row__WEBPACK_IMPORTED_MODULE_10__["default"], {
+      infoText: emptyTableInfoText,
+      actionText: emptyTableActionTextElement
+    }));
+  };
+  var renderNoSearchResults = function renderNoSearchResults() {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_search_search_no_results__WEBPACK_IMPORTED_MODULE_11__["default"], {
+      searchText: searchText
+    });
+  };
+  var handleAllItemsToggle = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
+    if (isAnySelected) {
+      var itemsIdsWithTypes = selectedItemsFromTable.map(function (selectedItem) {
+        return {
+          id: selectedItem.id,
+          type: selectedItem.type
+        };
+      });
+      dispatchSelectedItemsAction({
+        type: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_14__.REMOVE_SELECTED_ITEMS,
+        items: [selectedItemsFromTable],
+        itemsIdsWithTypes: itemsIdsWithTypes
+      });
+    } else {
+      var productsToSelect = multipleItemsLimit ? notSelectedItemsFromTable.slice(0, multipleItemsLimit) : notSelectedItemsFromTable;
+      var selectionItems = productsToSelect.map(function (product) {
+        return {
+          id: product.code,
+          type: _selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_16__.PRODUCT_ITEM_TYPE,
+          data: {
+            baseProduct: product,
+            productVariants: product.variants ? true : null
+          }
+        };
+      });
+      dispatchSelectedItemsAction({
+        type: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_14__.ADD_SELECTED_ITEMS,
+        items: selectionItems
+      });
+    }
+  }, [isAnySelected, selectedItemsFromTable, multipleItemsLimit, notSelectedItemsFromTable]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (!checkboxRef.current) {
+      return;
+    }
+    checkboxRef.current.indeterminate = isCheckboxIndeterminate;
+  }, [isCheckboxIndeterminate]);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    ref: function ref(node) {
+      return (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_3__.parse)(node);
+    },
+    className: className
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-table-header c-search__table-header c-product-table__table-header"
+  }, searchText ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-table-header__headline c-search__table-title"
+  }, searchResultsTitle), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    type: "button",
+    className: "btn ibexa-btn ibexa-btn--secondary ibexa-btn--small c-search__clear-results-btn",
+    onClick: handleResultsClear
+  }, searchResultsClearBtnLabel)) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-table-header__headline"
+  }, tableHeadline)), showInitSelectedItemsDeselectAlert && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_alert_alert__WEBPACK_IMPORTED_MODULE_12__["default"], {
+    type: "warning",
+    title: deselectAlertTitle,
+    extraClasses: " c-product-table__init-locations-alert"
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-scrollable-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    extraClasses: "c-product-table__table"
+  }, !isEmpty && renderTableContent(), isEmpty && !isSearchResult && renderEmptyTableContent(), isEmpty && isSearchResult && renderNoSearchResults())));
+};
+ProductTable.propTypes = {
+  items: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().array).isRequired,
+  totalCount: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().number).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductTable);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.table.thumbnail.js":
+/*!*************************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.table.thumbnail.js ***!
+  \*************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+
+
+
+var ProductTableThumbnail = function ProductTableThumbnail(_ref) {
+  var thumbnailData = _ref.thumbnailData;
+  if (!thumbnailData.mimeType) {
+    return null;
+  }
+  var isSvg = thumbnailData.mimeType === 'image/svg+xml';
+  var renderIcon = function renderIcon() {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+      extraClasses: "c-product-table-thumbnail__icon",
+      customPath: thumbnailData.resource
+    });
+  };
+  var renderImage = function renderImage() {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", {
+      className: "c-product-table-thumbnail__image",
+      src: thumbnailData.resource
+    });
+  };
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-product-table-thumbnail ibexa-pc-data-grid__image-wrapper ibexa-pc-data-grid__image-wrapper--product"
+  }, isSvg ? renderIcon() : renderImage());
+};
+ProductTableThumbnail.propTypes = {
+  thumbnailData: prop_types__WEBPACK_IMPORTED_MODULE_1___default().shape({
+    mimeType: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string).isRequired,
+    resource: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string).isRequired
+  }).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductTableThumbnail);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.variant.table.item.js":
+/*!****************************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.variant.table.item.js ***!
+  \****************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.cell */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.cell.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_row__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.row */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.row.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer.js");
+/* harmony import */ var _product_availability_status__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./product.availability.status */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.availability.status.js");
+/* harmony import */ var _selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../selected-items/selected.items.product.item */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/selected-items/selected.items.product.item.js");
+/* harmony import */ var _product_discovery_widget_module__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../product.discovery.widget.module */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/product.discovery.widget.module.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+
+
+
+
+var ProductVariantTableItem = function ProductVariantTableItem(_ref) {
+  var _preselectedBaseProdu, _baseProductSelection;
+  var productVariant = _ref.productVariant;
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__.SelectionConfigContext),
+    initSelectedItems = _useContext.initSelectedItems,
+    isInitLocationsDeselectionBlocked = _useContext.isInitLocationsDeselectionBlocked;
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_product_discovery_widget_module__WEBPACK_IMPORTED_MODULE_9__.MarkedBaseProductContext),
+    markedBaseProduct = _useContext2.markedBaseProduct;
+  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__.MultipleConfigContext),
+    _useContext4 = _slicedToArray(_useContext3, 2),
+    multiple = _useContext4[0],
+    multipleItemsLimit = _useContext4[1];
+  var _useContext5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__.SelectedItemsContext),
+    selectedItems = _useContext5.selectedItems,
+    dispatchSelectedItemsAction = _useContext5.dispatchSelectedItemsAction;
+  var preselectedBaseProductItem = !isInitLocationsDeselectionBlocked ? null : initSelectedItems.find(function (selectedItem) {
+    return selectedItem.type === _selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_8__.PRODUCT_ITEM_TYPE && selectedItem.productCode === markedBaseProduct.code;
+  });
+  var preselectedVariantCodesData = (_preselectedBaseProdu = preselectedBaseProductItem === null || preselectedBaseProductItem === void 0 ? void 0 : preselectedBaseProductItem.productVariants) !== null && _preselectedBaseProdu !== void 0 ? _preselectedBaseProdu : [];
+  var isPreselected = preselectedVariantCodesData === true ? true : preselectedVariantCodesData.includes(productVariant.code);
+  var isSelectable = !isPreselected;
+  var baseProductSelectionItem = selectedItems.find(function (selectedItem) {
+    return selectedItem.type === _selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_8__.PRODUCT_ITEM_TYPE && selectedItem.id === markedBaseProduct.code;
+  });
+  var baseProductVariantsCodes = markedBaseProduct.variants ? markedBaseProduct.variants_codes : [];
+  var selectedVariantCodesData = (_baseProductSelection = baseProductSelectionItem === null || baseProductSelectionItem === void 0 ? void 0 : baseProductSelectionItem.data.productVariants) !== null && _baseProductSelection !== void 0 ? _baseProductSelection : [];
+  var isSelected = selectedVariantCodesData === true ? true : selectedVariantCodesData.includes(productVariant.code);
+  var isSelectionBlocked = multipleItemsLimit !== 0 && selectedItems.length >= multipleItemsLimit && !isSelected;
+  var isSelectionDisabled = isSelectionBlocked || !isSelectable;
+  var handleItemSelect = function handleItemSelect() {
+    if (isSelectionDisabled) {
+      return;
+    }
+    if (!multiple && !baseProductSelectionItem) {
+      dispatchSelectedItemsAction({
+        type: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_6__.CLEAR_SELECTED_ITEMS
+      });
+    }
+    if (baseProductSelectionItem) {
+      var baseProductSelectionItemNew = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_2__["default"])(baseProductSelectionItem);
+      var productVariants = baseProductSelectionItemNew.data.productVariants;
+      var variantsCodesArray = productVariants === true ? (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_2__["default"])(baseProductVariantsCodes) : productVariants;
+      baseProductSelectionItemNew.data.productVariants = variantsCodesArray;
+      var productVariantCodeIndex = baseProductSelectionItemNew.data.productVariants.indexOf(productVariant.code);
+      if (productVariantCodeIndex === -1) {
+        baseProductSelectionItemNew.data.productVariants.push(productVariant.code);
+      } else {
+        baseProductSelectionItemNew.data.productVariants.splice(productVariantCodeIndex, 1);
+      }
+      if (baseProductSelectionItemNew.data.productVariants.length === baseProductVariantsCodes.length) {
+        baseProductSelectionItemNew.data.productVariants = true;
+      }
+      if (baseProductSelectionItemNew.data.productVariants.length === 0) {
+        dispatchSelectedItemsAction({
+          type: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_6__.REMOVE_SELECTED_ITEMS,
+          itemsIdsWithTypes: [{
+            id: baseProductSelectionItemNew.id,
+            type: baseProductSelectionItemNew.type
+          }]
+        });
+      } else {
+        dispatchSelectedItemsAction({
+          type: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_6__.UPDATE_SELECTED_ITEMS,
+          items: [baseProductSelectionItemNew]
+        });
+      }
+    } else {
+      var _baseProductSelectionItemNew = {
+        id: markedBaseProduct.code,
+        type: _selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_8__.PRODUCT_ITEM_TYPE,
+        data: {
+          baseProduct: markedBaseProduct,
+          productVariants: [productVariant.code]
+        }
+      };
+      dispatchSelectedItemsAction({
+        type: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_6__.ADD_SELECTED_ITEMS,
+        items: [_baseProductSelectionItemNew]
+      });
+    }
+  };
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_row__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    extraClasses: "c-product-variant-table-item",
+    isSelectable: !isSelectionDisabled,
+    isNotSelectable: isSelectionDisabled,
+    onClick: handleItemSelect
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    hasCheckbox: true
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
+    type: "checkbox",
+    className: "ibexa-input ibexa-input--checkbox",
+    checked: isPreselected || isSelected,
+    disabled: isPreselected,
+    readOnly: true
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    isCloseLeft: true
+  }, productVariant.name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-badge ibexa-badge--info"
+  }, productVariant.code)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__["default"], null, productVariant.price), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_product_availability_status__WEBPACK_IMPORTED_MODULE_7__["default"], {
+    isAvailable: productVariant.is_available
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__["default"], null, productVariant.stock), productVariant.attributes.map(function (attribute) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      key: attribute.identifier
+    }, attribute.value);
+  }));
+};
+ProductVariantTableItem.propTypes = {
+  productVariant: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductVariantTableItem);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.variant.table.js":
+/*!***********************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.variant.table.js ***!
+  \***********************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.cell */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.cell.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_row__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.row */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.row.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_search_search_no_results__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/search/search.no.results */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/search/search.no.results.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer.js");
+/* harmony import */ var _product_variant_table_item__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./product.variant.table.item */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.variant.table.item.js");
+/* harmony import */ var _product_discovery_widget_module__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../../product.discovery.widget.module */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/product.discovery.widget.module.js");
+/* harmony import */ var _selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../selected-items/selected.items.product.item */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/selected-items/selected.items.product.item.js");
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var ProductVariantTable = function ProductVariantTable(_ref) {
+  var _preselectedBaseProdu, _baseProductSelection;
+  var items = _ref.items,
+    discriminators = _ref.discriminators,
+    totalCount = _ref.totalCount;
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_product_discovery_widget_module__WEBPACK_IMPORTED_MODULE_15__.MarkedBaseProductContext),
+    markedBaseProduct = _useContext.markedBaseProduct,
+    setMarkedBaseProduct = _useContext.setMarkedBaseProduct;
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_12__.SelectionConfigContext),
+    initSelectedItems = _useContext2.initSelectedItems,
+    isInitLocationsDeselectionBlocked = _useContext2.isInitLocationsDeselectionBlocked;
+  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_12__.SelectedItemsContext),
+    selectedItems = _useContext3.selectedItems,
+    dispatchSelectedItemsAction = _useContext3.dispatchSelectedItemsAction;
+  var _useContext4 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_12__.MultipleConfigContext),
+    _useContext5 = _slicedToArray(_useContext4, 1),
+    multiple = _useContext5[0];
+  var preselectedBaseProductItem = !isInitLocationsDeselectionBlocked ? null : initSelectedItems.find(function (selectedItem) {
+    return selectedItem.type === _selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_16__.PRODUCT_ITEM_TYPE && selectedItem.productCode === markedBaseProduct.code;
+  });
+  var preselectedVariantCodesData = (_preselectedBaseProdu = preselectedBaseProductItem === null || preselectedBaseProductItem === void 0 ? void 0 : preselectedBaseProductItem.productVariants) !== null && _preselectedBaseProdu !== void 0 ? _preselectedBaseProdu : [];
+  var preselectedVariantCodes = preselectedVariantCodesData === true ? markedBaseProduct.variants_codes : preselectedVariantCodesData;
+  var preselectedItemsFromTable = items.filter(function (productVariant) {
+    return preselectedVariantCodes.includes(productVariant.code);
+  });
+  var baseProductSelectionItem = selectedItems.find(function (selectedItem) {
+    return selectedItem.type === _selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_16__.PRODUCT_ITEM_TYPE && selectedItem.id === markedBaseProduct.code;
+  });
+  var baseProductVariantsCodes = markedBaseProduct.variants ? markedBaseProduct.variants_codes : [];
+  var selectedVariants = (_baseProductSelection = baseProductSelectionItem === null || baseProductSelectionItem === void 0 ? void 0 : baseProductSelectionItem.data.productVariants) !== null && _baseProductSelection !== void 0 ? _baseProductSelection : [];
+  var selectedVariantsCodes = selectedVariants === true ? markedBaseProduct.variants_codes : selectedVariants;
+  var selectedItemsFromTable = items.filter(function (productVariant) {
+    return selectedVariantsCodes.includes(productVariant.code);
+  });
+  var selectedItemsCodesFromTable = selectedItemsFromTable.map(function (productVariant) {
+    return productVariant.code;
+  });
+  var notSelectedItemsFromTable = items.filter(function (productVariant) {
+    return !preselectedVariantCodes.includes(productVariant.code) && !selectedVariantsCodes.includes(productVariant.code);
+  });
+  var notSelectedItemsCodesFromTable = notSelectedItemsFromTable.map(function (productVariant) {
+    return productVariant.code;
+  });
+  var checkboxRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var isAnySelected = selectedItemsFromTable.length > 0;
+  var isCheckboxIndeterminate = isAnySelected && items.length - preselectedItemsFromTable.length - selectedItemsFromTable.length > 0;
+  var areAllItemsPreselected = preselectedItemsFromTable.length === items.length;
+  var isEmpty = items.length === 0;
+  var noResultsHints = [Translator.trans(/*@Desc("Try different search criteria.")*/'products_discovery_widget.product_variant_table.search.no_results.hint.different_search_criteria', {}, 'ibexa_universal_discovery_widget')];
+  var nameLabel = Translator.trans(/*@Desc("Name")*/'products_discovery_widget.product_variant_table.header.name', {}, 'ibexa_universal_discovery_widget');
+  var codeLabel = Translator.trans(/*@Desc("Code")*/'products_discovery_widget.product_variant_table.header.code', {}, 'ibexa_universal_discovery_widget');
+  var basePriceLabel = Translator.trans(/*@Desc("Base price")*/'products_discovery_widget.product_variant_table.header.base_price', {}, 'ibexa_universal_discovery_widget');
+  var availabilityLabel = Translator.trans(/*@Desc("Availability")*/'products_discovery_widget.product_variant_table.header.availability', {}, 'ibexa_universal_discovery_widget');
+  var stockLabel = Translator.trans(/*@Desc("Stock")*/'products_discovery_widget.product_variant_table.header.stock', {}, 'ibexa_universal_discovery_widget');
+  var tableHeadline = Translator.trans(/*@Desc("%baseProductName% (%totalCount% variants)")*/'products_discovery_widget.product_variant_table.headline', {
+    baseProductName: markedBaseProduct.name,
+    totalCount: totalCount
+  }, 'ibexa_universal_discovery_widget');
+  var backToProductsViewBtnTitle = Translator.trans(/*@Desc("Back to products")*/'products_discovery_widget.product_variant_table.back_to_products_btn.title', {}, 'ibexa_universal_discovery_widget');
+  var handleAllItemsToggle = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
+    if (!multiple && !baseProductSelectionItem) {
+      dispatchSelectedItemsAction({
+        type: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_13__.CLEAR_SELECTED_ITEMS
+      });
+    }
+    if (baseProductSelectionItem) {
+      var baseProductSelectionItemNew = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_4__["default"])(baseProductSelectionItem);
+      var productVariants = baseProductSelectionItemNew.data.productVariants;
+      var variantsCodesArray = productVariants === true ? (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_4__["default"])(baseProductVariantsCodes) : productVariants;
+      baseProductSelectionItemNew.data.productVariants = variantsCodesArray;
+      if (isAnySelected) {
+        baseProductSelectionItemNew.data.productVariants = baseProductSelectionItemNew.data.productVariants.filter(function (variantCode) {
+          return !selectedItemsCodesFromTable.includes(variantCode);
+        });
+      } else {
+        baseProductSelectionItemNew.data.productVariants = _toConsumableArray(new Set([].concat(_toConsumableArray(baseProductSelectionItemNew.data.productVariants), _toConsumableArray(notSelectedItemsCodesFromTable))));
+      }
+      if (baseProductSelectionItemNew.data.productVariants.length === baseProductVariantsCodes.length) {
+        baseProductSelectionItemNew.data.productVariants = true;
+      }
+      if (baseProductSelectionItemNew.data.productVariants.length === 0) {
+        dispatchSelectedItemsAction({
+          type: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_13__.REMOVE_SELECTED_ITEMS,
+          itemsIdsWithTypes: [{
+            id: baseProductSelectionItemNew.id,
+            type: baseProductSelectionItemNew.type
+          }]
+        });
+      } else {
+        dispatchSelectedItemsAction({
+          type: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_13__.UPDATE_SELECTED_ITEMS,
+          items: [baseProductSelectionItemNew]
+        });
+      }
+    } else {
+      var _baseProductSelectionItemNew = {
+        id: markedBaseProduct.code,
+        type: _selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_16__.PRODUCT_ITEM_TYPE,
+        data: {
+          baseProduct: markedBaseProduct,
+          productVariants: notSelectedItemsCodesFromTable
+        }
+      };
+      dispatchSelectedItemsAction({
+        type: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_13__.ADD_SELECTED_ITEMS,
+        items: [_baseProductSelectionItemNew]
+      });
+    }
+  }, [multiple, baseProductSelectionItem, baseProductVariantsCodes, selectedItemsCodesFromTable, notSelectedItemsCodesFromTable, markedBaseProduct]);
+  var renderTableContent = function renderTableContent() {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table__WEBPACK_IMPORTED_MODULE_6__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head__WEBPACK_IMPORTED_MODULE_8__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_row__WEBPACK_IMPORTED_MODULE_10__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_9__["default"], {
+      hasCheckbox: true
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
+      ref: checkboxRef,
+      type: "checkbox",
+      className: "ibexa-input ibexa-input--checkbox ibexa-table__header-cell-checkbox",
+      checked: isAnySelected,
+      readOnly: true,
+      onClick: handleAllItemsToggle,
+      disabled: areAllItemsPreselected
+    })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_9__["default"], {
+      isCloseLeft: true
+    }, nameLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_9__["default"], null, codeLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_9__["default"], null, basePriceLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_9__["default"], null, availabilityLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_9__["default"], null, stockLabel), discriminators.map(function (discriminator) {
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_9__["default"], {
+        key: discriminator.identifier
+      }, discriminator.name);
+    }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body__WEBPACK_IMPORTED_MODULE_7__["default"], null, items.map(function (productVariant) {
+      return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_product_variant_table_item__WEBPACK_IMPORTED_MODULE_14__["default"], {
+        key: productVariant.code,
+        productVariant: productVariant
+      });
+    }))));
+  };
+  var renderNoSearchResults = function renderNoSearchResults() {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_search_search_no_results__WEBPACK_IMPORTED_MODULE_11__["default"], {
+      extraClasses: "c-product-variant-table__no-search-results",
+      searchText: '',
+      noResultsHints: noResultsHints
+    });
+  };
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (!checkboxRef.current) {
+      return;
+    }
+    checkboxRef.current.indeterminate = isCheckboxIndeterminate;
+  }, [isCheckboxIndeterminate]);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    ref: function ref(node) {
+      return (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_3__.parse)(node);
+    },
+    className: "c-product-variant-table"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-product-variant-table__header ibexa-table-header"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    type: "button",
+    className: "c-product-variant-table__back-btn btn ibexa-btn ibexa-btn--tertiary ibexa-btn--small ibexa-btn--no-text",
+    onClick: function onClick() {
+      return setMarkedBaseProduct(null);
+    },
+    title: backToProductsViewBtnTitle,
+    "data-tooltip-container-selector": ".c-udw-tab"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    name: "caret-back",
+    extraClasses: "ibexa-icon--small"
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-table-header__headline"
+  }, tableHeadline)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-scrollable-wrapper"
+  }, !isEmpty && renderTableContent(), isEmpty && renderNoSearchResults()));
+};
+ProductVariantTable.propTypes = {
+  items: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().array).isRequired,
+  discriminators: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().array).isRequired,
+  totalCount: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().number).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductVariantTable);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/category.select.popup.js":
+/*!***********************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/category.select.popup.js ***!
+  \***********************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   TREE_BUILDER_MODULE_ID: () => (/* binding */ TREE_BUILDER_MODULE_ID),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom */ "react-dom");
+/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_dom__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_user_helper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/user.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/user.helper.js");
+/* harmony import */ var _ibexa_admin_ui_modules_common_popup_popup_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui-modules/common/popup/popup.component */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/popup/popup.component.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _ibexa_taxonomy_src_bundle_ui_dev_src_modules_select_ibexa_tag_select_ibexa_tag_module__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ibexa-taxonomy/src/bundle/ui-dev/src/modules/select-ibexa-tag/select.ibexa.tag.module */ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/select-ibexa-tag/select.ibexa.tag.module.js");
+/* harmony import */ var _products_view__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./products.view */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.view.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+
+
+
+var TREE_BUILDER_MODULE_ID = 'ibexa-pc-product-picker-category-select';
+var CategorySelectPopup = function CategorySelectPopup(_ref) {
+  var isVisible = _ref.isVisible,
+    onClose = _ref.onClose;
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_products_view__WEBPACK_IMPORTED_MODULE_8__.SelectedCategoriesContext),
+    selectedCategories = _useContext.selectedCategories,
+    setSelectedCategories = _useContext.setSelectedCategories;
+  var adminUiConfig = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__.getAdminUiConfig)();
+  var rootDOMElement = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__.getRootDOMElement)();
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__.getTranslator)();
+  var _adminUiConfig$langua = adminUiConfig.languages,
+    mappings = _adminUiConfig$langua.mappings,
+    priority = _adminUiConfig$langua.priority;
+  var _mappings$priority$ = mappings[priority[0]],
+    languageCode = _mappings$priority$.languageCode,
+    languageName = _mappings$priority$.name;
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
+    _useState2 = _slicedToArray(_useState, 2),
+    locallySelectedCategories = _useState2[0],
+    setLocallySelectedCategories = _useState2[1];
+  var updateSelectedCategories = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function (event) {
+    var _event$detail = event.detail,
+      id = _event$detail.id,
+      items = _event$detail.items;
+    if (id !== TREE_BUILDER_MODULE_ID) {
+      return;
+    }
+    var allItemsHaveData = items.every(function (item) {
+      return !!item.internalItem;
+    });
+    if (!allItemsHaveData) {
+      return;
+    }
+    var categories = items.map(function (item) {
+      return {
+        id: item.id,
+        name: item.internalItem.names[languageCode]
+      };
+    });
+    setLocallySelectedCategories(categories);
+  }, [setLocallySelectedCategories]);
+  var handleSelectionConfirm = function handleSelectionConfirm() {
+    rootDOMElement.removeEventListener('ibexa-tb-update-selected', updateSelectedCategories, false);
+    setSelectedCategories(locallySelectedCategories);
+  };
+  var headerTitle = Translator.trans(/*@Desc("Select product categories")*/'products_discovery_widget.category_select_popup.header.title', {}, 'ibexa_universal_discovery_widget');
+  var subheaderTitle = Translator.trans(/*@Desc("in %languageName%")*/'products_discovery_widget.category_select_popup.subheader.title', {
+    languageName: languageName
+  }, 'ibexa_universal_discovery_widget');
+  var confirmBtnAttrs = {
+    label: Translator.trans(/*@Desc("Select")*/'products_discovery_widget.category_select_popup.confirm', {}, 'ibexa_universal_discovery_widget'),
+    onClick: handleSelectionConfirm,
+    className: 'ibexa-btn--primary ibexa-btn--trigger'
+  };
+  var cancelBtnAttrs = {
+    label: Translator.trans(/*@Desc("Discard")*/'products_discovery_widget.category_select_popup.cancel', {}, 'ibexa_universal_discovery_widget'),
+    className: 'ibexa-btn--secondary',
+    'data-bs-dismiss': 'modal'
+  };
+  var actionBtnsConfig = [confirmBtnAttrs, cancelBtnAttrs];
+  var renderSubheader = function renderSubheader() {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
+      name: "languages",
+      extraClasses: "c-pc-category-select-popup__language-icon ibexa-icon--tiny-small"
+    }), subheaderTitle);
+  };
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (!isVisible) {
+      return;
+    }
+    rootDOMElement.addEventListener('ibexa-tb-update-selected', updateSelectedCategories, false);
+    return function () {
+      rootDOMElement.removeEventListener('ibexa-tb-update-selected', updateSelectedCategories, false);
+    };
+  }, [updateSelectedCategories, isVisible]);
+  return /*#__PURE__*/(0,react_dom__WEBPACK_IMPORTED_MODULE_1__.createPortal)(/*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_modules_common_popup_popup_component__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    title: headerTitle,
+    subheader: renderSubheader(),
+    isVisible: isVisible,
+    onClose: onClose,
+    extraClasses: "c-pc-category-select-popup",
+    actionBtnsConfig: actionBtnsConfig
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_taxonomy_src_bundle_ui_dev_src_modules_select_ibexa_tag_select_ibexa_tag_module__WEBPACK_IMPORTED_MODULE_7__["default"], {
+    userId: (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_user_helper__WEBPACK_IMPORTED_MODULE_4__.getId)(),
+    moduleId: TREE_BUILDER_MODULE_ID,
+    restInfo: (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__.getRestInfo)(),
+    taxonomyName: "product_categories",
+    taxonomyEntryId: undefined,
+    languageCode: languageCode,
+    selectedItems: selectedCategories.map(function (category) {
+      return {
+        id: category.id
+      };
+    }),
+    isMultiChoice: true,
+    rootSelectionDisable: false
+  })), rootDOMElement);
+};
+CategorySelectPopup.propTypes = {
+  isVisible: (prop_types__WEBPACK_IMPORTED_MODULE_2___default().bool).isRequired,
+  onClose: (prop_types__WEBPACK_IMPORTED_MODULE_2___default().func).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (CategorySelectPopup);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/product.variants.filters.js":
+/*!**************************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/product.variants.filters.js ***!
+  \**************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_collapsible_collapsible__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/collapsible/collapsible */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/collapsible/collapsible.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_filters_filters_panel__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/filters/filters.panel */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/filters/filters.panel.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_dropdown_dropdown__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/dropdown/dropdown */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/dropdown/dropdown.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _product_variants_view__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./product.variants.view */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/product.variants.view.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+
+
+
+
+
+
+
+
+var ProductVariantsFilters = function ProductVariantsFilters(_ref) {
+  var search = _ref.search,
+    attributesMap = _ref.attributesMap;
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_product_variants_view__WEBPACK_IMPORTED_MODULE_8__.SelectedProductVariantPropertiesContext),
+    selectedProductVariantProperties = _useContext.selectedProductVariantProperties,
+    setSelectedProductVariantProperties = _useContext.setSelectedProductVariantProperties;
+  var dropdownListRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_7__.DropdownPortalRefContext);
+  var attributesRowTitle = Translator.trans(/*@Desc("Attributes")*/'products_discovery_widget.product_variants_view.filters.row.attributes.title', {}, 'ibexa_universal_discovery_widget');
+  var clearFilters = function clearFilters() {
+    setSelectedProductVariantProperties({});
+  };
+  var handleAttributeValueChange = function handleAttributeValueChange(attributeKey, value) {
+    setSelectedProductVariantProperties(function (attributesOld) {
+      var _attributesOld$attrib;
+      var selection = (_attributesOld$attrib = attributesOld[attributeKey]) !== null && _attributesOld$attrib !== void 0 ? _attributesOld$attrib : [];
+      var isValueSelected = selection.includes(value);
+      var newSelection = isValueSelected ? selection.filter(function (selectionValue) {
+        return selectionValue != value;
+      }) : [].concat(_toConsumableArray(selection), [value]);
+      return _objectSpread(_objectSpread({}, attributesOld), {}, _defineProperty({}, attributeKey, newSelection));
+    });
+  };
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_filters_filters_panel__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    isApplyButtonEnabled: true,
+    makeSearch: search,
+    clearFilters: clearFilters
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_collapsible_collapsible__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    title: attributesRowTitle,
+    isInitiallyExpanded: true
+  }, attributesMap ? Object.entries(attributesMap).map(function (_ref2) {
+    var _selectedProductVaria;
+    var _ref3 = _slicedToArray(_ref2, 2),
+      attributeKey = _ref3[0],
+      _ref3$ = _slicedToArray(_ref3[1], 1),
+      _ref3$$ = _ref3$[0],
+      label = _ref3$$.label,
+      options = _ref3$$.options;
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", {
+      className: "ibexa-label ibexa-field-edit__label ibexa-label form-label"
+    }, label), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_dropdown_dropdown__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      dropdownListRef: dropdownListRef,
+      single: false,
+      onChange: function onChange(value) {
+        return handleAttributeValueChange(attributeKey, value);
+      },
+      value: (_selectedProductVaria = selectedProductVariantProperties[attributeKey]) !== null && _selectedProductVaria !== void 0 ? _selectedProductVaria : [],
+      options: options,
+      extraClasses: "c-udw-dropdown"
+    }));
+  }) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-pc-product-variants-filters__spinner-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_6__["default"], null)))));
+};
+ProductVariantsFilters.propTypes = {
+  search: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func).isRequired,
+  attributesMap: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().array)
+};
+ProductVariantsFilters.defaultProps = {
+  attributesMap: null
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductVariantsFilters);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/product.variants.view.js":
+/*!***********************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/product.variants.view.js ***!
+  \***********************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   SelectedProductVariantPropertiesContext: () => (/* binding */ SelectedProductVariantPropertiesContext),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination_info__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination.info */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination.info.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_usePaginableFetch__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/usePaginableFetch */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/usePaginableFetch.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _common_services_product_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../../common/services/product.service */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/common/services/product.service.js");
+/* harmony import */ var _product_table_product_variant_table__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../product-table/product.variant.table */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.variant.table.js");
+/* harmony import */ var _product_variants_filters__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./product.variants.filters */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/product.variants.filters.js");
+/* harmony import */ var _product_discovery_widget_module__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../product.discovery.widget.module */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/product.discovery.widget.module.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+
+
+
+
+
+var SelectedProductVariantPropertiesContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var ProductVariantsView = function ProductVariantsView() {
+  var _data$count, _data$attributes;
+  var tabsConfig = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__.TabsConfigContext);
+  var restInfo = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_6__.RestInfoContext);
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_product_discovery_widget_module__WEBPACK_IMPORTED_MODULE_10__.MarkedBaseProductContext),
+    markedBaseProduct = _useContext.markedBaseProduct;
+  var itemsPerPage = tabsConfig.productsDiscoveryWidgetTab.itemsPerPage;
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({}),
+    _useState2 = _slicedToArray(_useState, 2),
+    selectedProductVariantProperties = _useState2[0],
+    setSelectedProductVariantProperties = _useState2[1];
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({}),
+    _useState4 = _slicedToArray(_useState3, 2),
+    attributesFilters = _useState4[0],
+    setAttributesFilters = _useState4[1];
+  var extraFetchParams = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    return {
+      baseProductCode: markedBaseProduct.code,
+      attributesFilters: attributesFilters
+    };
+  }, [markedBaseProduct, attributesFilters]);
+  var _usePaginableFetch = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_usePaginableFetch__WEBPACK_IMPORTED_MODULE_5__.usePaginableFetch)({
+      itemsPerPage: itemsPerPage,
+      extraFetchParams: extraFetchParams,
+      restInfo: restInfo
+    }, _common_services_product_service__WEBPACK_IMPORTED_MODULE_7__.findProductVariantsBySearchQuery),
+    _usePaginableFetch2 = _slicedToArray(_usePaginableFetch, 4),
+    data = _usePaginableFetch2[0],
+    isLoading = _usePaginableFetch2[1],
+    activePageIndex = _usePaginableFetch2[2],
+    changePage = _usePaginableFetch2[3];
+  var totalCount = (_data$count = data === null || data === void 0 ? void 0 : data.count) !== null && _data$count !== void 0 ? _data$count : null;
+  var prepareAttributesFilters = function prepareAttributesFilters(selectedProperties) {
+    var filters = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_1__["default"])(selectedProperties);
+    for (var _i = 0, _Object$entries = Object.entries(filters); _i < _Object$entries.length; _i++) {
+      var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
+        key = _Object$entries$_i[0],
+        value = _Object$entries$_i[1];
+      if (value instanceof Array && value.length === 0) {
+        delete filters[key];
+        continue;
+      }
+      if (typeof value[0] === 'string') {
+        filters[key] = [value];
+      }
+    }
+    return filters;
+  };
+  var search = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
+    return setAttributesFilters(prepareAttributesFilters(selectedProductVariantProperties));
+  }, [selectedProductVariantProperties]);
+  var attributesMap = isLoading ? null : (_data$attributes = data === null || data === void 0 ? void 0 : data.attributes) !== null && _data$attributes !== void 0 ? _data$attributes : null;
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (totalCount === null) {
+      return;
+    }
+    var maxPageIndex = totalCount === 0 ? 0 : Math.ceil(totalCount / itemsPerPage) - 1;
+    changePage(Math.min(maxPageIndex, activePageIndex));
+  }, [totalCount, itemsPerPage, activePageIndex]);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-pc-product-variants-view"
+  }, data && !isLoading ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-pc-product-variants-view__table-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_product_table_product_variant_table__WEBPACK_IMPORTED_MODULE_8__["default"], {
+    items: data.items,
+    discriminators: data.discriminators,
+    totalCount: totalCount
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-pagination"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination_info__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    totalCount: totalCount,
+    viewingCount: data.items.length
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    proximity: 1,
+    itemsPerPage: itemsPerPage,
+    activePageIndex: activePageIndex,
+    totalCount: totalCount,
+    onPageChange: changePage,
+    disabled: false
+  }))) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-pc-product-variants-view__spinner-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_4__["default"], null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-pc-product-variants-view__filters-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SelectedProductVariantPropertiesContext.Provider, {
+    value: {
+      selectedProductVariantProperties: selectedProductVariantProperties,
+      setSelectedProductVariantProperties: setSelectedProductVariantProperties
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_product_variants_filters__WEBPACK_IMPORTED_MODULE_9__["default"], {
+    attributesMap: attributesMap,
+    search: search
+  }))));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductVariantsView);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.category.filter.js":
+/*!**************************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.category.filter.js ***!
+  \**************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _category_select_popup__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./category.select.popup */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/category.select.popup.js");
+/* harmony import */ var _products_view__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./products.view */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.view.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+var ProductsCategoryFilter = function ProductsCategoryFilter() {
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_1__.getTranslator)();
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_products_view__WEBPACK_IMPORTED_MODULE_4__.SelectedCategoriesContext),
+    selectedCategories = _useContext.selectedCategories,
+    setSelectedCategories = _useContext.setSelectedCategories;
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState2 = _slicedToArray(_useState, 2),
+    isPopupVisible = _useState2[0],
+    setIsPopupVisible = _useState2[1];
+  var categorySelectBtnLabel = Translator.trans(/*@Desc("Select category")*/'products_discovery_widget.products_view.filters.row.category.select_btn.label', {}, 'ibexa_universal_discovery_widget');
+  var handleCategoryRemove = function handleCategoryRemove(categoryId) {
+    setSelectedCategories(function (categories) {
+      return categories.filter(function (category) {
+        return category.id !== categoryId;
+      });
+    });
+  };
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_category_select_popup__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    isVisible: isPopupVisible,
+    onClose: function onClose() {
+      return setIsPopupVisible(false);
+    }
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-pc-products-category-filter ibexa-tag-view-select"
+  }, selectedCategories.length > 0 && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-tag-view-select__selected-list"
+  }, selectedCategories.map(function (category) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      key: category.id,
+      className: "ibexa-tag-view-select__selected-item-tag"
+    }, category.name, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      type: "button",
+      className: "btn ibexa-tag-view-select__selected-item-tag-remove-btn",
+      onClick: function onClick() {
+        return handleCategoryRemove(category.id);
+      }
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+      name: "discard",
+      extraClasses: "ibexa-icon--tiny"
+    })));
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    type: "button",
+    className: "btn ibexa-btn ibexa-btn--secondary ibexa-btn--small",
+    onClick: function onClick() {
+      return setIsPopupVisible(true);
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "ibexa-btn__label"
+  }, categorySelectBtnLabel))));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductsCategoryFilter);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.codes.filter.js":
+/*!***********************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.codes.filter.js ***!
+  \***********************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _products_view__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./products.view */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.view.js");
+
+
+
+
+var ProductsCodesFilter = function ProductsCodesFilter() {
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_1__.getTranslator)();
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_products_view__WEBPACK_IMPORTED_MODULE_3__.SelectedProductCodesContext),
+    selectedProductCodes = _useContext.selectedProductCodes,
+    setSelectedProductCodes = _useContext.setSelectedProductCodes;
+  var formattingInfo = Translator.trans(/*@Desc("To add more codes, separate them with comma (preferred), semicolon or use space.")*/'products_discovery_widget.products_view.filters.row.products_codes.formatting.info', {}, 'ibexa_universal_discovery_widget');
+  var productCodesTextareaLabel = Translator.trans(/*@Desc("Codes")*/'products_discovery_widget.products_view.filters.row.product_codes.input.label', {}, 'ibexa_universal_discovery_widget');
+  var formatCodesText = function formatCodesText(codesText) {
+    var hasTrailingComma = /[,;\s]\s*$/.test(codesText);
+    var formatted = codesText.split(/[\s,;]+/).filter(Boolean).map(function (code) {
+      return code.trim();
+    }).join(',');
+    return hasTrailingComma ? "".concat(formatted, ",") : formatted;
+  };
+  var setSelectedProductCodesWithFormatting = function setSelectedProductCodesWithFormatting(text) {
+    return setSelectedProductCodes(formatCodesText(text));
+  };
+  var handleSelectedProductCodesChange = function handleSelectedProductCodesChange(event) {
+    setSelectedProductCodesWithFormatting(event.target.value);
+  };
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", {
+    className: "ibexa-label ibexa-field-edit__label ibexa-label form-label",
+    htmlFor: "products_discovery_widget.products_view.filters.row.product_codes.textarea"
+  }, productCodesTextareaLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("textarea", {
+    id: "products_discovery_widget.products_view.filters.row.product_codes.textarea",
+    rows: "10",
+    className: "ibexa-data-source__input ibexa-input ibexa-input--textarea form-control",
+    spellCheck: "false",
+    value: selectedProductCodes,
+    onChange: handleSelectedProductCodesChange
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("small", {
+    className: "ibexa-form-help"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    name: "system-information",
+    extraClasses: "ibexa-icon ibexa-icon--small ibexa-form-help__icon"
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-form-help__content"
+  }, formattingInfo)));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductsCodesFilter);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.filters.js":
+/*!******************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.filters.js ***!
+  \******************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_filters_filters_panel__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/filters/filters.panel */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/filters/filters.panel.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_collapsible_collapsible__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/collapsible/collapsible */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/collapsible/collapsible.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _products_type_filter__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./products.type.filter */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.type.filter.js");
+/* harmony import */ var _products_view__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./products.view */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.view.js");
+/* harmony import */ var _products_category_filter__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./products.category.filter */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.category.filter.js");
+/* harmony import */ var _products_codes_filter__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./products.codes.filter */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.codes.filter.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+
+
+
+
+var ProductsFilters = function ProductsFilters(_ref) {
+  var search = _ref.search;
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_products_view__WEBPACK_IMPORTED_MODULE_7__.SelectedCategoriesContext),
+    setSelectedCategories = _useContext.setSelectedCategories;
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_products_view__WEBPACK_IMPORTED_MODULE_7__.SelectedProductTypesContext),
+    setSelectedProductTypes = _useContext2.setSelectedProductTypes;
+  var _useContext3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_products_view__WEBPACK_IMPORTED_MODULE_7__.SelectedProductCodesContext),
+    setSelectedProductCodes = _useContext3.setSelectedProductCodes;
+  var _useContext4 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__.SearchTextContext),
+    _useContext5 = _slicedToArray(_useContext4, 2),
+    setSearchText = _useContext5[1];
+  var clearFilters = function clearFilters() {
+    setSelectedCategories(_products_view__WEBPACK_IMPORTED_MODULE_7__.CATEGORIES_FILTER_EMPTY_STATE);
+    setSelectedProductTypes(_products_view__WEBPACK_IMPORTED_MODULE_7__.PRODUCT_TYPES_FILTER_EMPTY_STATE);
+    setSelectedProductCodes(_products_view__WEBPACK_IMPORTED_MODULE_7__.PRODUCT_CODES_FILTER_EMPTY_STATE);
+    setSearchText('');
+  };
+  var isApplyButtonEnabled = true;
+  var categoryRowTitle = Translator.trans(/*@Desc("Category")*/'products_discovery_widget.products_view.filters.row.category.title', {}, 'ibexa_universal_discovery_widget');
+  var productTypeRowTitle = Translator.trans(/*@Desc("Product types")*/'products_discovery_widget.products_view.filters.row.product_type.title', {}, 'ibexa_universal_discovery_widget');
+  var productCodesRowTitle = Translator.trans(/*@Desc("Product codes")*/'products_discovery_widget.products_view.filters.row.product_codes.title', {}, 'ibexa_universal_discovery_widget');
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_filters_filters_panel__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    isApplyButtonEnabled: isApplyButtonEnabled,
+    makeSearch: search,
+    clearFilters: clearFilters
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_collapsible_collapsible__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    title: categoryRowTitle,
+    isInitiallyExpanded: true
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_products_category_filter__WEBPACK_IMPORTED_MODULE_8__["default"], null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_collapsible_collapsible__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    title: productTypeRowTitle,
+    isInitiallyExpanded: true
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_products_type_filter__WEBPACK_IMPORTED_MODULE_6__["default"], null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_collapsible_collapsible__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    title: productCodesRowTitle,
+    isInitiallyExpanded: true
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_products_codes_filter__WEBPACK_IMPORTED_MODULE_9__["default"], null)));
+};
+ProductsFilters.propTypes = {
+  search: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductsFilters);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.type.filter.js":
+/*!**********************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.type.filter.js ***!
+  \**********************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_dropdown_dropdown__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/dropdown/dropdown */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/dropdown/dropdown.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _products_view__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./products.view */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.view.js");
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+
+
+
+
+
+var ProductsTypeFilter = function ProductsTypeFilter() {
+  var _adminUiConfig$conten;
+  var adminUiConfig = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_1__.getAdminUiConfig)();
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_1__.getTranslator)();
+  var dropdownListRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_4__.DropdownPortalRefContext);
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_products_view__WEBPACK_IMPORTED_MODULE_5__.SelectedProductTypesContext),
+    selectedProductTypes = _useContext.selectedProductTypes,
+    setSelectedProductTypes = _useContext.setSelectedProductTypes;
+  var productsContentTypes = (_adminUiConfig$conten = adminUiConfig.contentTypes.product) !== null && _adminUiConfig$conten !== void 0 ? _adminUiConfig$conten : [];
+  var productTypesOptions = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    return productsContentTypes.map(function (_ref) {
+      var identifier = _ref.identifier,
+        name = _ref.name;
+      return {
+        value: identifier,
+        label: name
+      };
+    });
+  }, [productsContentTypes]);
+  var hasOptions = productTypesOptions.length > 0;
+  var noProductTypesInfo = Translator.trans(/*@Desc("No product types defined.")*/'products_discovery_widget.products_view.filters.row.product_type.no_product_types.info', {}, 'ibexa_universal_discovery_widget');
+  var updateSelectedProductType = function updateSelectedProductType(value) {
+    setSelectedProductTypes(function (oldSelectedProductTypes) {
+      var isValueSelected = selectedProductTypes.includes(value);
+      return isValueSelected ? oldSelectedProductTypes.filter(function (oldSelectedProductType) {
+        return oldSelectedProductType != value;
+      }) : [].concat(_toConsumableArray(oldSelectedProductTypes), [value]);
+    });
+  };
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_dropdown_dropdown__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    dropdownListRef: dropdownListRef,
+    single: false,
+    onChange: updateSelectedProductType,
+    value: selectedProductTypes,
+    options: productTypesOptions,
+    disabled: !hasOptions,
+    extraClasses: "c-udw-dropdown"
+  }), !hasOptions && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("small", {
+    className: "ibexa-form-help"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    name: "system-information",
+    extraClasses: "ibexa-icon ibexa-icon--small ibexa-form-help__icon"
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-form-help__content"
+  }, noProductTypesInfo)));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductsTypeFilter);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.view.js":
+/*!***************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.view.js ***!
+  \***************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   CATEGORIES_FILTER_EMPTY_STATE: () => (/* binding */ CATEGORIES_FILTER_EMPTY_STATE),
+/* harmony export */   PRODUCT_CODES_FILTER_EMPTY_STATE: () => (/* binding */ PRODUCT_CODES_FILTER_EMPTY_STATE),
+/* harmony export */   PRODUCT_TYPES_FILTER_EMPTY_STATE: () => (/* binding */ PRODUCT_TYPES_FILTER_EMPTY_STATE),
+/* harmony export */   SearchParamsContext: () => (/* binding */ SearchParamsContext),
+/* harmony export */   SelectedCategoriesContext: () => (/* binding */ SelectedCategoriesContext),
+/* harmony export */   SelectedProductCodesContext: () => (/* binding */ SelectedProductCodesContext),
+/* harmony export */   SelectedProductTypesContext: () => (/* binding */ SelectedProductTypesContext),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination_info__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination.info */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination.info.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_usePaginableFetch__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/usePaginableFetch */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/usePaginableFetch.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _common_services_product_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../../common/services/product.service */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/common/services/product.service.js");
+/* harmony import */ var _product_table_product_table__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../product-table/product.table */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.table.js");
+/* harmony import */ var _products_filters__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./products.filters */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.filters.js");
+/* harmony import */ var _product_variants_view__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./product.variants.view */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/product.variants.view.js");
+/* harmony import */ var _product_discovery_widget_module__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../product.discovery.widget.module */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/product.discovery.widget.module.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+
+
+
+
+
+var SelectedCategoriesContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var SelectedProductTypesContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var SelectedProductCodesContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var SearchParamsContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var CATEGORIES_FILTER_EMPTY_STATE = [];
+var PRODUCT_TYPES_FILTER_EMPTY_STATE = [];
+var PRODUCT_CODES_FILTER_EMPTY_STATE = '';
+var ProductsView = function ProductsView() {
+  var _data$count;
+  var tabsConfig = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__.TabsConfigContext);
+  var restInfo = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__.RestInfoContext);
+  var itemsPerPage = tabsConfig.productsDiscoveryWidgetTab.itemsPerPage;
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_product_discovery_widget_module__WEBPACK_IMPORTED_MODULE_10__.MarkedBaseProductContext),
+    markedBaseProduct = _useContext.markedBaseProduct;
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_5__.SearchTextContext),
+    _useContext3 = _slicedToArray(_useContext2, 1),
+    searchText = _useContext3[0];
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({}),
+    _useState2 = _slicedToArray(_useState, 2),
+    searchParams = _useState2[0],
+    setSearchParams = _useState2[1];
+  var _usePaginableFetch = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_usePaginableFetch__WEBPACK_IMPORTED_MODULE_4__.usePaginableFetch)({
+      itemsPerPage: itemsPerPage,
+      extraFetchParams: searchParams,
+      restInfo: restInfo
+    }, _common_services_product_service__WEBPACK_IMPORTED_MODULE_6__.findProductsBySearchQuery),
+    _usePaginableFetch2 = _slicedToArray(_usePaginableFetch, 4),
+    data = _usePaginableFetch2[0],
+    isLoading = _usePaginableFetch2[1],
+    activePageIndex = _usePaginableFetch2[2],
+    changePage = _usePaginableFetch2[3];
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(CATEGORIES_FILTER_EMPTY_STATE),
+    _useState4 = _slicedToArray(_useState3, 2),
+    selectedCategories = _useState4[0],
+    setSelectedCategories = _useState4[1];
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(PRODUCT_TYPES_FILTER_EMPTY_STATE),
+    _useState6 = _slicedToArray(_useState5, 2),
+    selectedProductTypes = _useState6[0],
+    setSelectedProductTypes = _useState6[1];
+  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(PRODUCT_CODES_FILTER_EMPTY_STATE),
+    _useState8 = _slicedToArray(_useState7, 2),
+    selectedProductCodes = _useState8[0],
+    setSelectedProductCodes = _useState8[1];
+  var totalCount = (_data$count = data === null || data === void 0 ? void 0 : data.count) !== null && _data$count !== void 0 ? _data$count : null;
+  var search = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
+    return setSearchParams({
+      productNameSearchText: searchText,
+      productsCodes: selectedProductCodes ? selectedProductCodes.split(',').map(function (productCode) {
+        return productCode.trim();
+      }) : [],
+      productsTypes: selectedProductTypes,
+      productsCategories: selectedCategories.map(function (_ref) {
+        var id = _ref.id;
+        return id;
+      })
+    });
+  }, [selectedCategories, selectedProductTypes, selectedProductCodes, searchText]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    search();
+    changePage(0);
+  }, [searchText]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (totalCount === null) {
+      return;
+    }
+    var maxPageIndex = totalCount === 0 ? 0 : Math.ceil(totalCount / itemsPerPage) - 1;
+    changePage(Math.min(maxPageIndex, activePageIndex));
+  }, [data, itemsPerPage, activePageIndex]);
+  if (markedBaseProduct) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_product_variants_view__WEBPACK_IMPORTED_MODULE_9__["default"], null);
+  }
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-products-tab-layout"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SelectedCategoriesContext.Provider, {
+    value: {
+      selectedCategories: selectedCategories,
+      setSelectedCategories: setSelectedCategories
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SelectedProductTypesContext.Provider, {
+    value: {
+      selectedProductTypes: selectedProductTypes,
+      setSelectedProductTypes: setSelectedProductTypes
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SelectedProductCodesContext.Provider, {
+    value: {
+      selectedProductCodes: selectedProductCodes,
+      setSelectedProductCodes: setSelectedProductCodes
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SearchParamsContext.Provider, {
+    value: {
+      searchParams: searchParams
+    }
+  }, data && !isLoading ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-products-tab-layout__table-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_product_table_product_table__WEBPACK_IMPORTED_MODULE_7__["default"], {
+    items: data.items,
+    totalCount: totalCount
+  }), data.items.length !== 0 && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-pagination"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination_info__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    totalCount: totalCount,
+    viewingCount: data.items.length
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination__WEBPACK_IMPORTED_MODULE_1__["default"], {
+    proximity: 1,
+    itemsPerPage: itemsPerPage,
+    activePageIndex: activePageIndex,
+    totalCount: totalCount,
+    onPageChange: changePage,
+    disabled: false
+  }))) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-products-tab-layout__spinner-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_3__["default"], null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-products-tab-layout__filters-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_products_filters__WEBPACK_IMPORTED_MODULE_8__["default"], {
+    search: search
+  })))))));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductsView);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/selected-items/selected.items.product.item.description.js":
+/*!******************************************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/selected-items/selected.items.product.item.description.js ***!
+  \******************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+
+
+var SelectedItemsProductItemCode = function SelectedItemsProductItemCode(_ref) {
+  var code = _ref.code;
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-selected-items-product-item-code ibexa-badge ibexa-badge--info"
+  }, code);
+};
+SelectedItemsProductItemCode.propTypes = {
+  code: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SelectedItemsProductItemCode);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/selected-items/selected.items.product.item.js":
+/*!******************************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/selected-items/selected.items.product.item.js ***!
+  \******************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PRODUCT_ITEM_TYPE: () => (/* binding */ PRODUCT_ITEM_TYPE),
+/* harmony export */   SelectedItemsProductItemConfig: () => (/* binding */ SelectedItemsProductItemConfig),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_selected_items_selected_items_panel_item__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/selected-items/selected.items.panel.item */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/selected-items/selected.items.panel.item.js");
+/* harmony import */ var _selected_items_product_item_description__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./selected.items.product.item.description */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/selected-items/selected.items.product.item.description.js");
+/* harmony import */ var _selected_items_product_item_variants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./selected.items.product.item.variants */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/selected-items/selected.items.product.item.variants.js");
+
+
+
+
+
+var PRODUCT_ITEM_TYPE = 'PRODUCT_ITEM_TYPE';
+var SelectedItemsProductItem = function SelectedItemsProductItem(_ref) {
+  var item = _ref.item;
+  if (item.type !== PRODUCT_ITEM_TYPE) {
+    throw new Error("SelectedItemsProductItem: item type ".concat(item.type, " not supported by this component"));
+  }
+  var _item$data$baseProduc = item.data.baseProduct,
+    name = _item$data$baseProduc.name,
+    code = _item$data$baseProduc.code,
+    thumbnail = _item$data$baseProduc.thumbnail;
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_selected_items_selected_items_panel_item__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    thumbnailData: thumbnail,
+    item: item,
+    name: name,
+    description: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_selected_items_product_item_description__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      code: code
+    }),
+    extraContent: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_selected_items_product_item_variants__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      item: item
+    })
+  });
+};
+SelectedItemsProductItem.propTypes = {
+  item: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object).isRequired
+};
+var SelectedItemsProductItemConfig = {
+  itemType: PRODUCT_ITEM_TYPE,
+  component: SelectedItemsProductItem,
+  priority: 100
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SelectedItemsProductItem);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/selected-items/selected.items.product.item.variants.js":
+/*!***************************************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/selected-items/selected.items.product.item.variants.js ***!
+  \***************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_middle_ellipsis_middle_ellipsis__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/middle-ellipsis/middle.ellipsis */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/middle-ellipsis/middle.ellipsis.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/hooks/useSelectedItemsReducer.js");
+/* harmony import */ var _selected_items_product_item_description__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./selected.items.product.item.description */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/selected-items/selected.items.product.item.description.js");
+/* harmony import */ var _common_services_product_service__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../../../common/services/product.service */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/common/services/product.service.js");
+/* harmony import */ var _common_hooks_useHeightPreservation__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../../../common/hooks/useHeightPreservation */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/common/hooks/useHeightPreservation.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var SelectedItemsProductItemVariants = function SelectedItemsProductItemVariants(_ref) {
+  var item = _ref.item;
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
+  var restInfo = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_9__.RestInfoContext);
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_9__.SelectedItemsContext),
+    dispatchSelectedItemsAction = _useContext.dispatchSelectedItemsAction;
+  var _item$data = item.data,
+    selectedVariants = _item$data.productVariants,
+    _item$data$baseProduc = _item$data.baseProduct,
+    baseProductCode = _item$data$baseProduc.code,
+    totalVariantsCount = _item$data$baseProduc.variants,
+    allVariantsCodes = _item$data$baseProduc.variants_codes;
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState2 = _slicedToArray(_useState, 2),
+    isVariantsListOpened = _useState2[0],
+    setIsVariantsListOpened = _useState2[1];
+  var itemsPerPage = 10;
+  var selectedVariantsArray = selectedVariants === true ? allVariantsCodes : selectedVariants;
+  var items = selectedVariantsArray !== null && selectedVariantsArray !== void 0 ? selectedVariantsArray : [];
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0),
+    _useState4 = _slicedToArray(_useState3, 2),
+    activePageIndex = _useState4[0],
+    setActivePageIndex = _useState4[1];
+  var offset = activePageIndex * itemsPerPage;
+  var currentPageItems = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    return items.slice(offset, offset + itemsPerPage);
+  }, [items, offset, itemsPerPage]);
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState6 = _slicedToArray(_useState5, 2),
+    currentPageItemsLoaded = _useState6[0],
+    setCurrentPageItemsLoaded = _useState6[1];
+  var isLoading = currentPageItemsLoaded === null;
+  var isPaginationVisible = items.length > itemsPerPage;
+  var _useHeightPreservatio = (0,_common_hooks_useHeightPreservation__WEBPACK_IMPORTED_MODULE_13__.useHeightPreservation)({
+      minHeight: 100,
+      shouldApply: isLoading
+    }),
+    style = _useHeightPreservatio.style,
+    onElementRefChange = _useHeightPreservatio.onElementRefChange;
+  var handlePageChange = function handlePageChange(newPageIndex) {
+    setActivePageIndex(newPageIndex);
+    setCurrentPageItemsLoaded(null);
+  };
+  var removeFromSelection = function removeFromSelection(variantCodeToRemove) {
+    var itemWithoutVariant = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_8__["default"])(item);
+    var productVariants = itemWithoutVariant.data.productVariants;
+    var selectedVariantsCodes = productVariants === true ? (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_8__["default"])(allVariantsCodes) : productVariants;
+    itemWithoutVariant.data.productVariants = selectedVariantsCodes.filter(function (variantCode) {
+      return variantCode !== variantCodeToRemove;
+    });
+    if (itemWithoutVariant.data.productVariants.length === 0) {
+      dispatchSelectedItemsAction({
+        type: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_10__.REMOVE_SELECTED_ITEMS,
+        itemsIdsWithTypes: [{
+          id: itemWithoutVariant.id,
+          type: itemWithoutVariant.type
+        }]
+      });
+    } else {
+      dispatchSelectedItemsAction({
+        type: _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_hooks_useSelectedItemsReducer__WEBPACK_IMPORTED_MODULE_10__.UPDATE_SELECTED_ITEMS,
+        items: [itemWithoutVariant]
+      });
+    }
+  };
+  var noVariantsLabel = Translator.trans(/*@Desc("Variants: No")*/'products_discovery_widget.selected_items.product.variants_label.no_variants', {}, 'ibexa_universal_discovery_widget');
+  var hasVariantsLabel = Translator.trans(/*@Desc("Variants (%selectedVariantsCount%/%totalVariantsCount%)")*/'products_discovery_widget.selected_items.product.variants_label.has_variants', {
+    selectedVariantsCount: selectedVariants === true ? totalVariantsCount : selectedVariants === null || selectedVariants === void 0 ? void 0 : selectedVariants.length,
+    totalVariantsCount: totalVariantsCount
+  }, 'ibexa_universal_discovery_widget');
+  var variantsLabel = totalVariantsCount ? hasVariantsLabel : noVariantsLabel;
+  var renderVariantInfo = function renderVariantInfo(_ref2) {
+    var code = _ref2.code,
+      name = _ref2.name;
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      key: code,
+      className: "c-selected-items-product-item-variants__list-item"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "c-selected-items-product-item-variants__list-item-arrow"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      name: "go-right",
+      extraClasses: "ibexa-icon--tiny-small"
+    })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "c-selected-items-product-item-variants__list-item-content"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "c-selected-items-product-item-variants__list-item-name"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_middle_ellipsis_middle_ellipsis__WEBPACK_IMPORTED_MODULE_6__["default"], {
+      name: name
+    })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "c-selected-items-product-item-variants__list-item-code"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_selected_items_product_item_description__WEBPACK_IMPORTED_MODULE_11__["default"], {
+      code: code
+    }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "c-selected-items-product-item-variants__list-item-actions"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      type: "button",
+      className: "c-selected-items-product-item-variants__list-item-remove btn ibexa-btn ibexa-btn--small ibexa-btn--ghost ibexa-btn--no-text",
+      onClick: function onClick() {
+        return removeFromSelection(code);
+      }
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      name: "discard",
+      extraClasses: "ibexa-icon--tiny"
+    }))));
+  };
+  var infoClassName = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__.createCssClassNames)({
+    'c-selected-items-product-item-variants__info': true,
+    'c-selected-items-product-item-variants__info--has-variants': totalVariantsCount > 0
+  });
+  var infoArrowClassName = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__.createCssClassNames)({
+    'c-selected-items-product-item-variants__info-arrow': true,
+    'c-selected-items-product-item-variants__info-arrow--open': isVariantsListOpened
+  });
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    var maxPageIndex = Math.ceil(items.length / itemsPerPage) - 1;
+    setActivePageIndex(Math.min(maxPageIndex, activePageIndex));
+  }, [items, itemsPerPage, activePageIndex]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (!isVariantsListOpened) {
+      return;
+    }
+    setCurrentPageItemsLoaded(null);
+    (0,_common_services_product_service__WEBPACK_IMPORTED_MODULE_12__.findProductVariantsBySearchQuery)(_objectSpread(_objectSpread({}, restInfo), {}, {
+      baseProductCode: baseProductCode,
+      variantsCodes: currentPageItems,
+      limit: currentPageItems.length
+    }), function (response) {
+      setCurrentPageItemsLoaded(response.items);
+    });
+  }, [currentPageItems, isVariantsListOpened]);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-selected-items-product-item-variants"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: infoClassName,
+    onClick: function onClick() {
+      return setIsVariantsListOpened(function (isOpenedOld) {
+        return !isOpenedOld && totalVariantsCount > 0;
+      });
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-selected-items-product-item-variants__info-label"
+  }, variantsLabel), !!totalVariantsCount && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: infoArrowClassName
+  })), isVariantsListOpened && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    ref: onElementRefChange,
+    style: style,
+    className: "c-selected-items-product-item-variants__list-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-selected-items-product-item-variants__list"
+  }, isLoading ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-selected-items-product-item-variants__list-spinner-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_7__["default"], null)) : currentPageItemsLoaded.map(renderVariantInfo)), isPaginationVisible && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-selected-items-product-item-variants__pagination"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-pagination"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    proximity: 1,
+    itemsPerPage: itemsPerPage,
+    activePageIndex: activePageIndex,
+    totalCount: items.length,
+    onPageChange: handlePageChange,
+    disabled: false
+  })))));
+};
+SelectedItemsProductItemVariants.propTypes = {
+  item: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SelectedItemsProductItemVariants);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/config.loader.js":
+/*!**************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/config.loader.js ***!
+  \**************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _components_selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./components/selected-items/selected.items.product.item */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/selected-items/selected.items.product.item.js");
+/* harmony import */ var _product_discovery_widget_module__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./product.discovery.widget.module */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/product.discovery.widget.module.js");
+
+
+(function (ibexa) {
+  ibexa.addConfig('adminUiConfig.universalDiscoveryWidget.tabs', [_product_discovery_widget_module__WEBPACK_IMPORTED_MODULE_1__.ProductDiscoveryWidgetTab], true);
+  ibexa.addConfig('adminUiConfig.universalDiscoveryWidget.universalSelectItemsComponentsConfigs', [_components_selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_0__.SelectedItemsProductItemConfig], true);
+})(window.ibexa);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/product.discovery.widget.module.js":
+/*!********************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/product.discovery.widget.module.js ***!
+  \********************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MarkedBaseProductContext: () => (/* binding */ MarkedBaseProductContext),
+/* harmony export */   ProductDiscoveryWidgetTab: () => (/* binding */ ProductDiscoveryWidgetTab),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_tab_tab__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/tab/tab */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/components/tab/tab.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_icon_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/icon.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/icon.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _components_products_view_products_view__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/products-view/products.view */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/products-view/products.view.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+var MarkedBaseProductContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var ProductDiscoveryWidgetModule = function ProductDiscoveryWidgetModule() {
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__.getTranslator)();
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState2 = _slicedToArray(_useState, 2),
+    markedBaseProduct = _useState2[0],
+    setMarkedBaseProduct = _useState2[1];
+  var contentOnTheFlyConfig = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.ContentOnTheFlyConfigContext);
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.SearchTextContext),
+    _useContext2 = _slicedToArray(_useContext, 2),
+    searchText = _useContext2[0],
+    setSearchText = _useContext2[1];
+  var tabsConfig = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    return [_objectSpread(_objectSpread({}, ProductDiscoveryWidgetTab), {}, {
+      isHiddenOnList: false
+    })];
+  }, []);
+  var makeSearch = function makeSearch(text) {
+    setSearchText(text);
+    setMarkedBaseProduct(null);
+  };
+  var actionsDisabledMap = {
+    'sort-switcher': true,
+    'view-switcher': true
+  };
+  var productTabTableView = {
+    value: 'product-tab-table-view',
+    iconName: null,
+    getLabel: function getLabel() {
+      return Translator.trans(/*@Desc("Table")*/'products_discovery_widget.views.table.label', {}, 'ibexa_universal_discovery_widget');
+    }
+  };
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "m-products-tab"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.TabsContext.Provider, {
+    value: tabsConfig
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.ContentOnTheFlyConfigContext.Provider, {
+    value: _objectSpread(_objectSpread({}, contentOnTheFlyConfig), {}, {
+      hidden: true
+    })
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.ViewContext.Provider, {
+    value: {
+      views: [productTabTableView]
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_universal_discovery_module__WEBPACK_IMPORTED_MODULE_2__.SearchTextContext.Provider, {
+    value: [searchText, setSearchText, makeSearch]
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_universal_discovery_components_tab_tab__WEBPACK_IMPORTED_MODULE_1__["default"], {
+    isRightSidebarHidden: true,
+    actionsDisabledMap: actionsDisabledMap
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-products-tab-content"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(MarkedBaseProductContext.Provider, {
+    value: {
+      markedBaseProduct: markedBaseProduct,
+      setMarkedBaseProduct: setMarkedBaseProduct
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_products_view_products_view__WEBPACK_IMPORTED_MODULE_5__["default"], null)))))))));
+};
+var ProductDiscoveryWidgetTab = {
+  id: 'products_discovery_widget_tab',
+  component: ProductDiscoveryWidgetModule,
+  getLabel: function getLabel() {
+    var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_4__.getTranslator)();
+    return Translator.trans(/*@Desc("Products")*/'products.label', {}, 'ibexa_universal_discovery_widget');
+  },
+  getIcon: function getIcon() {
+    return (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_icon_helper__WEBPACK_IMPORTED_MODULE_3__.getIconPath)('product');
+  },
+  isHiddenOnList: true
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductDiscoveryWidgetModule);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/components/products-table/product.table.item.js":
+/*!**************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/components/products-table/product.table.item.js ***!
+  \**************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.cell */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.cell.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_row__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.row */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.row.js");
+/* harmony import */ var _products_selector_module__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../products.selector.module */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/products.selector.module.js");
+/* harmony import */ var _variants_viewer_components_variants_popup__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../../variants-viewer/components/variants.popup */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/variants-viewer/components/variants.popup.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+
+
+
+var ProductTableItem = function ProductTableItem(_ref) {
+  var productItem = _ref.productItem;
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_products_selector_module__WEBPACK_IMPORTED_MODULE_7__.SelectedLocallyProductsCodesContext),
+    selectedLocallyProductsItemsCodes = _useContext.selectedLocallyProductsItemsCodes,
+    onSelectedLocallyProductItemsToggle = _useContext.onSelectedLocallyProductItemsToggle;
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_products_selector_module__WEBPACK_IMPORTED_MODULE_7__.SelectedProductsContext),
+    onSelectedProductItemRemove = _useContext2.onSelectedProductItemRemove,
+    onSelectedProductVariantRemove = _useContext2.onSelectedProductVariantRemove;
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState2 = _slicedToArray(_useState, 2),
+    isVariantsPopupOpened = _useState2[0],
+    setIsVariantsPopupOpened = _useState2[1];
+  var isLocallySelected = selectedLocallyProductsItemsCodes.includes(productItem.productCode);
+  var _productItem$productD = productItem.productData,
+    productName = _productItem$productD.name,
+    productType = _productItem$productD.type,
+    allVariantsCodes = _productItem$productD.variants_codes,
+    totalVariantsCount = _productItem$productD.variants,
+    productStock = _productItem$productD.stock,
+    productBasePrice = _productItem$productD.base_price,
+    productCode = productItem.productCode,
+    productVariants = productItem.productVariants;
+  var variantsCodes = productVariants === true ? allVariantsCodes : productVariants;
+  var hasVariants = totalVariantsCount > 0;
+  var noVariantsLabel = Translator.trans(/*@Desc("No")*/'product_table_item.variants_btn.no_variants.label', {}, 'ibexa_products_selector');
+  var hasVariantsBtnLabel = Translator.trans(/*@Desc("Yes (%variantsCount%/%totalVariantsCount%)")*/'product_table_item.variants_btn.has_variants.label', {
+    variantsCount: productVariants === true ? totalVariantsCount : productVariants === null || productVariants === void 0 ? void 0 : productVariants.length,
+    totalVariantsCount: totalVariantsCount
+  }, 'ibexa_products_selector');
+  var variantsLabel = hasVariants ? hasVariantsBtnLabel : noVariantsLabel;
+  var removeBtnTitle = Translator.trans(/*@Desc("Remove from selection")*/'product_table.remove_btn.title', {}, 'ibexa_products_selector');
+  var renderToggleSelection = function renderToggleSelection() {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
+      type: "checkbox",
+      className: "ibexa-input ibexa-input--checkbox",
+      checked: isLocallySelected,
+      readOnly: true,
+      onClick: function onClick() {
+        return onSelectedLocallyProductItemsToggle(productCode);
+      }
+    });
+  };
+  var renderRemoveVariantBtn = function renderRemoveVariantBtn(productVariant) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      type: "button",
+      className: "btn ibexa-btn ibexa-btn--ghost ibexa-btn--small ibexa-btn--no-text",
+      onClick: function onClick() {
+        return onSelectedProductVariantRemove(productCode, productVariant.code);
+      },
+      "data-tooltip-container-selector": ".c-pc-selector-product-variants-popup",
+      title: removeBtnTitle
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      name: "trash",
+      extraClasses: "ibexa-icon ibexa-icon--small"
+    }));
+  };
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_row__WEBPACK_IMPORTED_MODULE_6__["default"], {
+    extraClasses: "c-pc-selector-product-table-item"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    hasCheckbox: true
+  }, renderToggleSelection()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], null, productName), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-badge ibexa-badge--info"
+  }, productCode)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], null, productType), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], null, hasVariants ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    type: "button",
+    className: "c-pc-selector-product-table-item__show-variants-btn btn ibexa-btn ibexa-btn--ghost ibexa-btn--small",
+    onClick: function onClick() {
+      return setIsVariantsPopupOpened(true);
+    },
+    title: variantsLabel,
+    ref: _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_3__.parse
+  }, variantsLabel, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    name: "caret-next",
+    extraClasses: "c-pc-selector-product-table-item__show-variants-btn-icon ibexa-icon--tiny-small"
+  })), isVariantsPopupOpened && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_variants_viewer_components_variants_popup__WEBPACK_IMPORTED_MODULE_8__["default"], {
+    variantsCodes: variantsCodes,
+    baseProductData: productItem.productData,
+    onClose: function onClose() {
+      return setIsVariantsPopupOpened(false);
+    },
+    renderActionColumn: renderRemoveVariantBtn
+  })) : noVariantsLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], null, productStock), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], null, productBasePrice), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_5__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    type: "button",
+    className: "btn ibexa-btn ibexa-btn--ghost ibexa-btn--small ibexa-btn--no-text",
+    onClick: function onClick() {
+      onSelectedProductItemRemove(productCode);
+    },
+    title: removeBtnTitle,
+    ref: _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_3__.parse
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    name: "trash",
+    extraClasses: "ibexa-icon ibexa-icon--small"
+  }))));
+};
+ProductTableItem.propTypes = {
+  productItem: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductTableItem);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/components/products-table/product.table.js":
+/*!*********************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/components/products-table/product.table.js ***!
+  \*********************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.cell */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.cell.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_row__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.row */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.row.js");
+/* harmony import */ var _product_table_item__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./product.table.item */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/components/products-table/product.table.item.js");
+/* harmony import */ var _products_selector_module__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../products.selector.module */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/products.selector.module.js");
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+
+
+
+
+
+
+
+
+
+var ProductTable = function ProductTable(_ref) {
+  var items = _ref.items;
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_products_selector_module__WEBPACK_IMPORTED_MODULE_9__.SelectedLocallyProductsCodesContext),
+    selectedLocallyProductsItemsCodes = _useContext.selectedLocallyProductsItemsCodes,
+    setSelectedLocallyProductsItemsCodes = _useContext.setSelectedLocallyProductsItemsCodes;
+  var checkboxRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var tableItemsProductCodes = items.map(function (productItem) {
+    return productItem.productCode;
+  });
+  var selectedLocallyItemsCodesFromTable = selectedLocallyProductsItemsCodes.filter(function (productCode) {
+    return tableItemsProductCodes.includes(productCode);
+  });
+  var isAnySelected = selectedLocallyItemsCodesFromTable.length > 0;
+  var isIndeterminate = isAnySelected && tableItemsProductCodes.length > selectedLocallyItemsCodesFromTable.length;
+  var nameLabel = Translator.trans(/*@Desc("Name")*/'product_table.header.name', {}, 'ibexa_products_selector');
+  var codeLabel = Translator.trans(/*@Desc("Code")*/'product_table.header.code', {}, 'ibexa_products_selector');
+  var typeLabel = Translator.trans(/*@Desc("Type")*/'product_table.header.type', {}, 'ibexa_products_selector');
+  var variantsLabel = Translator.trans(/*@Desc("Variants")*/'product_variants_table.header.variants', {}, 'ibexa_products_selector');
+  var stockLabel = Translator.trans(/*@Desc("Stock")*/'product_table.header.stock', {}, 'ibexa_products_selector');
+  var basePriceLabel = Translator.trans(/*@Desc("Base price")*/'product_table.header.base_price', {}, 'ibexa_products_selector');
+  var handleAllItemsToggle = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
+    if (selectedLocallyItemsCodesFromTable.length > 0) {
+      setSelectedLocallyProductsItemsCodes(function (productCodes) {
+        return productCodes.filter(function (productCode) {
+          return !tableItemsProductCodes.includes(productCode);
+        });
+      });
+    } else {
+      setSelectedLocallyProductsItemsCodes(function (productCodes) {
+        return _toConsumableArray(new Set([].concat(_toConsumableArray(productCodes), _toConsumableArray(tableItemsProductCodes))));
+      });
+    }
+  }, [tableItemsProductCodes, selectedLocallyItemsCodesFromTable, setSelectedLocallyProductsItemsCodes]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (!checkboxRef.current) {
+      return;
+    }
+    checkboxRef.current.indeterminate = isIndeterminate;
+  }, [isIndeterminate]);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    isLastColumnSticky: true
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head__WEBPACK_IMPORTED_MODULE_5__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_row__WEBPACK_IMPORTED_MODULE_7__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
+    ref: checkboxRef,
+    type: "checkbox",
+    className: "ibexa-input ibexa-input--checkbox",
+    checked: isAnySelected,
+    readOnly: true,
+    onClick: handleAllItemsToggle
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__["default"], null, nameLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__["default"], null, codeLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__["default"], null, typeLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__["default"], null, variantsLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__["default"], null, stockLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__["default"], null, basePriceLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__["default"], null))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body__WEBPACK_IMPORTED_MODULE_4__["default"], null, items.map(function (productItem) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_product_table_item__WEBPACK_IMPORTED_MODULE_8__["default"], {
+      key: productItem.productCode,
+      productItem: productItem
+    });
+  })));
+};
+ProductTable.propTypes = {
+  items: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().array).isRequired,
+  totalCount: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().number).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductTable);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/components/products-table/product.table.view.js":
+/*!**************************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/components/products-table/product.table.view.js ***!
+  \**************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination_info__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination.info */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination.info.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner.js");
+/* harmony import */ var _product_table__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./product.table */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/components/products-table/product.table.js");
+/* harmony import */ var _products_selector_module__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../products.selector.module */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/products.selector.module.js");
+/* harmony import */ var _common_services_product_service__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../../common/services/product.service */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/common/services/product.service.js");
+/* harmony import */ var _common_hooks_useHeightPreservation__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../../common/hooks/useHeightPreservation */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/common/hooks/useHeightPreservation.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+
+
+
+var ProductTableView = function ProductTableView() {
+  var restInfo = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_1__.getRestInfo)();
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_products_selector_module__WEBPACK_IMPORTED_MODULE_6__.ProductsSelectorConfigContext),
+    itemsPerPage = _useContext.itemsPerPage;
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_products_selector_module__WEBPACK_IMPORTED_MODULE_6__.SelectedProductsContext),
+    items = _useContext2.selectedProductsItems,
+    onSelectedProductItemsDataUpdate = _useContext2.onSelectedProductItemsDataUpdate;
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0),
+    _useState2 = _slicedToArray(_useState, 2),
+    activePageIndex = _useState2[0],
+    setActivePageIndex = _useState2[1];
+  var loadingProductsCodes = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)([]);
+  var offset = activePageIndex * itemsPerPage;
+  var currentPageItems = items.slice(offset, offset + itemsPerPage);
+  var handlePageChange = function handlePageChange(newPageIndex) {
+    return setActivePageIndex(newPageIndex);
+  };
+  var isPageItemsProductsDataLoaded = currentPageItems.every(function (item) {
+    return !!item.productData;
+  });
+  var _useHeightPreservatio = (0,_common_hooks_useHeightPreservation__WEBPACK_IMPORTED_MODULE_8__.useHeightPreservation)({
+      minHeight: 150,
+      shouldApply: !isPageItemsProductsDataLoaded
+    }),
+    style = _useHeightPreservatio.style,
+    onElementRefChange = _useHeightPreservatio.onElementRefChange;
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    var maxPageIndex = Math.ceil(items.length / itemsPerPage) - 1;
+    setActivePageIndex(Math.min(maxPageIndex, activePageIndex));
+  }, [items, itemsPerPage, activePageIndex]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    var productsWithMissingData = currentPageItems.filter(function (productItem) {
+      return !productItem.productData;
+    });
+    var productsWithMissingDataCodes = productsWithMissingData.map(function (productItem) {
+      return productItem.productCode;
+    });
+    var productsToLoadCodes = productsWithMissingDataCodes.filter(function (productCode) {
+      return !loadingProductsCodes.current.includes(productCode);
+    });
+    if (productsToLoadCodes.length) {
+      loadingProductsCodes.current = [].concat(_toConsumableArray(loadingProductsCodes.current), _toConsumableArray(productsToLoadCodes));
+      (0,_common_services_product_service__WEBPACK_IMPORTED_MODULE_7__.findProductsBySearchQuery)(_objectSpread(_objectSpread({}, restInfo), {}, {
+        productsCodes: productsToLoadCodes,
+        limit: productsToLoadCodes.length
+      }), function (response) {
+        var productsDataMap = response.items.reduce(function (dataMap, responseItem) {
+          dataMap[responseItem.code] = responseItem;
+          return dataMap;
+        }, {});
+        onSelectedProductItemsDataUpdate(productsDataMap);
+        loadingProductsCodes.current = loadingProductsCodes.current.filter(function (productCode) {
+          return productsToLoadCodes.includes(productCode);
+        });
+      });
+    }
+  }, [currentPageItems]);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    ref: onElementRefChange,
+    style: style,
+    className: "c-pc-selector-product-table-view"
+  }, isPageItemsProductsDataLoaded ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_product_table__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    items: currentPageItems
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-pagination"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination_info__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    totalCount: items.length,
+    viewingCount: currentPageItems.length
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    proximity: 1,
+    itemsPerPage: itemsPerPage,
+    activePageIndex: activePageIndex,
+    totalCount: items.length,
+    onPageChange: handlePageChange,
+    disabled: false
+  }))) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-pc-selector-product-variants-view__spinner-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_4__["default"], null)));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductTableView);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/components/selector/selector.view.js":
+/*!***************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/components/selector/selector.view.js ***!
+  \***************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _products_selector_module__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../products.selector.module */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/products.selector.module.js");
+
+
+
+
+
+var SelectorView = function SelectorView(_ref) {
+  var tableElement = _ref.children,
+    onUdwOpen = _ref.onUdwOpen,
+    onSelectedLocallyProductsRemove = _ref.onSelectedLocallyProductsRemove;
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_products_selector_module__WEBPACK_IMPORTED_MODULE_4__.SelectedProductsContext),
+    selectedProductsItems = _useContext.selectedProductsItems;
+  var _useContext2 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_products_selector_module__WEBPACK_IMPORTED_MODULE_4__.SelectedLocallyProductsCodesContext),
+    selectedLocallyProductsItemsCodes = _useContext2.selectedLocallyProductsItemsCodes;
+  var selectorInfoText = Translator.trans(/*@Desc("Choose products for discount")*/'selector_view.selector_info', {}, 'ibexa_products_selector');
+  var selectProductsBtnLabel = Translator.trans(/*@Desc("Select products")*/'selector_view.select_product_btn.label', {}, 'ibexa_products_selector');
+  var removeLocallySelectedProductsBtnLabel = Translator.trans(/*@Desc("Delete")*/'selector_view.remove_locally_selected_products_btn.label', {}, 'ibexa_products_selector');
+  var renderOpenUdwBtn = function renderOpenUdwBtn() {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      type: "button",
+      className: "button ibexa-btn ibexa-btn--secondary ibexa-btn--small",
+      onClick: function onClick() {
+        return onUdwOpen();
+      }
+    }, selectProductsBtnLabel);
+  };
+  var renderDeleteSelectedActionBtn = function renderDeleteSelectedActionBtn() {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      type: "button",
+      className: "btn ibexa-btn ibexa-btn--ghost ibexa-btn--small",
+      onClick: function onClick() {
+        onSelectedLocallyProductsRemove();
+      },
+      disabled: !selectedLocallyProductsItemsCodes.length
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      name: "trash",
+      extraClasses: "ibexa-icon ibexa-icon--small"
+    }), " ", removeLocallySelectedProductsBtnLabel);
+  };
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-pc-selector-selector-view"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-pc-selector-selector-view__header"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-pc-selector-selector-view__info"
+  }, selectorInfoText), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-pc-selector-selector-view__actions"
+  }, !!selectedProductsItems.length && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, renderOpenUdwBtn(), renderDeleteSelectedActionBtn()))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-pc-selector-selector-view__no-item-actions"
+  }, !selectedProductsItems.length && renderOpenUdwBtn()), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-pc-selector-selector-view__table"
+  }, tableElement));
+};
+SelectorView.propTypes = {
+  children: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().node).isRequired,
+  onUdwOpen: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func).isRequired,
+  onSelectedLocallyProductsRemove: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SelectorView);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/products.selector.module.js":
+/*!******************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/products.selector.module.js ***!
+  \******************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ProductsSelectorConfigContext: () => (/* binding */ ProductsSelectorConfigContext),
+/* harmony export */   SelectedLocallyProductsCodesContext: () => (/* binding */ SelectedLocallyProductsCodesContext),
+/* harmony export */   SelectedProductsContext: () => (/* binding */ SelectedProductsContext),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom */ "react-dom");
+/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_dom__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper.js");
+/* harmony import */ var _components_products_table_product_table_view__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/products-table/product.table.view */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/components/products-table/product.table.view.js");
+/* harmony import */ var _components_selector_selector_view__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/selector/selector.view */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/components/selector/selector.view.js");
+/* harmony import */ var _product_discovery_widget_components_selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../product-discovery-widget/components/selected-items/selected.items.product.item */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/selected-items/selected.items.product.item.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+
+var ProductsSelectorConfigContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var SelectedProductsContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var SelectedLocallyProductsCodesContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var ProductsSelectorModule = function ProductsSelectorModule(_ref) {
+  var handleProductsChanged = _ref.handleProductsChanged,
+    udwConfigProductDiscoveryWidget = _ref.udwConfigProductDiscoveryWidget,
+    initialValue = _ref.initialValue,
+    itemsPerPage = _ref.itemsPerPage;
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(initialValue),
+    _useState2 = _slicedToArray(_useState, 2),
+    selectedProductsItems = _useState2[0],
+    setSelectedProductsItems = _useState2[1];
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
+    _useState4 = _slicedToArray(_useState3, 2),
+    selectedLocallyProductsItemsCodes = _useState4[0],
+    setSelectedLocallyProductsItemsCodes = _useState4[1];
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState6 = _slicedToArray(_useState5, 2),
+    isUdwOpened = _useState6[0],
+    setIsUdwOpened = _useState6[1];
+  var previousSelectedProductItems = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(selectedProductsItems);
+  var UniversalDiscovery = window.ibexa.modules.UniversalDiscovery;
+  var udwContainer = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var udwTitle = Translator.trans(/*@Desc("Select products")*/'universal_discovery_widget.title', {}, 'ibexa_products_selector');
+  var initSelectedItems = selectedProductsItems.map(function (productItem) {
+    var productCode = productItem.productCode,
+      productVariants = productItem.productVariants;
+    return {
+      type: _product_discovery_widget_components_selected_items_selected_items_product_item__WEBPACK_IMPORTED_MODULE_6__.PRODUCT_ITEM_TYPE,
+      productCode: productCode,
+      productVariants: productVariants
+    };
+  });
+  var updateOldSelectedItemsWithNew = function updateOldSelectedItemsWithNew(selectedItemsOld, selectedItemsNew) {
+    return selectedItemsOld.reduce(function (updatedItems, oldItem) {
+      var selectedRelatedItem = selectedItemsNew.find(function (selectedItem) {
+        return selectedItem.productCode === oldItem.productCode;
+      });
+      if (!selectedRelatedItem) {
+        return [].concat(_toConsumableArray(updatedItems), [oldItem]);
+      }
+      var hasVariants = selectedRelatedItem.productData.variants > 0;
+      if (!hasVariants) {
+        return [].concat(_toConsumableArray(updatedItems), [selectedRelatedItem]);
+      }
+      var oldItemVariantsCodes = oldItem.productVariants;
+      var relatedItemVariantsCodes = selectedRelatedItem.productVariants;
+      return [].concat(_toConsumableArray(updatedItems), [_objectSpread(_objectSpread({}, selectedRelatedItem), {}, {
+        productVariants: _toConsumableArray(new Set([].concat(_toConsumableArray(oldItemVariantsCodes), _toConsumableArray(relatedItemVariantsCodes))))
+      })]);
+    }, []);
+  };
+  var handleUdwCancel = function handleUdwCancel() {
+    setIsUdwOpened(false);
+  };
+  var handleUdwConfirm = function handleUdwConfirm(selectedUdwItems) {
+    var selectedItems = selectedUdwItems.map(function (_ref2) {
+      var _ref2$data = _ref2.data,
+        baseProduct = _ref2$data.baseProduct,
+        productVariants = _ref2$data.productVariants;
+      return {
+        productData: baseProduct,
+        productCode: baseProduct.code,
+        productVariants: productVariants
+      };
+    });
+    setIsUdwOpened(false);
+    setSelectedProductsItems(function (selectedProductsItemsOld) {
+      var newItems = selectedItems.filter(function (selectedItem) {
+        var hasOldItem = selectedProductsItemsOld.some(function (selectedProductsItem) {
+          return selectedProductsItem.productCode === selectedItem.productCode;
+        });
+        return !hasOldItem;
+      });
+      var updatedOldItems = updateOldSelectedItemsWithNew(selectedProductsItemsOld, selectedItems);
+      return [].concat(_toConsumableArray(updatedOldItems), _toConsumableArray(newItems));
+    });
+  };
+  var handleUdwOpen = function handleUdwOpen() {
+    return setIsUdwOpened(true);
+  };
+  var handleItemSelectToggle = function handleItemSelectToggle(productItemCode) {
+    return setSelectedLocallyProductsItemsCodes(function (currentProductItemsCodes) {
+      var isCurrentlySelected = currentProductItemsCodes.includes(productItemCode);
+      return isCurrentlySelected ? currentProductItemsCodes.filter(function (currentProductItemCode) {
+        return currentProductItemCode !== productItemCode;
+      }) : [].concat(_toConsumableArray(currentProductItemsCodes), [productItemCode]);
+    });
+  };
+  var handleSelectedProductItemsDataUpdate = function handleSelectedProductItemsDataUpdate(productsDataMap) {
+    setSelectedProductsItems(function (selectedItems) {
+      var updatedSelectedItems = selectedItems.reduce(function (updatedItems, productItem) {
+        var hasNewDataForProduct = !!productsDataMap[productItem.productCode];
+        var updatedItem = hasNewDataForProduct ? _objectSpread(_objectSpread({}, productItem), {}, {
+          productData: productsDataMap[productItem.productCode]
+        }) : productItem;
+        return [].concat(_toConsumableArray(updatedItems), [updatedItem]);
+      }, []);
+      return updatedSelectedItems;
+    });
+  };
+  var handleSelectedProductItemRemove = function handleSelectedProductItemRemove(productItemToRemoveCode) {
+    return setSelectedProductsItems(function (selectedItems) {
+      return selectedItems.filter(function (productItem) {
+        return productItem.productCode !== productItemToRemoveCode;
+      });
+    });
+  };
+  var handleSelectedProductVariantRemove = function handleSelectedProductVariantRemove(baseProductCode, variantCodeToRemove) {
+    setSelectedProductsItems(function (selectedItems) {
+      var baseProductItemIndex = selectedItems.findIndex(function (productItem) {
+        return productItem.productCode === baseProductCode;
+      });
+      if (baseProductItemIndex === -1) {
+        return selectedItems;
+      }
+      var baseProductItem = selectedItems[baseProductItemIndex];
+      var baseProductItemCopy = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper__WEBPACK_IMPORTED_MODULE_3__["default"])(baseProductItem);
+      if (baseProductItemCopy.productVariants === true) {
+        var allProductVariants = baseProductItem.productData.variants_codes;
+        baseProductItemCopy.productVariants = allProductVariants;
+      }
+      baseProductItemCopy.productVariants = baseProductItemCopy.productVariants.filter(function (variantCode) {
+        return variantCode !== variantCodeToRemove;
+      });
+      var selectedItemsNew = _toConsumableArray(selectedItems);
+      if (baseProductItemCopy.productVariants.length) {
+        selectedItemsNew[baseProductItemIndex] = baseProductItemCopy;
+      } else {
+        selectedItemsNew.splice(baseProductItemIndex, 1);
+      }
+      return selectedItemsNew;
+    });
+  };
+  var handleSelectedLocallyProductsRemove = function handleSelectedLocallyProductsRemove() {
+    setSelectedProductsItems(function (currentlySelectedProductsItems) {
+      return currentlySelectedProductsItems.filter(function (productItem) {
+        return !selectedLocallyProductsItemsCodes.includes(productItem.productCode);
+      });
+    });
+    setSelectedLocallyProductsItemsCodes([]);
+  };
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    udwContainer.current = document.getElementById('react-udw');
+  }, []);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    var selectedProductsCodes = selectedProductsItems.map(function (productItem) {
+      return productItem.productCode;
+    });
+    var selectedLocallyProductsItemsCodesFiltered = selectedLocallyProductsItemsCodes.filter(function (selectedLocallyProductItemCode) {
+      return selectedProductsCodes.includes(selectedLocallyProductItemCode);
+    });
+    if (selectedLocallyProductsItemsCodesFiltered.length !== selectedLocallyProductsItemsCodes.length) {
+      setSelectedLocallyProductsItemsCodes(selectedLocallyProductsItemsCodesFiltered);
+    }
+  }, [selectedProductsItems, selectedLocallyProductsItemsCodes, setSelectedLocallyProductsItemsCodes]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (previousSelectedProductItems.current !== selectedProductsItems) {
+      handleProductsChanged(selectedProductsItems);
+    }
+  }, [selectedProductsItems, handleProductsChanged]);
+  var udwProps = _objectSpread(_objectSpread({
+    title: udwTitle
+  }, udwConfigProductDiscoveryWidget), {}, {
+    onItemsConfirm: handleUdwConfirm,
+    onCancel: handleUdwCancel,
+    isInitLocationsDeselectionBlocked: true,
+    initSelectedItems: initSelectedItems
+  });
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(ProductsSelectorConfigContext.Provider, {
+    value: {
+      itemsPerPage: itemsPerPage
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SelectedProductsContext.Provider, {
+    value: {
+      selectedProductsItems: selectedProductsItems,
+      setSelectedProductsItems: setSelectedProductsItems,
+      onSelectedProductItemsDataUpdate: handleSelectedProductItemsDataUpdate,
+      onSelectedProductItemRemove: handleSelectedProductItemRemove,
+      onSelectedProductVariantRemove: handleSelectedProductVariantRemove
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(SelectedLocallyProductsCodesContext.Provider, {
+    value: {
+      selectedLocallyProductsItemsCodes: selectedLocallyProductsItemsCodes,
+      setSelectedLocallyProductsItemsCodes: setSelectedLocallyProductsItemsCodes,
+      onSelectedLocallyProductItemsToggle: handleItemSelectToggle
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_selector_selector_view__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    onUdwOpen: handleUdwOpen,
+    onSelectedLocallyProductsRemove: handleSelectedLocallyProductsRemove
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "m-pc-products-selector"
+  }, isUdwOpened && /*#__PURE__*/react_dom__WEBPACK_IMPORTED_MODULE_1___default().createPortal(/*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(UniversalDiscovery, udwProps), udwContainer.current), !!selectedProductsItems.length && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_products_table_product_table_view__WEBPACK_IMPORTED_MODULE_4__["default"], null))))));
+};
+ProductsSelectorModule.propTypes = {
+  handleProductsChanged: PropTypes.func.isRequired,
+  udwConfigProductDiscoveryWidget: PropTypes.node.isRequired,
+  itemsPerPage: PropTypes.number,
+  initialValue: PropTypes.array
+};
+ProductsSelectorModule.defaultProps = {
+  itemsPerPage: 10,
+  initialValue: []
+};
+window.ibexa.addConfig('modules.ProductsSelector', ProductsSelectorModule);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductsSelectorModule);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/variants-viewer/components/product.variants.table.item.js":
+/*!******************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/variants-viewer/components/product.variants.table.item.js ***!
+  \******************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/tooltips.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.cell */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.cell.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_row__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.row */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.row.js");
+/* harmony import */ var _variants_popup__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./variants.popup */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/variants-viewer/components/variants.popup.js");
+/* harmony import */ var _product_discovery_widget_components_product_table_product_availability_status__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../product-discovery-widget/components/product-table/product.availability.status */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/components/product-table/product.availability.status.js");
+
+
+
+
+
+
+
+var ProductVariantsTableItem = function ProductVariantsTableItem(_ref) {
+  var productVariant = _ref.productVariant;
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_variants_popup__WEBPACK_IMPORTED_MODULE_5__.VariantsPopupContext),
+    renderActionColumn = _useContext.renderActionColumn;
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_row__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    ref: _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_tooltips_helper__WEBPACK_IMPORTED_MODULE_2__.parse
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__["default"], null, productVariant.name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-badge ibexa-badge--info"
+  }, productVariant.code)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__["default"], null, productVariant.stock), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__["default"], null, productVariant.price), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_product_discovery_widget_components_product_table_product_availability_status__WEBPACK_IMPORTED_MODULE_6__["default"], {
+    isAvailable: productVariant.is_available
+  })), productVariant.attributes.map(function (attribute) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      key: attribute.identifier
+    }, attribute.value);
+  }), renderActionColumn && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body_cell__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    hasActionBtns: true
+  }, renderActionColumn(productVariant)));
+};
+ProductVariantsTableItem.propTypes = {
+  productVariant: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().object).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductVariantsTableItem);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/variants-viewer/components/product.variants.table.js":
+/*!*************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/variants-viewer/components/product.variants.table.js ***!
+  \*************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.body.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.cell */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.cell.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_row__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.row */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/table/table.head.row.js");
+/* harmony import */ var _product_variants_table_item__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./product.variants.table.item */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/variants-viewer/components/product.variants.table.item.js");
+/* harmony import */ var _variants_popup__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./variants.popup */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/variants-viewer/components/variants.popup.js");
+
+
+
+
+
+
+
+
+
+
+var ProductVariantsTable = function ProductVariantsTable(_ref) {
+  var items = _ref.items,
+    discriminators = _ref.discriminators;
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getTranslator)();
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_variants_popup__WEBPACK_IMPORTED_MODULE_9__.VariantsPopupContext),
+    renderActionColumn = _useContext.renderActionColumn;
+  var nameLabel = Translator.trans(/*@Desc("Name")*/'product_variants_table.header.name', {}, 'ibexa_products_selector');
+  var codeLabel = Translator.trans(/*@Desc("Code")*/'product_variants_table.header.code', {}, 'ibexa_products_selector');
+  var stockLabel = Translator.trans(/*@Desc("Stock")*/'product_variants_table.header.stock', {}, 'ibexa_products_selector');
+  var basePriceLabel = Translator.trans(/*@Desc("Base price")*/'product_variants_table.header.base_price', {}, 'ibexa_products_selector');
+  var availabilityLabel = Translator.trans(/*@Desc("Availability")*/'product_variants_table.header.availability', {}, 'ibexa_products_selector');
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    isLastColumnSticky: true
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head__WEBPACK_IMPORTED_MODULE_5__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_row__WEBPACK_IMPORTED_MODULE_7__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__["default"], null, nameLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__["default"], null, codeLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__["default"], null, stockLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__["default"], null, basePriceLabel), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__["default"], null, availabilityLabel), discriminators.map(function (discriminator) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__["default"], {
+      key: discriminator.identifier
+    }, discriminator.name);
+  }), renderActionColumn && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_head_cell__WEBPACK_IMPORTED_MODULE_6__["default"], null))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_table_table_body__WEBPACK_IMPORTED_MODULE_4__["default"], null, items.map(function (productVariant) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_product_variants_table_item__WEBPACK_IMPORTED_MODULE_8__["default"], {
+      key: productVariant.code,
+      productVariant: productVariant
+    });
+  })));
+};
+ProductVariantsTable.propTypes = {
+  items: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().array).isRequired,
+  discriminators: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().array).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductVariantsTable);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/variants-viewer/components/product.variants.view.js":
+/*!************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/variants-viewer/components/product.variants.view.js ***!
+  \************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination_info__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination.info */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/pagination/pagination.info.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/spinner/spinner.js");
+/* harmony import */ var _product_variants_table__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./product.variants.table */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/variants-viewer/components/product.variants.table.js");
+/* harmony import */ var _common_services_product_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../common/services/product.service */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/common/services/product.service.js");
+/* harmony import */ var _variants_popup__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./variants.popup */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/variants-viewer/components/variants.popup.js");
+/* harmony import */ var _common_hooks_useHeightPreservation__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../common/hooks/useHeightPreservation */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/common/hooks/useHeightPreservation.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+
+
+
+var ProductVariantsView = function ProductVariantsView() {
+  var restInfo = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_1__.getRestInfo)();
+  var _useContext = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_variants_popup__WEBPACK_IMPORTED_MODULE_7__.VariantsPopupContext),
+    variantsCodes = _useContext.variantsCodes,
+    baseProductData = _useContext.baseProductData,
+    itemsPerPage = _useContext.itemsPerPage;
+  var items = variantsCodes !== null && variantsCodes !== void 0 ? variantsCodes : [];
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0),
+    _useState2 = _slicedToArray(_useState, 2),
+    activePageIndex = _useState2[0],
+    setActivePageIndex = _useState2[1];
+  var offset = activePageIndex * itemsPerPage;
+  var currentPageItems = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    return items.slice(offset, offset + itemsPerPage);
+  }, [items, offset, itemsPerPage]);
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState4 = _slicedToArray(_useState3, 2),
+    currentPageDataLoaded = _useState4[0],
+    setCurrentPageDataLoaded = _useState4[1];
+  var isLoading = currentPageDataLoaded === null;
+  var _useHeightPreservatio = (0,_common_hooks_useHeightPreservation__WEBPACK_IMPORTED_MODULE_8__.useHeightPreservation)({
+      minHeight: 150,
+      shouldApply: isLoading
+    }),
+    style = _useHeightPreservatio.style,
+    onElementRefChange = _useHeightPreservatio.onElementRefChange;
+  var handlePageChange = function handlePageChange(newPageIndex) {
+    setActivePageIndex(newPageIndex);
+    setCurrentPageDataLoaded(null);
+  };
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    var maxPageIndex = Math.ceil(items.length / itemsPerPage) - 1;
+    setActivePageIndex(Math.max(Math.min(maxPageIndex, activePageIndex), 0));
+  }, [items, itemsPerPage, activePageIndex]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    setCurrentPageDataLoaded(null);
+    if (!baseProductData || !variantsCodes) {
+      return;
+    }
+    (0,_common_services_product_service__WEBPACK_IMPORTED_MODULE_6__.findProductVariantsBySearchQuery)(_objectSpread(_objectSpread({}, restInfo), {}, {
+      baseProductCode: baseProductData.code,
+      variantsCodes: currentPageItems,
+      limit: currentPageItems.length
+    }), function (response) {
+      setCurrentPageDataLoaded(response);
+    });
+  }, [currentPageItems, baseProductData, variantsCodes]);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    ref: onElementRefChange,
+    style: style,
+    className: "c-pc-selector-product-variants-view"
+  }, !isLoading ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_product_variants_table__WEBPACK_IMPORTED_MODULE_5__["default"], {
+    items: currentPageDataLoaded.items,
+    discriminators: currentPageDataLoaded.discriminators
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-pagination"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination_info__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    totalCount: items.length,
+    viewingCount: currentPageDataLoaded.items.length
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_pagination_pagination__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    proximity: 1,
+    itemsPerPage: itemsPerPage,
+    activePageIndex: activePageIndex,
+    totalCount: items.length,
+    onPageChange: handlePageChange,
+    disabled: false
+  }))) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-pc-selector-product-variants-view__spinner-wrapper"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_spinner_spinner__WEBPACK_IMPORTED_MODULE_4__["default"], null)));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductVariantsView);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/variants-viewer/components/variants.popup.js":
+/*!*****************************************************************************************************************!*\
+  !*** ./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/variants-viewer/components/variants.popup.js ***!
+  \*****************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   VariantsPopupContext: () => (/* binding */ VariantsPopupContext),
+/* harmony export */   VariantsViewContext: () => (/* binding */ VariantsViewContext),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom */ "react-dom");
+/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_dom__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
+/* harmony import */ var _ibexa_admin_ui_modules_common_popup_popup_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ibexa-admin-ui-modules/common/popup/popup.component */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/popup/popup.component.js");
+/* harmony import */ var _product_variants_view__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./product.variants.view */ "./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/variants-viewer/components/product.variants.view.js");
+
+
+
+
+
+
+var VariantsViewContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var VariantsPopupContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
+var VariantsPopup = function VariantsPopup(_ref) {
+  var _baseProductData$name;
+  var variantsCodes = _ref.variantsCodes,
+    baseProductData = _ref.baseProductData,
+    itemsPerPage = _ref.itemsPerPage,
+    onClose = _ref.onClose,
+    renderActionColumn = _ref.renderActionColumn;
+  var rootDOMElement = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__.getRootDOMElement)();
+  var Translator = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_3__.getTranslator)();
+  var subtitle = (_baseProductData$name = baseProductData === null || baseProductData === void 0 ? void 0 : baseProductData.name) !== null && _baseProductData$name !== void 0 ? _baseProductData$name : '';
+  var title = Translator.trans(/*@Desc("Variants")*/'variants_popup.title', {}, 'ibexa_products_selector');
+  return /*#__PURE__*/(0,react_dom__WEBPACK_IMPORTED_MODULE_1__.createPortal)(/*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(VariantsPopupContext.Provider, {
+    value: {
+      variantsCodes: variantsCodes,
+      baseProductData: baseProductData,
+      itemsPerPage: itemsPerPage,
+      renderActionColumn: renderActionColumn
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_modules_common_popup_popup_component__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    title: title,
+    subtitle: subtitle,
+    isVisible: true,
+    onClose: onClose,
+    actionBtnsConfig: [],
+    noFooter: true,
+    extraClasses: "c-pc-selector-product-variants-popup"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_product_variants_view__WEBPACK_IMPORTED_MODULE_5__["default"], null))), rootDOMElement);
+};
+VariantsPopup.propTypes = {
+  variantsCodes: (prop_types__WEBPACK_IMPORTED_MODULE_2___default().array).isRequired,
+  baseProductData: (prop_types__WEBPACK_IMPORTED_MODULE_2___default().object).isRequired,
+  onClose: (prop_types__WEBPACK_IMPORTED_MODULE_2___default().func).isRequired,
+  itemsPerPage: (prop_types__WEBPACK_IMPORTED_MODULE_2___default().number),
+  renderActionColumn: (prop_types__WEBPACK_IMPORTED_MODULE_2___default().func)
+};
+VariantsPopup.defaultProps = {
+  itemsPerPage: 10,
+  renderActionColumn: null
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (VariantsPopup);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/components/empty-tree/empty.tree.js":
+/*!********************************************************************************************************!*\
+  !*** ./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/components/empty-tree/empty.tree.js ***!
+  \********************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+
+var _window = window,
+  Translator = _window.Translator;
+var EmptyTree = function EmptyTree() {
+  var emptyBadge = Translator.trans(/*@Desc("1")*/'taxonomy.1', {}, 'ibexa_taxonomy_ui');
+  var emptyContent = Translator.trans(/*@Desc("Your tree is empty. Start creating your structure")*/'taxonomy.empty', {}, 'ibexa_taxonomy_ui');
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-tt-empty"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-tt-empty__badge"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-tt-badge"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-tt-badge__content"
+  }, emptyBadge))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-tt-empty__content"
+  }, emptyContent));
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (EmptyTree);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/components/name-content/name-content.js":
+/*!************************************************************************************************************!*\
+  !*** ./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/components/name-content/name-content.js ***!
+  \************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+var NameContent = function NameContent(_ref) {
+  var _name$match;
+  var searchActive = _ref.searchActive,
+    searchValue = _ref.searchValue,
+    name = _ref.name;
+  if (!searchActive) {
+    return name;
+  }
+  var searchNameRegexp = new RegExp("(.*)(".concat(searchValue, ")(.*)"), 'i');
+  var _ref2 = (_name$match = name.match(searchNameRegexp)) !== null && _name$match !== void 0 ? _name$match : [],
+    _ref3 = _slicedToArray(_ref2, 4),
+    searchPrefix = _ref3[1],
+    searchName = _ref3[2],
+    searchSuffix = _ref3[3];
+  if (!searchName) {
+    return name;
+  }
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "c-tt-list-item__search-fragment"
+  }, searchPrefix), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "c-tt-list-item__search-fragment--matched"
+  }, searchName), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("span", {
+    className: "c-tt-list-item__search-fragment"
+  }, searchSuffix));
+};
+NameContent.propTypes = {
+  searchActive: PropTypes.bool.isRequired,
+  searchValue: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (NameContent);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/components/not-translated-info/not.translated.info.js":
+/*!**************************************************************************************************************************!*\
+  !*** ./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/components/not-translated-info/not.translated.info.js ***!
+  \**************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "prop-types");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+
+
+
+var _window = window,
+  Translator = _window.Translator,
+  ibexa = _window.ibexa;
+var NotTranslatedInfo = function NotTranslatedInfo(_ref) {
+  var languageCode = _ref.languageCode;
+  var language = ibexa.adminUiConfig.languages.mappings[languageCode];
+  var languageName = language.name;
+  var warningMessage = Translator.trans(/*@Desc("Not translated in %languageName% language")*/'taxonomy.not_translated_info', {
+    languageName: languageName
+  }, 'ibexa_taxonomy_ui');
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "c-tt-not-translated-info"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    name: "warning-triangle",
+    extraClasses: "ibexa-icon--small c-tt-not-translated-info__icon-warning"
+  }), warningMessage);
+};
+NotTranslatedInfo.propTypes = {
+  languageCode: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().string).isRequired
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (NotTranslatedInfo);
+
+/***/ }),
+
+/***/ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/helpers/array.js":
+/*!*************************************************************************************!*\
+  !*** ./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/helpers/array.js ***!
+  \*************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   getLastElement: () => (/* binding */ getLastElement)
+/* harmony export */ });
+var getLastElement = function getLastElement(arr) {
+  var arrLength = arr.length;
+  return arr[arrLength - 1];
+};
+
+/***/ }),
+
+/***/ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/helpers/getters.js":
+/*!***************************************************************************************!*\
+  !*** ./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/helpers/getters.js ***!
+  \***************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   getContentLink: () => (/* binding */ getContentLink),
+/* harmony export */   getPath: () => (/* binding */ getPath),
+/* harmony export */   getTotal: () => (/* binding */ getTotal)
+/* harmony export */ });
+/* harmony import */ var _array__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./array */ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/helpers/array.js");
+
+
+/* we don't have totalSubitems because of performance, we use nested set tree properties */
+var hasSubitems = function hasSubitems(item) {
+  return item.right - item.left > 1;
+};
+var getContentLink = function getContentLink(item) {
+  var locationHref = window.Routing.generate('ibexa.content.view', {
+    contentId: item.contentId
+  });
+  return locationHref;
+};
+var getTotal = function getTotal(item) {
+  var totalChildrenCount = 0;
+  if (hasSubitems(item)) {
+    if (item.__children.length) {
+      totalChildrenCount = item.__children.length;
+    } else {
+      totalChildrenCount = 1;
+    }
+  }
+  return totalChildrenCount;
+};
+var getParentPath = function getParentPath(parents) {
+  if (!parents || parents.length === 0) {
+    return '';
+  }
+  var parent = (0,_array__WEBPACK_IMPORTED_MODULE_0__.getLastElement)(parents);
+  return "".concat(parent.path, "/");
+};
+var getPath = function getPath(item) {
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+    parents = _ref.parents;
+  var parentPath = getParentPath(parents);
+  return "".concat(parentPath).concat(item.id);
+};
+
+/***/ }),
+
+/***/ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/helpers/languages.js":
+/*!*****************************************************************************************!*\
+  !*** ./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/helpers/languages.js ***!
+  \*****************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   getTranslatedName: () => (/* binding */ getTranslatedName),
+/* harmony export */   hasTranslation: () => (/* binding */ hasTranslation)
+/* harmony export */ });
+var hasTranslation = function hasTranslation(entry, languageCode) {
+  var _entry$names;
+  return !!((_entry$names = entry.names) !== null && _entry$names !== void 0 && _entry$names[languageCode]);
+};
+var getTranslatedName = function getTranslatedName(entry, languageCode) {
+  if (hasTranslation(entry, languageCode)) {
+    var _entry$names2;
+    return (_entry$names2 = entry.names) === null || _entry$names2 === void 0 ? void 0 : _entry$names2[languageCode];
+  }
+  return entry.name;
+};
+
+/***/ }),
+
+/***/ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/helpers/search.js":
+/*!**************************************************************************************!*\
+  !*** ./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/helpers/search.js ***!
+  \**************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   getSearchTreeProps: () => (/* binding */ getSearchTreeProps)
+/* harmony export */ });
+/* harmony import */ var _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_helpers_tree__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-tree-builder/src/bundle/ui-dev/src/modules/tree-builder/helpers/tree */ "./vendor/ibexa/tree-builder/src/bundle/ui-dev/src/modules/tree-builder/helpers/tree.js");
+
+var getMenuActions = function getMenuActions(_ref) {
+  var actions = _ref.actions,
+    item = _ref.item;
+  var activeActionsIds = ['add', 'delete', 'assignContent'];
+  return (0,_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_helpers_tree__WEBPACK_IMPORTED_MODULE_0__.getMenuActions)({
+    actions: actions,
+    item: item,
+    activeActionsIds: activeActionsIds
+  });
+};
+var getSearchTreeProps = function getSearchTreeProps(_ref2) {
+  var searchTree = _ref2.searchTree,
+    searchActive = _ref2.searchActive;
+  if (!searchActive) {
+    return {};
+  }
+  return {
+    tree: searchTree,
+    isLocalStorageActive: false,
+    getMenuActions: getMenuActions,
+    extraClasses: 'c-tb-tree--non-expandable'
+  };
+};
+
+/***/ }),
+
+/***/ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/helpers/tree.js":
+/*!************************************************************************************!*\
+  !*** ./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/helpers/tree.js ***!
+  \************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   findItem: () => (/* binding */ _findItem),
+/* harmony export */   getExpandedItems: () => (/* binding */ _getExpandedItems),
+/* harmony export */   isRoot: () => (/* binding */ isRoot)
+/* harmony export */ });
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+var _findItem = function findItem(items, originalPath) {
+  var path = _toConsumableArray(originalPath);
+  var isLast = path.length === 1;
+  var item = items.find(function (element) {
+    return element.id === parseInt(path[0], 10);
+  });
+  if (!item) {
+    return null;
+  }
+  if (isLast) {
+    return item;
+  }
+  if (!Array.isArray(item.__children)) {
+    return null;
+  }
+  path.shift();
+  return _findItem(item.__children, path);
+};
+
+var isRoot = function isRoot(item) {
+  return item.root === item.id;
+};
+var _getExpandedItems = function getExpandedItems(treeNode) {
+  if (!treeNode.__children.length) {
+    return [];
+  }
+  return treeNode.__children.filter(function (_ref) {
+    var __children = _ref.__children;
+    return __children.length;
+  }).reduce(function (expandedItems, child) {
+    return [].concat(_toConsumableArray(expandedItems), _toConsumableArray(_getExpandedItems(child)));
+  }, [treeNode]);
+};
+
+
+/***/ }),
+
+/***/ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/services/taxonomy.tree.service.js":
+/*!******************************************************************************************************!*\
+  !*** ./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/services/taxonomy.tree.service.js ***!
+  \******************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   assignContent: () => (/* binding */ assignContent),
+/* harmony export */   deleteElements: () => (/* binding */ deleteElements),
+/* harmony export */   loadNode: () => (/* binding */ loadNode),
+/* harmony export */   loadSearchResults: () => (/* binding */ loadSearchResults),
+/* harmony export */   loadTree: () => (/* binding */ loadTree),
+/* harmony export */   loadTreeRoot: () => (/* binding */ loadTreeRoot),
+/* harmony export */   moveElements: () => (/* binding */ moveElements)
+/* harmony export */ });
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_request_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/request.helper */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/request.helper.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+var NO_CONTENT_STATUS_CODE = 204;
+var ENDPOINT_BULK = '/api/ibexa/v2/bulk';
+var HEADERS_BULK = {
+  Accept: 'application/vnd.ibexa.api.BulkOperationResponse+json',
+  'Content-Type': 'application/vnd.ibexa.api.BulkOperation+json'
+};
+var cleanEntryIds = function cleanEntryIds(entryIds) {
+  return entryIds.filter(function (el) {
+    return !!el;
+  });
+};
+
+// TODO: should be moved to admin-ui helpers
+var handleRequestResponseWrapper = function handleRequestResponseWrapper(response) {
+  var statusCode = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_request_helper__WEBPACK_IMPORTED_MODULE_0__.handleRequestResponseStatus)(response);
+  if (statusCode === NO_CONTENT_STATUS_CODE) {
+    return null;
+  }
+  return (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_request_helper__WEBPACK_IMPORTED_MODULE_0__.handleRequestResponse)(response);
+};
+var handleAbortException = function handleAbortException(error) {
+  if ((error === null || error === void 0 ? void 0 : error.name) === 'AbortError') {
+    return;
+  }
+  throw error;
+};
+var loadTreeRoot = function loadTreeRoot(_ref) {
+  var taxonomyName = _ref.taxonomyName;
+  var loadTreeRootUrl = window.Routing.generate('ibexa.taxonomy.tree.root', {
+    taxonomyName: taxonomyName
+  }, true);
+  var request = new Request(loadTreeRootUrl, {
+    method: 'GET',
+    mode: 'same-origin',
+    credentials: 'same-origin'
+  });
+  return fetch(request).then(handleRequestResponseWrapper);
+};
+var loadTree = function loadTree(_ref2) {
+  var taxonomyName = _ref2.taxonomyName,
+    entryIds = _ref2.entryIds;
+  var loadTreeUrl = window.Routing.generate('ibexa.taxonomy.tree.subtree', {
+    taxonomyName: taxonomyName,
+    entryIds: cleanEntryIds(entryIds)
+  }, true);
+  var request = new Request(loadTreeUrl, {
+    method: 'GET',
+    mode: 'same-origin',
+    credentials: 'same-origin'
+  });
+  return fetch(request).then(handleRequestResponseWrapper);
+};
+var loadNode = function loadNode(_ref3) {
+  var taxonomyName = _ref3.taxonomyName,
+    entryId = _ref3.entryId;
+  var loadNodeUrl = window.Routing.generate('ibexa.taxonomy.tree.node', {
+    taxonomyName: taxonomyName,
+    entryId: entryId
+  }, true);
+  var request = new Request(loadNodeUrl, {
+    method: 'GET',
+    mode: 'same-origin',
+    credentials: 'same-origin'
+  });
+  return fetch(request).then(handleRequestResponseWrapper);
+};
+var moveElements = function moveElements(entries, _ref4) {
+  var restInfo = _ref4.restInfo,
+    taxonomyName = _ref4.taxonomyName;
+  var route = "/api/ibexa/v2/taxonomy/".concat(taxonomyName, "/entries/move");
+  var request = new Request(route, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/vnd.ibexa.api.TaxonomyEntryBulkMove+json',
+      'X-CSRF-Token': restInfo.token,
+      'X-Siteaccess': restInfo.siteaccess
+    },
+    body: JSON.stringify({
+      TaxonomyEntryBulkMove: {
+        entries: entries
+      }
+    }),
+    mode: 'same-origin',
+    credentials: 'same-origin'
+  });
+  return fetch(request).then(handleRequestResponseWrapper);
+};
+var deleteElements = function deleteElements(entries, _ref5) {
+  var restInfo = _ref5.restInfo,
+    taxonomyName = _ref5.taxonomyName;
+  var route = "/api/ibexa/v2/taxonomy/".concat(taxonomyName, "/entries");
+  var request = new Request(route, {
+    method: 'DELETE',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/vnd.ibexa.api.TaxonomyEntryBulkRemove+json',
+      'X-CSRF-Token': restInfo.token,
+      'X-Siteaccess': restInfo.siteaccess
+    },
+    body: JSON.stringify({
+      TaxonomyEntryBulkRemove: {
+        entries: entries
+      }
+    }),
+    mode: 'same-origin',
+    credentials: 'same-origin'
+  });
+  return fetch(request).then(handleRequestResponseWrapper);
+};
+var getBulkAssignContent = function getBulkAssignContent(taxonomyName, contentId, entriesIds) {
+  return {
+    uri: "/api/ibexa/v2/taxonomy/".concat(taxonomyName, "/entry-assignments/assign-to-content"),
+    content: JSON.stringify({
+      TaxonomyEntryAssignToContent: {
+        content: contentId,
+        entries: entriesIds
+      }
+    }),
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/vnd.ibexa.api.TaxonomyEntryAssignToContent+json'
+    },
+    method: 'POST'
+  };
+};
+var assignContent = function assignContent(contentIds, entriesIds, _ref6) {
+  var restInfo = _ref6.restInfo,
+    taxonomyName = _ref6.taxonomyName;
+  var requestBodyOperations = contentIds.map(function (contentId) {
+    return getBulkAssignContent(taxonomyName, contentId, entriesIds);
+  });
+  var request = new Request(ENDPOINT_BULK, {
+    method: 'POST',
+    headers: _objectSpread(_objectSpread({}, HEADERS_BULK), {}, {
+      'X-CSRF-Token': restInfo.token,
+      'X-Siteaccess': restInfo.siteaccess
+    }),
+    body: JSON.stringify({
+      bulkOperations: {
+        operations: requestBodyOperations
+      }
+    }),
+    mode: 'same-origin',
+    credentials: 'same-origin'
+  });
+  return fetch(request).then(handleRequestResponseWrapper);
+};
+var loadSearchResults = function loadSearchResults(_ref7) {
+  var taxonomyName = _ref7.taxonomyName,
+    searchValue = _ref7.searchValue,
+    languageCode = _ref7.languageCode,
+    signal = _ref7.signal;
+  var loadTreeUrl = window.Routing.generate('ibexa.taxonomy.tree.search', {
+    taxonomyName: taxonomyName,
+    query: searchValue,
+    languageCode: languageCode
+  }, true);
+  var request = new Request(loadTreeUrl, {
+    method: 'GET',
+    mode: 'same-origin',
+    credentials: 'same-origin'
+  });
+  return fetch(request, {
+    signal: signal
+  }).then(handleRequestResponseWrapper)["catch"](handleAbortException);
+};
+
+/***/ }),
+
+/***/ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/select-ibexa-tag/select.ibexa.tag.module.js":
+/*!*********************************************************************************************************!*\
+  !*** ./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/select-ibexa-tag/select.ibexa.tag.module.js ***!
+  \*********************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper.js */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/deep.clone.helper.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/icon/icon.js");
+/* harmony import */ var _ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_helpers_tree__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ibexa-tree-builder/src/bundle/ui-dev/src/modules/tree-builder/helpers/tree */ "./vendor/ibexa/tree-builder/src/bundle/ui-dev/src/modules/tree-builder/helpers/tree.js");
+/* harmony import */ var _common_services_taxonomy_tree_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../common/services/taxonomy.tree.service */ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/services/taxonomy.tree.service.js");
+/* harmony import */ var _common_helpers_getters__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../common/helpers/getters */ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/helpers/getters.js");
+/* harmony import */ var _common_helpers_tree__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../common/helpers/tree */ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/helpers/tree.js");
+/* harmony import */ var _common_helpers_languages__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../common/helpers/languages */ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/helpers/languages.js");
+/* harmony import */ var _common_helpers_search__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../common/helpers/search */ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/helpers/search.js");
+/* harmony import */ var _common_components_empty_tree_empty_tree__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../common/components/empty-tree/empty.tree */ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/components/empty-tree/empty.tree.js");
+/* harmony import */ var _common_components_not_translated_info_not_translated_info__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../common/components/not-translated-info/not.translated.info */ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/components/not-translated-info/not.translated.info.js");
+/* harmony import */ var _common_components_name_content_name_content__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../common/components/name-content/name-content */ "./vendor/ibexa/taxonomy/src/bundle/ui-dev/src/modules/common/components/name-content/name-content.js");
+/* harmony import */ var _ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names */ "./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/common/helpers/css.class.names.js");
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+var _window = window,
+  ibexa = _window.ibexa,
+  Translator = _window.Translator;
+var MIN_SEARCH_LENGTH = 1;
+var SelectIbexaTag = function SelectIbexaTag(props) {
+  var moduleId = props.moduleId,
+    userId = props.userId,
+    selectedItems = props.selectedItems,
+    taxonomyName = props.taxonomyName,
+    taxonomyEntryId = props.taxonomyEntryId,
+    isMultiChoice = props.isMultiChoice,
+    languageCode = props.languageCode,
+    isSearchVisible = props.isSearchVisible,
+    rootSelectionDisabled = props.rootSelectionDisabled;
+  var treeBuilderModuleRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState2 = _slicedToArray(_useState, 2),
+    tree = _useState2[0],
+    setTree = _useState2[1];
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState4 = _slicedToArray(_useState3, 2),
+    searchTree = _useState4[0],
+    setSearchTree = _useState4[1];
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState6 = _slicedToArray(_useState5, 2),
+    searchActive = _useState6[0],
+    setSearchActive = _useState6[1];
+  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+    _useState8 = _slicedToArray(_useState7, 2),
+    searchValue = _useState8[0],
+    setSearchValue = _useState8[1];
+  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState10 = _slicedToArray(_useState9, 2),
+    isLoaded = _useState10[0],
+    setIsLoaded = _useState10[1];
+  var _useState11 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState12 = _slicedToArray(_useState11, 2),
+    showTranslationWarning = _useState12[0],
+    setShowTranslationWarning = _useState12[1];
+  var searchRequestTimeoutRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)();
+  var abortControllerSearchRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)();
+  var setInitialItemsState = function setInitialItemsState(location) {
+    setIsLoaded(true);
+    setTree(location);
+  };
+  var setTranslationWarningVisibility = function setTranslationWarningVisibility(treeNode) {
+    if (!treeNode) {
+      return false;
+    }
+    var expandedItems = (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_6__.getExpandedItems)(treeNode);
+    var visibleNodes = [];
+    expandedItems.forEach(function (expandedItem) {
+      visibleNodes.push.apply(visibleNodes, [expandedItem].concat(_toConsumableArray(expandedItem.__children)));
+    });
+    setShowTranslationWarning(visibleNodes.some(function (node) {
+      return !(0,_common_helpers_languages__WEBPACK_IMPORTED_MODULE_7__.hasTranslation)(node, languageCode);
+    }));
+  };
+  var loadTreeToState = function loadTreeToState() {
+    if (selectedItems.length) {
+      return (0,_common_services_taxonomy_tree_service__WEBPACK_IMPORTED_MODULE_4__.loadTree)({
+        taxonomyName: taxonomyName,
+        entryIds: getSelectedItemsIds()
+      }).then(function (rootResponse) {
+        var _treeBuilderModuleRef;
+        var _rootResponse = _slicedToArray(rootResponse, 1),
+          rootItem = _rootResponse[0];
+        var expandedItems = (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_6__.getExpandedItems)(rootItem);
+        setInitialItemsState(rootItem);
+        setTranslationWarningVisibility(rootItem);
+        (_treeBuilderModuleRef = treeBuilderModuleRef.current) === null || _treeBuilderModuleRef === void 0 || _treeBuilderModuleRef.expandItems(expandedItems);
+        return rootItem;
+      })["catch"](ibexa.helpers.notification.showErrorNotification);
+    }
+    return (0,_common_services_taxonomy_tree_service__WEBPACK_IMPORTED_MODULE_4__.loadTreeRoot)({
+      taxonomyName: taxonomyName
+    }).then(function (rootResponse) {
+      var _rootResponse2 = _slicedToArray(rootResponse, 1),
+        rootItem = _rootResponse2[0];
+      return (0,_common_services_taxonomy_tree_service__WEBPACK_IMPORTED_MODULE_4__.loadNode)({
+        taxonomyName: taxonomyName,
+        entryId: rootItem.id
+      }).then(function (nodeResponse) {
+        var _treeBuilderModuleRef2;
+        rootItem.__children = nodeResponse.__children;
+        setInitialItemsState(rootItem);
+        setTranslationWarningVisibility(rootItem);
+        (_treeBuilderModuleRef2 = treeBuilderModuleRef.current) === null || _treeBuilderModuleRef2 === void 0 || _treeBuilderModuleRef2.expandItems([buildItem(rootItem)]);
+        return rootItem;
+      });
+    })["catch"](ibexa.helpers.notification.showErrorNotification);
+  };
+  var renderLabel = function renderLabel(item) {
+    var internalItem = item.internalItem;
+    var id = internalItem.id;
+    var name = (0,_common_helpers_languages__WEBPACK_IMPORTED_MODULE_7__.getTranslatedName)(item.internalItem, languageCode);
+    var isDisabled = checkIsInputDisabled(item);
+    var labelClassName = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_12__.createCssClassNames)({
+      'c-tt-list-item__link': true,
+      'c-tt-list-item__link--disabled': isDisabled
+    });
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", {
+      htmlFor: "ibexa-tb-row-selected-".concat(moduleId, "-").concat(id),
+      className: labelClassName
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_components_name_content_name_content__WEBPACK_IMPORTED_MODULE_11__["default"], {
+      searchActive: searchActive,
+      searchValue: searchValue,
+      name: name
+    }), !(0,_common_helpers_languages__WEBPACK_IMPORTED_MODULE_7__.hasTranslation)(internalItem, languageCode) && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+      name: "warning-triangle",
+      extraClasses: "ibexa-icon--small c-tt-list-item__icon-warning"
+    }));
+  };
+  var loadMoreSubitems = function loadMoreSubitems(item) {
+    return (0,_common_services_taxonomy_tree_service__WEBPACK_IMPORTED_MODULE_4__.loadNode)({
+      taxonomyName: taxonomyName,
+      entryId: item.id
+    }).then(function (nodeResponse) {
+      var children = nodeResponse.__children;
+      var treeItem = (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_6__.findItem)([tree], item.path.split('/'));
+      if (treeItem) {
+        var nextTree = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_deep_clone_helper_js__WEBPACK_IMPORTED_MODULE_1__["default"])(tree);
+        var nextTreeItem = (0,_common_helpers_tree__WEBPACK_IMPORTED_MODULE_6__.findItem)([nextTree], item.path.split('/'));
+        nextTreeItem.__children = children;
+        setTree(nextTree);
+        setTranslationWarningVisibility(nextTree);
+      }
+      return children;
+    })["catch"](window.ibexa.helpers.notification.showErrorNotification);
+  };
+  var callbackToggleExpanded = function callbackToggleExpanded(item, _ref) {
+    var isExpanded = _ref.isExpanded,
+      loadMore = _ref.loadMore;
+    if (isExpanded) {
+      var shouldLoadInitialItems = item.subitems && !item.subitems.length;
+      if (shouldLoadInitialItems) {
+        loadMore();
+      }
+    }
+  };
+  var renderEmpty = function renderEmpty() {
+    if (!isLoaded || (tree === null || tree === void 0 ? void 0 : tree.id) !== undefined) {
+      return null;
+    }
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_components_empty_tree_empty_tree__WEBPACK_IMPORTED_MODULE_9__["default"], null);
+  };
+  var buildItem = function buildItem(item) {
+    var restProps = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    return item.internalItem ? item : {
+      internalItem: item,
+      id: item.id,
+      path: (0,_common_helpers_getters__WEBPACK_IMPORTED_MODULE_5__.getPath)(item, restProps),
+      subitems: item.__children,
+      total: (0,_common_helpers_getters__WEBPACK_IMPORTED_MODULE_5__.getTotal)(item),
+      renderLabel: renderLabel,
+      customItemClass: 'c-tt-list-item'
+    };
+  };
+  var checkIsInputDisabled = function checkIsInputDisabled(item) {
+    var unavailableEntriesIds = item.path.split('/').map(function (id) {
+      return parseInt(id, 10);
+    });
+    return unavailableEntriesIds.includes(taxonomyEntryId) || item.internalItem.disabled;
+  };
+  var getSelectedItemsIds = function getSelectedItemsIds() {
+    return selectedItems.map(function (item) {
+      return item.id;
+    });
+  };
+  var moduleName = Translator.trans(/*@Desc("Taxonomy tree")*/'taxonomy.tree_name', {}, 'ibexa_taxonomy_ui');
+  var onSearchInputChange = function onSearchInputChange(inputValue) {
+    setSearchValue(inputValue.trim());
+  };
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    loadTreeToState();
+  }, []);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    var _abortControllerSearc;
+    (_abortControllerSearc = abortControllerSearchRef.current) === null || _abortControllerSearc === void 0 || _abortControllerSearc.abort();
+    clearTimeout(searchRequestTimeoutRef.current);
+    searchRequestTimeoutRef.current = setTimeout(function () {
+      if (searchValue.length >= MIN_SEARCH_LENGTH) {
+        abortControllerSearchRef.current = new AbortController();
+        (0,_common_services_taxonomy_tree_service__WEBPACK_IMPORTED_MODULE_4__.loadSearchResults)({
+          taxonomyName: taxonomyName,
+          searchValue: searchValue,
+          languageCode: languageCode,
+          signal: abortControllerSearchRef.current.signal
+        }).then(function (rootResponse) {
+          if (!(rootResponse !== null && rootResponse !== void 0 && rootResponse.length)) {
+            setSearchTree(null);
+          } else {
+            var _treeBuilderModuleRef3;
+            var _rootResponse3 = _slicedToArray(rootResponse, 1),
+              rootItem = _rootResponse3[0];
+            setSearchTree(rootItem);
+            var hasSubitems = function hasSubitems(_ref2) {
+              var subitems = _ref2.subitems;
+              return !!subitems && subitems.length;
+            };
+            var allChildren = (0,_ibexa_tree_builder_src_bundle_ui_dev_src_modules_tree_builder_helpers_tree__WEBPACK_IMPORTED_MODULE_3__.getAllChildren)({
+              data: rootItem,
+              buildItem: buildItem,
+              condition: hasSubitems
+            });
+            (_treeBuilderModuleRef3 = treeBuilderModuleRef.current) === null || _treeBuilderModuleRef3 === void 0 || _treeBuilderModuleRef3.expandItems(allChildren);
+          }
+          setSearchActive(true);
+        });
+      } else {
+        setSearchTree(null);
+        setSearchActive(false);
+      }
+    }, 100);
+    return function () {
+      clearTimeout(searchRequestTimeoutRef.current);
+    };
+  }, [searchValue]);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(ibexa.modules.TreeBuilder, _extends({
+    ref: treeBuilderModuleRef,
+    moduleId: moduleId,
+    moduleName: moduleName,
+    userId: userId,
+    subId: taxonomyName,
+    tree: tree,
+    buildItem: buildItem,
+    checkIsInputDisabled: checkIsInputDisabled,
+    isActive: function isActive() {
+      return false;
+    },
+    loadMoreSubitems: loadMoreSubitems,
+    callbackToggleExpanded: callbackToggleExpanded,
+    selectedLimit: isMultiChoice ? undefined : 1,
+    dragDisabled: true,
+    isResizable: false,
+    headerVisible: false,
+    actionsVisible: false,
+    initiallySelectedItemsIds: selectedItems ? getSelectedItemsIds() : [],
+    onSearchInputChange: onSearchInputChange,
+    initialSearchValue: searchValue,
+    searchVisible: isSearchVisible,
+    isLoading: !isLoaded,
+    rootSelectionDisabled: rootSelectionDisabled
+  }, (0,_common_helpers_search__WEBPACK_IMPORTED_MODULE_8__.getSearchTreeProps)({
+    searchTree: searchTree,
+    searchActive: searchActive
+  })), renderEmpty(), showTranslationWarning && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_common_components_not_translated_info_not_translated_info__WEBPACK_IMPORTED_MODULE_10__["default"], {
+    languageCode: languageCode
+  }));
+};
+SelectIbexaTag.propTypes = {
+  moduleId: PropTypes.string.isRequired,
+  userId: PropTypes.number.isRequired,
+  restInfo: PropTypes.shape({
+    token: PropTypes.string.isRequired,
+    siteaccess: PropTypes.string.isRequired
+  }).isRequired,
+  taxonomyName: PropTypes.string.isRequired,
+  selectedItems: PropTypes.array,
+  isMultiChoice: PropTypes.bool,
+  languageCode: PropTypes.string,
+  taxonomyEntryId: PropTypes.string,
+  isSearchVisible: PropTypes.bool,
+  rootSelectionDisabled: PropTypes.bool
+};
+SelectIbexaTag.defaultProps = {
+  selectedItems: null,
+  isMultiChoice: false,
+  languageCode: window.ibexa.adminUiConfig.languages.priority[0],
+  taxonomyEntryId: null,
+  isSearchVisible: true,
+  rootSelectionDisabled: false
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SelectIbexaTag);
+
+/***/ }),
+
 /***/ "./vendor/ibexa/tree-builder/src/bundle/ui-dev/src/modules/tree-builder/actions/delete/delete.js":
 /*!*******************************************************************************************************!*\
   !*** ./vendor/ibexa/tree-builder/src/bundle/ui-dev/src/modules/tree-builder/actions/delete/delete.js ***!
@@ -20570,10 +26752,14 @@ var ActionList = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.forwardRef)(
         forcedProps = menuItem.forcedProps,
         fetchMethods = menuItem.fetchMethods;
       if (subitems) {
-        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("ul", {
-          className: "c-tb-action-list__list",
-          key: id
-        }, _renderSubmenu(subitems));
+        var hasAnyChildren = subitems.length;
+        if (hasAnyChildren) {
+          return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("ul", {
+            className: "c-tb-action-list__list",
+            key: id
+          }, _renderSubmenu(subitems));
+        }
+        return null;
       }
       var Component = component;
       var fetchedDataMap = allFetchedData.filter(function (_ref2) {
@@ -20802,7 +26988,7 @@ var ContextualMenu = function ContextualMenu(_ref) {
         menuPortalHeight = _menuPortalRef$curren.height;
       var _itemElement$getBound2 = itemElement.getBoundingClientRect(),
         itemYPosition = _itemElement$getBound2.y;
-      if (itemYPosition + menuPortalHeight > window.innerHeight) {
+      if (itemYPosition + menuPortalHeight > window.innerHeight && itemYPosition >= menuPortalHeight) {
         setMenuDirection(function (prevPosition) {
           return _objectSpread(_objectSpread({}, prevPosition), {}, {
             vertical: MENU_DIRECTION.VERTICAL.TOP
@@ -21174,6 +27360,9 @@ var Header = function Header(_ref) {
   var containerWidth = (_widthContainer$resiz = widthContainer.resizedContainerWidth) !== null && _widthContainer$resiz !== void 0 ? _widthContainer$resiz : widthContainer.containerWidth;
   var isCollapsed = (0,_width_container_width_container__WEBPACK_IMPORTED_MODULE_5__.checkIsTreeCollapsed)(containerWidth);
   var toggleWidthContainer = function toggleWidthContainer() {
+    if (!isCollapsed) {
+      setIsExpanded(false);
+    }
     setWidthContainer(function (prevState) {
       return _objectSpread(_objectSpread({}, prevState), {}, {
         containerWidth: isCollapsed ? EXPANDED_WIDTH : COLLAPSED_WIDTH
@@ -21902,7 +28091,7 @@ var ListItemSingle = function ListItemSingle(_ref) {
       onClick: onLabelClick
     };
     var label = getLabel();
-    if (!item.href) {
+    if (!item.href || isDisabled) {
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", labelProps, getIconChoice(), label, getHiddenInfo());
     }
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", labelProps, getIconChoice(), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("a", {
@@ -22039,7 +28228,7 @@ var ListItemSingle = function ListItemSingle(_ref) {
     'c-tb-list-item-single--has-sub-items': item.total,
     'c-tb-list-item-single--hovered': isHovered && !isDragging && !isQuickEditModeEnabled && !isQuickCreateModeEnabled && !(dragItemDisabled && actionsDisabled),
     'c-tb-list-item-single--highlighted': showHighlight,
-    'c-tb-list-item-single--clickable': item.href || item.onItemClick,
+    'c-tb-list-item-single--clickable': (item.href || item.onItemClick) && !isDisabled,
     'c-tb-list-item-single--disabled': isDisabled,
     'c-tb-list-item-single--expanded': isExpanded,
     'c-tb-list-item-single--active': isItemActive,
@@ -23078,6 +29267,8 @@ var Search = function Search(_ref) {
     className: "c-tb-search"
   }, !isCollapsed && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "ibexa-input-text-wrapper ibexa-input-text-wrapper--search"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "ibexa-input-text-wrapper__input-wrapper"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
     type: "text",
     className: "form-control ibexa-input ibexa-input--text ibexa-input--small",
@@ -23105,7 +29296,7 @@ var Search = function Search(_ref) {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_admin_ui_src_bundle_ui_dev_src_modules_common_icon_icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
     name: "search",
     extraClasses: "ibexa-icon ibexa-icon--small"
-  })))));
+  }))))));
 };
 Search.propTypes = {
   onSearchInputChange: (prop_types__WEBPACK_IMPORTED_MODULE_1___default().func).isRequired,
@@ -23148,16 +29339,21 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 var SelectedContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)();
-var getStateHash = function getStateHash(state) {
-  return state.map(function (item) {
-    return item.id;
-  }).join('_');
+var generateObjectHash = function generateObjectHash(obj) {
+  var str = JSON.stringify(obj);
+  var hash = 0;
+  for (var i = 0, len = str.length; i < len; i++) {
+    var chr = str.charCodeAt(i);
+    hash = (hash << 5) - hash + chr;
+    hash |= 0;
+  }
+  return hash;
 };
 var SelectedProvider = function SelectedProvider(_ref) {
   var children = _ref.children,
     initiallySelectedItemsIds = _ref.initiallySelectedItemsIds;
   var rootDOMElement = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_2__.getRootDOMElement)();
-  var prevSelectedDataHashRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(getStateHash([]));
+  var prevSelectedDataHashRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(generateObjectHash([]));
   var prevInitialItemsIds = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)('');
   var moduleId = (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(_tree_builder_module__WEBPACK_IMPORTED_MODULE_3__.ModuleIdContext);
   var _useStoredItemsReduce = (0,_hooks_useStoredItemsReducer__WEBPACK_IMPORTED_MODULE_4__["default"])(),
@@ -23184,7 +29380,7 @@ var SelectedProvider = function SelectedProvider(_ref) {
     }
   }, [initiallySelectedItemsIds]);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    var currentSelectedDataHash = getStateHash(selectedData);
+    var currentSelectedDataHash = generateObjectHash(selectedData);
     var areSetsEqual = prevSelectedDataHashRef.current === currentSelectedDataHash;
     if (!areSetsEqual) {
       rootDOMElement.dispatchEvent(new CustomEvent('ibexa-tb-update-selected', {
@@ -23626,11 +29822,18 @@ var saveData = function saveData(_ref2) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   buildGetMenuActionsList: () => (/* binding */ buildGetMenuActionsList),
 /* harmony export */   getAllChildren: () => (/* binding */ getAllChildren),
 /* harmony export */   getMenuActions: () => (/* binding */ _getMenuActions)
 /* harmony export */ });
 /* harmony import */ var _ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ibexa-admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper */ "./vendor/ibexa/admin-ui/src/bundle/Resources/public/js/scripts/helpers/context.helper.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
@@ -23638,16 +29841,20 @@ function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" 
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 
 var EXCLUDED_ACTION_IDS = ['preview'];
+var HIDE_REVEAL_ACTION_ID = 'hide';
 var isActionExcluded = function isActionExcluded(_ref) {
   var action = _ref.action,
     item = _ref.item,
     previewExcludedItemPath = _ref.previewExcludedItemPath;
-  if (!item.internalItem || !EXCLUDED_ACTION_IDS.includes(action.id)) {
+  var internalItem = item.internalItem;
+  if (action.id === HIDE_REVEAL_ACTION_ID && item.internalItem && item.internalItem.isInvisible && !item.internalItem.isHidden) {
+    return true;
+  }
+  if (!internalItem || !EXCLUDED_ACTION_IDS.includes(action.id)) {
     return false;
   }
-  var pathString = item.internalItem.pathString;
-  return previewExcludedItemPath.some(function (excludedPath) {
-    return pathString.startsWith(excludedPath);
+  return previewExcludedItemPath.length && previewExcludedItemPath.some(function (excludedPath) {
+    return internalItem.pathString.startsWith(excludedPath);
   });
 };
 var _getMenuActions = function getMenuActions(_ref2) {
@@ -23658,7 +29865,7 @@ var _getMenuActions = function getMenuActions(_ref2) {
     activeActionsIds = _ref2$activeActionsId === void 0 ? [] : _ref2$activeActionsId,
     _ref2$previewExcluded = _ref2.previewExcludedItemPath,
     previewExcludedItemPath = _ref2$previewExcluded === void 0 ? (_getAdminUiConfig$sit = (_getAdminUiConfig$sit2 = (0,_ibexa_admin_ui_src_bundle_Resources_public_js_scripts_helpers_context_helper__WEBPACK_IMPORTED_MODULE_0__.getAdminUiConfig)().siteContext) === null || _getAdminUiConfig$sit2 === void 0 ? void 0 : _getAdminUiConfig$sit2.excludedPaths) !== null && _getAdminUiConfig$sit !== void 0 ? _getAdminUiConfig$sit : [] : _ref2$previewExcluded;
-  var filteredActions = previewExcludedItemPath.length && item ? actions.filter(function (action) {
+  var filteredActions = item ? actions.filter(function (action) {
     return !isActionExcluded({
       action: action,
       item: item,
@@ -23700,6 +29907,26 @@ var getAllChildren = function getAllChildren(_ref3) {
   };
   _getAllChildrenHelper([data]);
   return output;
+};
+var buildGetMenuActionsList = function buildGetMenuActionsList(treeBuilderConfig, builtinGetMenuActions) {
+  var _treeBuilderConfig$ge;
+  var unorderedGetMenuActionsList = [{
+    priority: 100,
+    callback: builtinGetMenuActions
+  }].concat(_toConsumableArray((_treeBuilderConfig$ge = treeBuilderConfig === null || treeBuilderConfig === void 0 ? void 0 : treeBuilderConfig.getMenuActions) !== null && _treeBuilderConfig$ge !== void 0 ? _treeBuilderConfig$ge : []));
+  var orderedGetMenuActionsList = unorderedGetMenuActionsList.toSorted(function (_ref4, _ref5) {
+    var priorityA = _ref4.priority;
+    var priorityB = _ref5.priority;
+    return priorityA - priorityB;
+  });
+  return function (menuActionArg) {
+    var output = menuActionArg;
+    orderedGetMenuActionsList.forEach(function (_ref6) {
+      var callback = _ref6.callback;
+      output = callback(output);
+    });
+    return output;
+  };
 };
 
 /***/ }),
@@ -24092,7 +30319,7 @@ var QUICK_ACTION_MODES = {
 var _window = window,
   ibexa = _window.ibexa;
 var TreeBuilderModule = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.forwardRef)(function (_ref, ref) {
-  var _ibexa$treeBuilder;
+  var _ibexa$treeBuilder, _ibexa$treeBuilder2;
   var actionsType = _ref.actionsType,
     actionsVisible = _ref.actionsVisible,
     callbackAddElement = _ref.callbackAddElement,
@@ -24180,8 +30407,8 @@ var TreeBuilderModule = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.forwa
   var menuActionsContextData = {
     actionsType: actionsType,
     actionsVisible: actionsVisible,
-    getMenuActions: getMenuActions,
-    actions: moduleMenuActions || (ibexa === null || ibexa === void 0 || (_ibexa$treeBuilder = ibexa.treeBuilder) === null || _ibexa$treeBuilder === void 0 || (_ibexa$treeBuilder = _ibexa$treeBuilder[moduleId]) === null || _ibexa$treeBuilder === void 0 ? void 0 : _ibexa$treeBuilder.menuActions) || []
+    getMenuActions: (0,_helpers_tree__WEBPACK_IMPORTED_MODULE_15__.buildGetMenuActionsList)(ibexa === null || ibexa === void 0 || (_ibexa$treeBuilder = ibexa.treeBuilder) === null || _ibexa$treeBuilder === void 0 ? void 0 : _ibexa$treeBuilder[moduleId], getMenuActions),
+    actions: moduleMenuActions || (ibexa === null || ibexa === void 0 || (_ibexa$treeBuilder2 = ibexa.treeBuilder) === null || _ibexa$treeBuilder2 === void 0 || (_ibexa$treeBuilder2 = _ibexa$treeBuilder2[moduleId]) === null || _ibexa$treeBuilder2 === void 0 ? void 0 : _ibexa$treeBuilder2.menuActions) || []
   };
   var treeClassName = (0,_ibexa_admin_ui_src_bundle_ui_dev_src_modules_common_helpers_css_class_names__WEBPACK_IMPORTED_MODULE_3__.createCssClassNames)(_defineProperty({
     'c-tb-tree': true,
@@ -24962,6 +31189,6 @@ module.exports = ReactDOM;
 },
 /******/ __webpack_require__ => { // webpackRuntimeModules
 /******/ var __webpack_exec__ = (moduleId) => (__webpack_require__(__webpack_require__.s = moduleId))
-/******/ var __webpack_exports__ = (__webpack_exec__("./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/config.loader.js"), __webpack_exec__("./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js"), __webpack_exec__("./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/config.loader.js"), __webpack_exec__("./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/image.picker.tab.module.js"));
+/******/ var __webpack_exports__ = (__webpack_exec__("./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/config.loader.js"), __webpack_exec__("./vendor/ibexa/admin-ui/src/bundle/ui-dev/src/modules/universal-discovery/universal.discovery.module.js"), __webpack_exec__("./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/product-discovery-widget/config.loader.js"), __webpack_exec__("./vendor/ibexa/product-catalog/src/bundle/ui-dev/src/modules/products-selector/products.selector.module.js"), __webpack_exec__("./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/config.loader.js"), __webpack_exec__("./vendor/ibexa/image-picker/src/bundle/ui-dev/src/modules/image-picker/image.picker.tab.module.js"));
 /******/ }
 ]);
